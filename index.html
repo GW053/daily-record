@@ -1,0 +1,1306 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>日常记录</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f8f1ea;
+      --surface: #fffaf5;
+      --surface-strong: #fffdf9;
+      --ink: #2f2924;
+      --muted: #7b695d;
+      --line: #ecd9cc;
+      --accent: #b65a2b;
+      --accent-strong: #8f4324;
+      --accent-soft: #f5dfd0;
+      --good: #557a58;
+      --good-soft: #e6efe3;
+      --improve: #bd6436;
+      --improve-soft: #f6e2d5;
+      --lucky: #a67718;
+      --lucky-soft: #f4ebcf;
+      --shadow: 0 10px 26px rgba(102, 68, 42, 0.09);
+      --radius: 8px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      background: var(--bg);
+      overflow-x: hidden;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      color: var(--ink);
+      background: var(--bg);
+      overflow-x: hidden;
+    }
+
+    button,
+    input,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .app-shell {
+      width: min(100%, 480px);
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: 18px 14px calc(88px + env(safe-area-inset-bottom));
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 54px;
+      margin-bottom: 12px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 38px;
+      height: 38px;
+      flex: 0 0 auto;
+      place-items: center;
+      color: #fff;
+      background: var(--accent);
+      border-radius: 8px;
+      box-shadow: 0 8px 18px rgba(182, 90, 43, 0.22);
+    }
+
+    .brand-mark svg {
+      width: 21px;
+      height: 21px;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+    }
+
+    h1 {
+      overflow: hidden;
+      font-size: 22px;
+      line-height: 1.18;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      letter-spacing: 0;
+    }
+
+    .page-date {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.3;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 0 0 auto;
+    }
+
+    .save-state {
+      min-width: 42px;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: right;
+    }
+
+    .icon-button {
+      display: inline-grid;
+      width: 38px;
+      height: 38px;
+      flex: 0 0 auto;
+      place-items: center;
+      color: var(--ink);
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+    }
+
+    .icon-button:active {
+      transform: scale(0.96);
+    }
+
+    .icon-button:hover,
+    .icon-button:focus-visible {
+      border-color: rgba(182, 90, 43, 0.48);
+      outline: none;
+    }
+
+    .icon-button svg {
+      width: 19px;
+      height: 19px;
+      stroke-width: 2;
+    }
+
+    .screen {
+      display: none;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .screen.is-active {
+      display: grid;
+    }
+
+    .panel {
+      min-width: 0;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .date-strip {
+      display: grid;
+      grid-template-columns: auto 38px minmax(0, 1fr) 38px 38px;
+      gap: 8px;
+      align-items: center;
+      padding: 12px 14px;
+    }
+
+    .inline-label {
+      min-width: 0;
+    }
+
+    .field-label,
+    .inline-label,
+    .note-title {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.3;
+      font-weight: 700;
+    }
+
+    .date-picker-control {
+      position: relative;
+      display: grid;
+      width: 38px;
+      height: 38px;
+      place-items: center;
+      color: var(--ink);
+      background: var(--surface-strong);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      cursor: pointer;
+      overflow: hidden;
+      transition: border-color 0.16s ease, background 0.16s ease;
+    }
+
+    .date-picker-control:hover,
+    .date-picker-control:focus-within {
+      border-color: rgba(182, 90, 43, 0.48);
+    }
+
+    .date-picker-control svg {
+      width: 19px;
+      height: 19px;
+      stroke-width: 2;
+    }
+
+    .date-picker-control input {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      min-height: 0;
+      height: 100%;
+      padding: 0;
+      color: transparent;
+      background: transparent;
+      border: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .date-display {
+      height: 38px;
+      min-height: 38px;
+      padding: 0 10px;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    .date-display,
+    input[type="date"],
+    input[type="number"],
+    textarea {
+      width: 100%;
+      color: var(--ink);
+      background: var(--surface-strong);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      outline: none;
+      transition: border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+    }
+
+    .date-display:focus,
+    input[type="date"]:focus,
+    input[type="number"]:focus,
+    textarea:focus {
+      background: #fff;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(182, 90, 43, 0.14);
+    }
+
+    input[type="date"] {
+      min-height: 42px;
+      padding: 0 11px;
+    }
+
+    .date-picker-control input[type="date"] {
+      min-height: 0;
+      height: 100%;
+      padding: 0;
+      color: transparent;
+      background: transparent;
+      border: 0;
+      box-shadow: none;
+    }
+
+    .score-panel {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(112px, 150px);
+      gap: 12px;
+      align-items: center;
+      padding: 14px;
+    }
+
+    .score-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .score-row input {
+      height: 44px;
+      padding: 0 10px;
+      font-size: 22px;
+      line-height: 1;
+      text-align: center;
+      appearance: textfield;
+    }
+
+    .score-row input::-webkit-outer-spin-button,
+    .score-row input::-webkit-inner-spin-button {
+      margin: 0;
+      appearance: none;
+    }
+
+    .score-row span {
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .notes-panel {
+      display: grid;
+      gap: 14px;
+      padding: 14px;
+    }
+
+    .section-title,
+    .calendar-title,
+    .detail-title {
+      font-size: 16px;
+      line-height: 1.3;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    .note-block {
+      display: grid;
+      gap: 7px;
+    }
+
+    .note-block + .note-block {
+      padding-top: 14px;
+      border-top: 1px solid var(--line);
+    }
+
+    .note-title {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .note-icon {
+      display: inline-grid;
+      width: 24px;
+      height: 24px;
+      flex: 0 0 auto;
+      place-items: center;
+      color: currentColor;
+      border-radius: 8px;
+    }
+
+    .note-icon svg {
+      width: 15px;
+      height: 15px;
+      stroke-width: 2.2;
+    }
+
+    .note-good .note-title,
+    .detail-good h3 {
+      color: var(--good);
+    }
+
+    .note-improve .note-title,
+    .detail-improve h3 {
+      color: var(--improve);
+    }
+
+    .note-lucky .note-title,
+    .detail-lucky h3 {
+      color: var(--lucky);
+    }
+
+    .note-good .note-icon {
+      background: var(--good-soft);
+    }
+
+    .note-improve .note-icon {
+      background: var(--improve-soft);
+    }
+
+    .note-lucky .note-icon {
+      background: var(--lucky-soft);
+    }
+
+    textarea {
+      min-height: 132px;
+      padding: 12px;
+      line-height: 1.55;
+      resize: vertical;
+    }
+
+    .chart-panel {
+      padding: 14px 12px 12px;
+    }
+
+    .section-head,
+    .detail-head,
+    .calendar-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .range-text,
+    .score-badge {
+      flex: 0 0 auto;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.2;
+    }
+
+    .chart-wrap {
+      position: relative;
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      min-height: 210px;
+      margin-top: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface-strong);
+      overflow: hidden;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      height: 210px;
+    }
+
+    .chart-empty {
+      position: absolute;
+      inset: 0;
+      display: none;
+      place-items: center;
+      color: var(--muted);
+      font-size: 14px;
+      pointer-events: none;
+    }
+
+    .chart-empty.is-visible {
+      display: grid;
+    }
+
+    .calendar-panel {
+      padding: 12px;
+    }
+
+    .calendar-top {
+      min-height: 40px;
+      margin-bottom: 10px;
+    }
+
+    .calendar-title {
+      flex: 1 1 auto;
+      text-align: center;
+    }
+
+    .weekdays,
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 4px;
+    }
+
+    .weekdays {
+      margin-bottom: 5px;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .day-cell {
+      position: relative;
+      display: grid;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      place-items: center;
+      color: var(--ink);
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.14s ease, border-color 0.14s ease, color 0.14s ease;
+    }
+
+    .day-cell:focus-visible {
+      border-color: var(--accent);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(182, 90, 43, 0.14);
+    }
+
+    .day-cell.is-today {
+      border-color: rgba(182, 90, 43, 0.36);
+    }
+
+    .day-cell.is-selected {
+      color: #fff;
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .day-cell.has-entry::after {
+      position: absolute;
+      right: 7px;
+      bottom: 6px;
+      width: 5px;
+      height: 5px;
+      content: "";
+      background: var(--lucky);
+      border-radius: 50%;
+    }
+
+    .day-cell.is-selected.has-entry::after {
+      background: #fff;
+    }
+
+    .day-blank {
+      aspect-ratio: 1 / 1;
+    }
+
+    .day-detail {
+      display: grid;
+      gap: 12px;
+      padding: 14px;
+    }
+
+    .detail-date {
+      min-width: 0;
+      font-size: 16px;
+      line-height: 1.3;
+      word-break: keep-all;
+    }
+
+    .score-badge {
+      padding: 5px 8px;
+      background: var(--accent-soft);
+      border-radius: 999px;
+      color: var(--accent-strong);
+      white-space: nowrap;
+    }
+
+    .detail-block {
+      display: grid;
+      gap: 6px;
+      padding-top: 10px;
+      border-top: 1px solid var(--line);
+    }
+
+    .detail-block h3 {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.3;
+      font-weight: 700;
+    }
+
+    .detail-block.detail-good h3 {
+      color: var(--good);
+    }
+
+    .detail-block.detail-improve h3 {
+      color: var(--improve);
+    }
+
+    .detail-block.detail-lucky h3 {
+      color: var(--lucky);
+    }
+
+    .detail-block p {
+      min-height: 24px;
+      color: var(--ink);
+      font-size: 14px;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .empty-text {
+      color: var(--muted) !important;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      z-index: 5;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      width: min(100%, 480px);
+      max-width: 100%;
+      margin: 0 auto;
+      padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+      background: var(--surface);
+      border-top: 1px solid var(--line);
+      transform: translateX(-50%);
+    }
+
+    .nav-button {
+      display: grid;
+      gap: 3px;
+      place-items: center;
+      min-height: 54px;
+      color: var(--muted);
+      background: transparent;
+      border: 0;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .nav-button svg {
+      width: 21px;
+      height: 21px;
+      stroke-width: 2;
+    }
+
+    .nav-button span {
+      font-size: 12px;
+      line-height: 1.2;
+    }
+
+    .nav-button.is-active {
+      color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    @media (min-width: 700px) {
+      .app-shell {
+        padding-top: 24px;
+      }
+
+      .bottom-nav {
+        border-right: 1px solid var(--line);
+        border-left: 1px solid var(--line);
+        border-radius: 12px 12px 0 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 2v4"></path>
+            <path d="M16 2v4"></path>
+            <path d="M3 10h18"></path>
+            <path d="M5 4h14a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"></path>
+            <path d="m8 15 2 2 5-6"></path>
+          </svg>
+        </div>
+        <div>
+          <h1 id="pageTitle">今日记录</h1>
+          <p class="page-date" id="pageDate"></p>
+        </div>
+      </div>
+      <div class="top-actions">
+        <span class="save-state" id="saveState"></span>
+        <button class="icon-button" id="todayButton" type="button" aria-label="回到今天" title="回到今天">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 2v4"></path>
+            <path d="M16 2v4"></path>
+            <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+            <path d="M3 10h18"></path>
+            <path d="M8 14h.01"></path>
+            <path d="M12 14h.01"></path>
+            <path d="M16 14h.01"></path>
+            <path d="M8 18h.01"></path>
+            <path d="M12 18h.01"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="screen is-active" id="todayScreen">
+      <section class="panel date-strip" aria-label="选择日期">
+        <span class="inline-label">日期</span>
+        <button class="icon-button" id="prevDateButton" type="button" aria-label="前一天" title="前一天">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m15 18-6-6 6-6"></path>
+          </svg>
+        </button>
+        <input class="date-display" id="entryDateText" type="text" inputmode="numeric" placeholder="YYYY-MM-DD" aria-label="当前日期">
+        <label class="date-picker-control" for="entryDate" aria-label="选择日期" title="选择日期">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M8 2v4"></path>
+            <path d="M16 2v4"></path>
+            <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+            <path d="M3 10h18"></path>
+          </svg>
+          <input id="entryDate" type="date">
+        </label>
+        <button class="icon-button" id="nextDateButton" type="button" aria-label="后一天" title="后一天">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m9 18 6-6-6-6"></path>
+          </svg>
+        </button>
+      </section>
+
+      <section class="panel score-panel">
+        <label class="field-label" for="scoreInput">给自己的打分</label>
+        <div class="score-row">
+          <input id="scoreInput" type="number" min="0" max="100" step="1" inputmode="numeric" aria-label="给自己的打分，0 到 100">
+          <span>分</span>
+        </div>
+      </section>
+
+      <section class="panel notes-panel">
+        <h2 class="section-title">具体记录</h2>
+        <label class="note-block note-good" for="goodText">
+          <span class="note-title">
+            <span class="note-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m20 6-11 11-5-5"></path>
+              </svg>
+            </span>
+            做得好的事情
+          </span>
+          <textarea id="goodText"></textarea>
+        </label>
+        <label class="note-block note-improve" for="improveText">
+          <span class="note-title">
+            <span class="note-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 19V5"></path>
+                <path d="m5 12 7-7 7 7"></path>
+              </svg>
+            </span>
+            渴望提高的事情
+          </span>
+          <textarea id="improveText"></textarea>
+        </label>
+        <label class="note-block note-lucky" for="luckyText">
+          <span class="note-title">
+            <span class="note-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 3 14.2 8.1 20 8.6 15.6 12.4 16.9 18 12 15.1 7.1 18 8.4 12.4 4 8.6 9.8 8.1 12 3Z"></path>
+              </svg>
+            </span>
+            幸运的事情
+          </span>
+          <textarea id="luckyText"></textarea>
+        </label>
+      </section>
+    </main>
+
+    <main class="screen" id="historyScreen">
+      <section class="panel chart-panel">
+        <div class="section-head">
+          <h2 class="section-title">近七天分数</h2>
+          <span class="range-text" id="rangeText"></span>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="scoreChart" width="640" height="420" aria-label="近七天分数折线图"></canvas>
+          <div class="chart-empty" id="chartEmpty">暂无分数</div>
+        </div>
+      </section>
+
+      <section class="panel calendar-panel">
+        <div class="calendar-top">
+          <button class="icon-button" id="prevMonthButton" type="button" aria-label="上个月" title="上个月">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m15 18-6-6 6-6"></path>
+            </svg>
+          </button>
+          <h2 class="calendar-title" id="monthTitle"></h2>
+          <button class="icon-button" id="nextMonthButton" type="button" aria-label="下个月" title="下个月">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m9 18 6-6-6-6"></path>
+            </svg>
+          </button>
+        </div>
+        <div class="weekdays" aria-hidden="true">
+          <span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span>
+        </div>
+        <div class="calendar-grid" id="calendarGrid"></div>
+      </section>
+
+      <section class="panel day-detail" id="dayDetail">
+        <div class="detail-head">
+          <h2 class="detail-date" id="detailDate"></h2>
+          <span class="score-badge" id="detailScore"></span>
+        </div>
+        <article class="detail-block detail-good">
+          <h3>做得好的事情</h3>
+          <p id="detailGood"></p>
+        </article>
+        <article class="detail-block detail-improve">
+          <h3>渴望提高的事情</h3>
+          <p id="detailImprove"></p>
+        </article>
+        <article class="detail-block detail-lucky">
+          <h3>幸运的事情</h3>
+          <p id="detailLucky"></p>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <nav class="bottom-nav" aria-label="底部导航">
+    <button class="nav-button is-active" type="button" data-tab="today" aria-label="今日记录">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 20h9"></path>
+        <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
+      </svg>
+      <span>今日记录</span>
+    </button>
+    <button class="nav-button" type="button" data-tab="history" aria-label="历史回顾">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M3 3v18h18"></path>
+        <path d="m19 9-5 5-4-4-3 3"></path>
+      </svg>
+      <span>历史回顾</span>
+    </button>
+  </nav>
+
+  <script>
+    const STORAGE_KEY = "daily-record-site-v1";
+    const state = loadState();
+    const els = {
+      pageTitle: document.querySelector("#pageTitle"),
+      pageDate: document.querySelector("#pageDate"),
+      saveState: document.querySelector("#saveState"),
+      todayButton: document.querySelector("#todayButton"),
+      todayScreen: document.querySelector("#todayScreen"),
+      historyScreen: document.querySelector("#historyScreen"),
+      navButtons: document.querySelectorAll(".nav-button"),
+      entryDate: document.querySelector("#entryDate"),
+      entryDateText: document.querySelector("#entryDateText"),
+      prevDateButton: document.querySelector("#prevDateButton"),
+      nextDateButton: document.querySelector("#nextDateButton"),
+      scoreInput: document.querySelector("#scoreInput"),
+      goodText: document.querySelector("#goodText"),
+      improveText: document.querySelector("#improveText"),
+      luckyText: document.querySelector("#luckyText"),
+      rangeText: document.querySelector("#rangeText"),
+      chart: document.querySelector("#scoreChart"),
+      chartEmpty: document.querySelector("#chartEmpty"),
+      monthTitle: document.querySelector("#monthTitle"),
+      calendarGrid: document.querySelector("#calendarGrid"),
+      prevMonthButton: document.querySelector("#prevMonthButton"),
+      nextMonthButton: document.querySelector("#nextMonthButton"),
+      detailDate: document.querySelector("#detailDate"),
+      detailScore: document.querySelector("#detailScore"),
+      detailGood: document.querySelector("#detailGood"),
+      detailImprove: document.querySelector("#detailImprove"),
+      detailLucky: document.querySelector("#detailLucky")
+    };
+
+    let activeTab = "today";
+    let selectedDate = todayKey();
+    let selectedHistoryDate = selectedDate;
+    let monthCursor = firstOfMonth(parseDateKey(selectedDate));
+    let saveTimer = null;
+    let chartFrame = 0;
+
+    init();
+
+    function init() {
+      syncDateInputs(selectedDate);
+      loadForm(selectedDate);
+      bindEvents();
+      renderAll();
+
+      if ("ResizeObserver" in window) {
+        new ResizeObserver(queueDrawChart).observe(els.chart.parentElement);
+      } else {
+        window.addEventListener("resize", queueDrawChart);
+      }
+    }
+
+    function bindEvents() {
+      els.entryDate.addEventListener("change", () => {
+        selectedDate = els.entryDate.value || todayKey();
+        selectedHistoryDate = selectedDate;
+        monthCursor = firstOfMonth(parseDateKey(selectedDate));
+        syncDateInputs(selectedDate);
+        loadForm(selectedDate);
+        renderAll();
+      });
+
+      els.entryDateText.addEventListener("change", commitDateText);
+      els.entryDateText.addEventListener("blur", commitDateText);
+
+      els.prevDateButton.addEventListener("click", () => shiftEntryDate(-1));
+      els.nextDateButton.addEventListener("click", () => shiftEntryDate(1));
+      els.todayButton.addEventListener("click", () => {
+        selectedDate = todayKey();
+        selectedHistoryDate = selectedDate;
+        monthCursor = firstOfMonth(parseDateKey(selectedDate));
+        syncDateInputs(selectedDate);
+        loadForm(selectedDate);
+        renderAll();
+      });
+
+      [els.scoreInput, els.goodText, els.improveText, els.luckyText].forEach((field) => {
+        field.addEventListener("input", saveCurrentEntry);
+      });
+
+      els.scoreInput.addEventListener("blur", () => {
+        const score = normalizeScore(els.scoreInput.value);
+        els.scoreInput.value = score === null ? "" : score;
+        saveCurrentEntry();
+      });
+
+      els.navButtons.forEach((button) => {
+        button.addEventListener("click", () => switchTab(button.dataset.tab));
+      });
+
+      els.prevMonthButton.addEventListener("click", () => {
+        monthCursor = new Date(monthCursor.getFullYear(), monthCursor.getMonth() - 1, 1);
+        renderCalendar();
+      });
+
+      els.nextMonthButton.addEventListener("click", () => {
+        monthCursor = new Date(monthCursor.getFullYear(), monthCursor.getMonth() + 1, 1);
+        renderCalendar();
+      });
+    }
+
+    function switchTab(tab) {
+      activeTab = tab;
+      els.todayScreen.classList.toggle("is-active", tab === "today");
+      els.historyScreen.classList.toggle("is-active", tab === "history");
+      els.navButtons.forEach((button) => {
+        button.classList.toggle("is-active", button.dataset.tab === tab);
+      });
+      renderAll();
+    }
+
+    function shiftEntryDate(days) {
+      selectedDate = dateKey(addDays(parseDateKey(selectedDate), days));
+      selectedHistoryDate = selectedDate;
+      monthCursor = firstOfMonth(parseDateKey(selectedDate));
+      syncDateInputs(selectedDate);
+      loadForm(selectedDate);
+      renderAll();
+    }
+
+    function commitDateText() {
+      const nextDate = normalizeDateKey(els.entryDateText.value);
+      if (!nextDate) {
+        syncDateInputs(selectedDate);
+        return;
+      }
+      selectedDate = nextDate;
+      selectedHistoryDate = nextDate;
+      monthCursor = firstOfMonth(parseDateKey(nextDate));
+      syncDateInputs(nextDate);
+      loadForm(nextDate);
+      renderAll();
+    }
+
+    function syncDateInputs(key) {
+      els.entryDate.value = key;
+      els.entryDateText.value = key;
+    }
+
+    function loadForm(key) {
+      const entry = state.entries[key] || {};
+      els.scoreInput.value = entry.score ?? "";
+      els.goodText.value = entry.good || "";
+      els.improveText.value = entry.improve || "";
+      els.luckyText.value = entry.lucky || "";
+      els.saveState.textContent = "";
+    }
+
+    function saveCurrentEntry() {
+      const key = els.entryDate.value || selectedDate;
+      selectedDate = key;
+      const entry = {
+        score: normalizeScore(els.scoreInput.value),
+        good: els.goodText.value,
+        improve: els.improveText.value,
+        lucky: els.luckyText.value,
+        updatedAt: new Date().toISOString()
+      };
+
+      if (
+        entry.score === null &&
+        !entry.good.trim() &&
+        !entry.improve.trim() &&
+        !entry.lucky.trim()
+      ) {
+        delete state.entries[key];
+      } else {
+        state.entries[key] = entry;
+      }
+
+      persistState();
+      showSaved();
+      renderAll();
+    }
+
+    function showSaved() {
+      els.saveState.textContent = "已保存";
+      window.clearTimeout(saveTimer);
+      saveTimer = window.setTimeout(() => {
+        els.saveState.textContent = "";
+      }, 1200);
+    }
+
+    function renderAll() {
+      renderHeader();
+      renderChart();
+      renderCalendar();
+      renderDetail();
+    }
+
+    function renderHeader() {
+      els.pageTitle.textContent = activeTab === "today" ? "今日记录" : "历史回顾";
+      const key = activeTab === "today" ? selectedDate : selectedHistoryDate;
+      els.pageDate.textContent = formatLongDate(key);
+    }
+
+    function renderChart() {
+      const today = parseDateKey(todayKey());
+      const days = Array.from({ length: 7 }, (_, index) => addDays(today, index - 6));
+      els.rangeText.textContent = `${formatShortDate(dateKey(days[0]))} - ${formatShortDate(dateKey(days[6]))}`;
+      els.chart.dataset.days = JSON.stringify(days.map(dateKey));
+      queueDrawChart();
+    }
+
+    function queueDrawChart() {
+      if (chartFrame) {
+        return;
+      }
+      chartFrame = window.requestAnimationFrame(() => {
+        chartFrame = 0;
+        drawChart();
+      });
+    }
+
+    function drawChart() {
+      const canvas = els.chart;
+      const wrap = canvas.parentElement;
+      const width = Math.floor(wrap.clientWidth);
+      if (width < 80) {
+        return;
+      }
+      const height = 210;
+      if (canvas.width !== width) {
+        canvas.width = width;
+      }
+      if (canvas.height !== height) {
+        canvas.height = height;
+      }
+
+      const ctx = canvas.getContext("2d");
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, width, height);
+      const lineColor = cssVar("--line");
+      const mutedColor = cssVar("--muted");
+      const accentColor = cssVar("--accent");
+      const pointFill = cssVar("--surface-strong");
+
+      const keys = JSON.parse(canvas.dataset.days || "[]");
+      const values = keys.map((key) => {
+        const score = state.entries[key]?.score;
+        return typeof score === "number" ? score : null;
+      });
+      const hasValue = values.some((value) => value !== null);
+      els.chartEmpty.classList.toggle("is-visible", !hasValue);
+
+      const pad = { top: 18, right: 20, bottom: 38, left: 34 };
+      const plotWidth = width - pad.left - pad.right;
+      const plotHeight = height - pad.top - pad.bottom;
+      const xFor = (index) => pad.left + (plotWidth * index) / 6;
+      const yFor = (value) => pad.top + plotHeight - (plotHeight * value) / 100;
+
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = lineColor;
+      ctx.fillStyle = mutedColor;
+      ctx.font = "12px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
+      ctx.textAlign = "right";
+      ctx.textBaseline = "middle";
+
+      [0, 25, 50, 75, 100].forEach((tick) => {
+        const y = yFor(tick);
+        ctx.beginPath();
+        ctx.moveTo(pad.left, y);
+        ctx.lineTo(width - pad.right, y);
+        ctx.stroke();
+        ctx.fillText(String(tick), pad.left - 7, y);
+      });
+
+      ctx.textAlign = "center";
+      ctx.textBaseline = "top";
+      keys.forEach((key, index) => {
+        const x = xFor(index);
+        const label = key.slice(5).replace("-", "/");
+        ctx.fillText(label, x, height - pad.bottom + 14);
+      });
+
+      if (!hasValue) {
+        return;
+      }
+
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = accentColor;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      let drawing = false;
+      values.forEach((value, index) => {
+        if (value === null) {
+          if (drawing) {
+            ctx.stroke();
+          }
+          drawing = false;
+          return;
+        }
+        const x = xFor(index);
+        const y = yFor(value);
+        if (!drawing) {
+          ctx.beginPath();
+          ctx.moveTo(x, y);
+          drawing = true;
+        } else {
+          ctx.lineTo(x, y);
+        }
+      });
+      if (drawing) {
+        ctx.stroke();
+      }
+
+      values.forEach((value, index) => {
+        if (value === null) {
+          return;
+        }
+        const x = xFor(index);
+        const y = yFor(value);
+        ctx.beginPath();
+        ctx.fillStyle = pointFill;
+        ctx.strokeStyle = accentColor;
+        ctx.lineWidth = 3;
+        ctx.arc(x, y, 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      });
+    }
+
+    function cssVar(name) {
+      return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    }
+
+    function renderCalendar() {
+      const year = monthCursor.getFullYear();
+      const month = monthCursor.getMonth();
+      const first = new Date(year, month, 1);
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const leading = first.getDay();
+      const fragment = document.createDocumentFragment();
+
+      els.monthTitle.textContent = `${year}年${month + 1}月`;
+      els.calendarGrid.replaceChildren();
+
+      for (let index = 0; index < leading; index += 1) {
+        const blank = document.createElement("div");
+        blank.className = "day-blank";
+        fragment.append(blank);
+      }
+
+      for (let day = 1; day <= daysInMonth; day += 1) {
+        const date = new Date(year, month, day);
+        const key = dateKey(date);
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "day-cell";
+        button.textContent = day;
+        button.setAttribute("aria-label", formatLongDate(key));
+        button.classList.toggle("is-today", key === todayKey());
+        button.classList.toggle("is-selected", key === selectedHistoryDate);
+        button.classList.toggle("has-entry", Boolean(state.entries[key]));
+        button.addEventListener("click", () => {
+          selectedHistoryDate = key;
+          selectedDate = key;
+          syncDateInputs(key);
+          loadForm(key);
+          renderAll();
+        });
+        fragment.append(button);
+      }
+
+      els.calendarGrid.append(fragment);
+    }
+
+    function renderDetail() {
+      const entry = state.entries[selectedHistoryDate] || {};
+      els.detailDate.textContent = formatLongDate(selectedHistoryDate);
+      els.detailScore.textContent = typeof entry.score === "number" ? `${entry.score} 分` : "未打分";
+      setDetailText(els.detailGood, entry.good);
+      setDetailText(els.detailImprove, entry.improve);
+      setDetailText(els.detailLucky, entry.lucky);
+    }
+
+    function setDetailText(el, text) {
+      el.textContent = text || "暂无记录";
+      el.classList.toggle("empty-text", !text);
+    }
+
+    function normalizeScore(value) {
+      if (value === "" || value === null || value === undefined) {
+        return null;
+      }
+      const number = Number(value);
+      if (!Number.isFinite(number)) {
+        return null;
+      }
+      return Math.min(100, Math.max(0, Math.round(number)));
+    }
+
+    function normalizeDateKey(value) {
+      const trimmed = String(value || "").trim();
+      const match = trimmed.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+      if (!match) {
+        return null;
+      }
+      const year = Number(match[1]);
+      const month = Number(match[2]);
+      const day = Number(match[3]);
+      const date = new Date(year, month - 1, day);
+      if (
+        date.getFullYear() !== year ||
+        date.getMonth() !== month - 1 ||
+        date.getDate() !== day
+      ) {
+        return null;
+      }
+      return dateKey(date);
+    }
+
+    function loadState() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+        return { entries: saved.entries || {} };
+      } catch {
+        return { entries: {} };
+      }
+    }
+
+    function persistState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function todayKey() {
+      return dateKey(new Date());
+    }
+
+    function dateKey(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    function parseDateKey(key) {
+      const [year, month, day] = key.split("-").map(Number);
+      return new Date(year, month - 1, day);
+    }
+
+    function addDays(date, days) {
+      const copy = new Date(date);
+      copy.setDate(copy.getDate() + days);
+      return copy;
+    }
+
+    function firstOfMonth(date) {
+      return new Date(date.getFullYear(), date.getMonth(), 1);
+    }
+
+    function formatLongDate(key) {
+      const date = parseDateKey(key);
+      return new Intl.DateTimeFormat("zh-CN", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        weekday: "short"
+      }).format(date);
+    }
+
+    function formatShortDate(key) {
+      const date = parseDateKey(key);
+      return new Intl.DateTimeFormat("zh-CN", {
+        month: "numeric",
+        day: "numeric"
+      }).format(date);
+    }
+  </script>
+</body>
+</html>
