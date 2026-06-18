@@ -806,6 +806,7 @@
       color: var(--muted);
       font-size: 12px;
       line-height: 1.45;
+      white-space: pre-wrap;
     }
 
     @media (max-width: 620px) {
@@ -1877,12 +1878,19 @@
         return;
       }
       setAuthStatus("正在登录...");
-      const { error } = await supabaseClient.auth.signInWithPassword(credentials);
-      if (error) {
+      try {
+        const { data, error } = await supabaseClient.auth.signInWithPassword(credentials);
+        if (error) {
+          setAuthStatus(`登录失败：${formatSyncError(error)}`);
+          return;
+        }
+        if (data.session) {
+          handleAuthSession(data.session);
+        }
+        setAuthStatus("登录成功，正在同步...");
+      } catch (error) {
         setAuthStatus(`登录失败：${formatSyncError(error)}`);
-        return;
       }
-      setAuthStatus("登录成功，正在同步...");
     }
 
     async function signUpWithEmail() {
@@ -1898,15 +1906,20 @@
       const signUpPayload = redirectTo
         ? { ...credentials, options: { emailRedirectTo: redirectTo } }
         : credentials;
-      const { data, error } = await supabaseClient.auth.signUp(signUpPayload);
-      if (error) {
+      try {
+        const { data, error } = await supabaseClient.auth.signUp(signUpPayload);
+        if (error) {
+          setAuthStatus(`注册失败：${formatSyncError(error)}`);
+          return;
+        }
+        if (data.session) {
+          handleAuthSession(data.session);
+          setAuthStatus("注册成功，正在同步...");
+        } else {
+          setAuthStatus("注册成功，请按邮件提示确认后再登录。");
+        }
+      } catch (error) {
         setAuthStatus(`注册失败：${formatSyncError(error)}`);
-        return;
-      }
-      if (data.session) {
-        setAuthStatus("注册成功，正在同步...");
-      } else {
-        setAuthStatus("注册成功，请按邮件提示确认后再登录。");
       }
     }
 
@@ -1914,8 +1927,13 @@
       if (!ensureSupabaseClient()) {
         return;
       }
-      const { error } = await supabaseClient.auth.signOut();
-      if (error) {
+      try {
+        const { error } = await supabaseClient.auth.signOut();
+        if (error) {
+          setAuthStatus(`退出失败：${formatSyncError(error)}`);
+          return;
+        }
+      } catch (error) {
         setAuthStatus(`退出失败：${formatSyncError(error)}`);
         return;
       }
@@ -2055,10 +2073,33 @@
 
     function formatSyncError(error) {
       const message = error?.message || String(error || "未知错误");
+      const details = [
+        message,
+        error?.status ? `状态码：${error.status}` : "",
+        error?.code ? `错误码：${error.code}` : ""
+      ].filter(Boolean);
+      const normalized = message.toLowerCase();
+      let hint = "";
       if (message.includes(SYNC_TABLE) || message.includes("does not exist")) {
-        return `${message}。请先在 Supabase 创建 ${SYNC_TABLE} 表并开启 RLS。`;
+        hint = `请先在 Supabase 创建 ${SYNC_TABLE} 表并开启 RLS。`;
+      } else if (normalized.includes("invalid api key") || normalized.includes("api key")) {
+        hint = "请检查 Project URL 和 Publishable key 是否来自同一个 Supabase 项目。";
+      } else if (normalized.includes("failed to fetch") || normalized.includes("networkerror")) {
+        hint = "请用已部署的 https 网站地址测试，并检查网络是否能访问 Supabase 和 jsDelivr。";
+      } else if (normalized.includes("signup") && (normalized.includes("disabled") || normalized.includes("not allowed"))) {
+        hint = "请在 Authentication > Providers > Email 中允许新用户注册。";
+      } else if (normalized.includes("password")) {
+        hint = "请确认密码长度和复杂度符合 Supabase 的要求，通常至少 6 位。";
+      } else if (normalized.includes("already") || normalized.includes("registered")) {
+        hint = "这个邮箱可能已经注册过，请直接登录或换一个邮箱。";
+      } else if (normalized.includes("rate limit")) {
+        hint = "触发了邮件或注册频率限制，请稍后再试。";
+      } else if (normalized.includes("captcha")) {
+        hint = "如果开启了 Bot/Captcha 防护，需要关闭它或在前端接入验证码 token。";
+      } else if (normalized.includes("redirect")) {
+        hint = "请检查 Authentication > URL Configuration 里的 Site URL 和 Redirect URLs。";
       }
-      return message;
+      return hint ? `${details.join("\n")}\n${hint}` : details.join("\n");
     }
 
     function renderAll() {
