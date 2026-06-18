@@ -22,6 +22,10 @@
       --improve-soft: #f6e2d5;
       --lucky: #a67718;
       --lucky-soft: #f4ebcf;
+      --sleep-main: #b65a2b;
+      --sleep-line: #7f604f;
+      --sleep-soft: #d8cbc1;
+      --sleep-softer: #eadfd6;
       --shadow: 0 10px 26px rgba(102, 68, 42, 0.09);
       --radius: 8px;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
@@ -120,8 +124,10 @@
     .top-actions {
       display: flex;
       align-items: center;
+      justify-content: flex-end;
       gap: 8px;
       flex: 0 0 auto;
+      min-width: 42px;
     }
 
     .save-state {
@@ -249,7 +255,9 @@
     }
 
     .date-display,
+    .duration-input,
     input[type="date"],
+    input[type="time"],
     input[type="number"],
     textarea {
       width: 100%;
@@ -262,7 +270,9 @@
     }
 
     .date-display:focus,
+    .duration-input:focus,
     input[type="date"]:focus,
+    input[type="time"]:focus,
     input[type="number"]:focus,
     textarea:focus {
       background: #fff;
@@ -273,6 +283,18 @@
     input[type="date"] {
       min-height: 42px;
       padding: 0 11px;
+    }
+
+    input[type="time"] {
+      min-height: 42px;
+      padding: 0 11px;
+    }
+
+    .duration-input {
+      min-height: 42px;
+      padding: 0 11px;
+      font-weight: 700;
+      text-align: center;
     }
 
     .date-picker-control input[type="date"] {
@@ -325,6 +347,84 @@
       display: grid;
       gap: 14px;
       padding: 14px;
+    }
+
+    .sleep-panel,
+    .sleep-chart-panel {
+      display: grid;
+      gap: 14px;
+      padding: 14px;
+    }
+
+    .sleep-time-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .time-field {
+      display: grid;
+      gap: 7px;
+      min-width: 0;
+    }
+
+    .time-field span,
+    .total-label {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    .sleep-total-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(112px, 150px);
+      gap: 12px;
+      align-items: center;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+    }
+
+    .total-value {
+      display: grid;
+      min-height: 42px;
+      place-items: center;
+      color: var(--accent-strong);
+      background: var(--accent-soft);
+      border-radius: 8px;
+      font-weight: 700;
+    }
+
+    .section-actions {
+      display: inline-flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .chart-options {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      flex: 0 0 auto;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .chart-options label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 28px;
+    }
+
+    .chart-options input {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--accent);
     }
 
     .section-title,
@@ -444,6 +544,14 @@
       height: 210px;
     }
 
+    .sleep-timeline-chart {
+      height: 320px;
+    }
+
+    .sleep-metric-chart {
+      height: 240px;
+    }
+
     .chart-empty {
       position: absolute;
       inset: 0;
@@ -456,6 +564,258 @@
 
     .chart-empty.is-visible {
       display: grid;
+    }
+
+    .metric-tabs {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr)) minmax(72px, 0.85fr);
+      grid-template-rows: repeat(2, minmax(34px, auto));
+      gap: 6px;
+    }
+
+    .metric-tab {
+      min-height: 34px;
+      color: var(--muted);
+      background: var(--surface-strong);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .metric-tab.is-active {
+      color: var(--accent-strong);
+      background: var(--accent-soft);
+      border-color: var(--accent-soft);
+    }
+
+    .metric-tab[data-sleep-metric="sleep"] {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    .metric-tab[data-sleep-metric="wake"] {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    .metric-tab[data-sleep-metric="bed"] {
+      grid-column: 1;
+      grid-row: 2;
+    }
+
+    .metric-tab[data-sleep-metric="rise"] {
+      grid-column: 2;
+      grid-row: 2;
+    }
+
+    .metric-tab[data-sleep-metric="total"] {
+      grid-column: 3;
+      grid-row: 1 / 3;
+      min-height: 74px;
+    }
+
+    .backup-button {
+      display: inline-grid;
+    }
+
+    .sync-button.is-signed-in {
+      color: var(--accent-strong);
+      background: var(--accent-soft);
+      border-color: var(--accent-soft);
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px 12px;
+      background: rgba(47, 41, 36, 0.34);
+    }
+
+    .modal-backdrop.is-visible {
+      display: flex;
+    }
+
+    .backup-modal {
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      width: min(100%, 920px);
+      max-height: min(76vh, 520px);
+      overflow: hidden;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 18px 50px rgba(47, 41, 36, 0.22);
+    }
+
+    .auth-modal {
+      width: min(100%, 420px);
+      max-height: min(86vh, 520px);
+    }
+
+    .modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .modal-title {
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    .modal-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex: 0 0 auto;
+    }
+
+    .backup-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      min-height: 0;
+      padding: 14px;
+      overflow: auto;
+    }
+
+    .backup-column {
+      display: grid;
+      grid-template-rows: auto auto auto;
+      gap: 8px;
+      min-width: 0;
+      min-height: 0;
+    }
+
+    .backup-column h3 {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    .backup-column textarea {
+      min-height: 68px;
+      height: 68px;
+      resize: none;
+    }
+
+    .backup-import-box {
+      display: grid;
+      min-height: 68px;
+      height: 68px;
+      align-content: center;
+      gap: 10px;
+      padding: 12px;
+      background: var(--surface-strong);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .backup-file-input {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .backup-status {
+      min-height: 18px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.3;
+    }
+
+    .auth-body {
+      display: grid;
+      gap: 12px;
+      min-height: 0;
+      padding: 14px;
+      overflow: auto;
+    }
+
+    .auth-current {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+      word-break: break-word;
+    }
+
+    .auth-fields {
+      display: grid;
+      gap: 8px;
+    }
+
+    .auth-fields input {
+      min-height: 42px;
+      padding: 0 11px;
+    }
+
+    .auth-buttons {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .action-button {
+      min-height: 40px;
+      color: var(--ink);
+      background: var(--surface-strong);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 700;
+      transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+    }
+
+    .action-button.primary {
+      color: #fff;
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .action-button:active {
+      transform: scale(0.98);
+    }
+
+    .action-button:disabled {
+      color: var(--muted);
+      background: var(--surface);
+      cursor: default;
+      opacity: 0.62;
+    }
+
+    .auth-status {
+      min-height: 18px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    @media (max-width: 620px) {
+      .backup-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .backup-modal {
+        max-height: 90vh;
+      }
     }
 
     .calendar-panel {
@@ -601,7 +961,7 @@
       left: 50%;
       z-index: 5;
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       width: min(100%, 480px);
       max-width: 100%;
       margin: 0 auto;
@@ -672,17 +1032,19 @@
       </div>
       <div class="top-actions">
         <span class="save-state" id="saveState"></span>
-        <button class="icon-button" id="todayButton" type="button" aria-label="回到今天" title="回到今天">
+        <button class="icon-button sync-button" id="syncButton" type="button" aria-label="账户同步" title="账户同步">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M8 2v4"></path>
-            <path d="M16 2v4"></path>
-            <rect x="3" y="4" width="18" height="18" rx="2"></rect>
-            <path d="M3 10h18"></path>
-            <path d="M8 14h.01"></path>
-            <path d="M12 14h.01"></path>
-            <path d="M16 14h.01"></path>
-            <path d="M8 18h.01"></path>
-            <path d="M12 18h.01"></path>
+            <path d="M20 17.5A4.5 4.5 0 0 0 15.5 13h-7A4.5 4.5 0 0 0 4 17.5"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+            <path d="M18 22v-4"></path>
+            <path d="m16 20 2 2 2-2"></path>
+          </svg>
+        </button>
+        <button class="icon-button backup-button" id="backupButton" type="button" aria-label="备份数据" title="备份数据">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <path d="M7 10 12 5l5 5"></path>
+            <path d="M12 5v12"></path>
           </svg>
         </button>
       </div>
@@ -714,7 +1076,7 @@
       </section>
 
       <section class="panel score-panel">
-        <label class="field-label" for="scoreInput">给自己的打分</label>
+        <label class="field-label" for="scoreInput">给自己的打分（0-100分）</label>
         <div class="score-row">
           <input id="scoreInput" type="number" min="0" max="100" step="1" inputmode="numeric" aria-label="给自己的打分，0 到 100">
           <span>分</span>
@@ -760,11 +1122,113 @@
       </section>
     </main>
 
+    <main class="screen" id="sleepScreen">
+      <section class="panel date-strip" aria-label="选择睡眠日期">
+        <span class="inline-label">日期</span>
+        <button class="icon-button" id="sleepPrevDateButton" type="button" aria-label="前一天" title="前一天">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m15 18-6-6 6-6"></path>
+          </svg>
+        </button>
+        <input class="date-display" id="sleepDateText" type="text" inputmode="numeric" placeholder="YYYY-MM-DD" aria-label="睡眠日期">
+        <label class="date-picker-control" for="sleepEntryDate" aria-label="选择睡眠日期" title="选择日期">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M8 2v4"></path>
+            <path d="M16 2v4"></path>
+            <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+            <path d="M3 10h18"></path>
+          </svg>
+          <input id="sleepEntryDate" type="date">
+        </label>
+        <button class="icon-button" id="sleepNextDateButton" type="button" aria-label="后一天" title="后一天">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m9 18 6-6-6-6"></path>
+          </svg>
+        </button>
+      </section>
+
+      <section class="panel sleep-panel">
+        <h2 class="section-title">睡眠记录</h2>
+        <div class="sleep-time-grid">
+          <label class="time-field" for="sleepTimeInput">
+            <span>入睡时间</span>
+            <input id="sleepTimeInput" type="time">
+          </label>
+          <label class="time-field" for="wakeTimeInput">
+            <span>醒来时间</span>
+            <input id="wakeTimeInput" type="time">
+          </label>
+          <label class="time-field" for="bedTimeInput">
+            <span>上床时间</span>
+            <input id="bedTimeInput" type="time">
+          </label>
+          <label class="time-field" for="riseTimeInput">
+            <span>起床时间</span>
+            <input id="riseTimeInput" type="time">
+          </label>
+        </div>
+        <div class="sleep-total-row">
+          <span class="total-label">总睡眠时长</span>
+          <input class="duration-input" id="sleepTotalInput" type="text" placeholder="未计算" aria-label="总睡眠时长">
+        </div>
+      </section>
+
+      <section class="panel sleep-chart-panel">
+        <div class="section-head">
+          <h2 class="section-title" id="sleepRangeTitle">近七天睡眠</h2>
+          <div class="section-actions">
+            <div class="chart-options">
+              <label for="timelineLabelsToggle">
+                <input id="timelineLabelsToggle" type="checkbox">
+                显示时间
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="chart-wrap">
+          <canvas class="sleep-timeline-chart" id="sleepTimelineChart" width="640" height="640" aria-label="近七天睡眠横向时间图"></canvas>
+          <div class="chart-empty" id="sleepTimelineEmpty">暂无睡眠数据</div>
+        </div>
+      </section>
+
+      <section class="panel sleep-chart-panel">
+        <div class="section-head">
+          <h2 class="section-title" id="sleepMetricTitle">单项变化</h2>
+          <div class="section-actions">
+            <div class="chart-options">
+              <label for="metricLabelsToggle">
+                <input id="metricLabelsToggle" type="checkbox">
+                显示时间
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="metric-tabs" aria-label="睡眠统计切换">
+          <button class="metric-tab is-active" type="button" data-sleep-metric="sleep">入睡</button>
+          <button class="metric-tab" type="button" data-sleep-metric="wake">醒来</button>
+          <button class="metric-tab" type="button" data-sleep-metric="bed">上床</button>
+          <button class="metric-tab" type="button" data-sleep-metric="rise">起床</button>
+          <button class="metric-tab" type="button" data-sleep-metric="total">总时长</button>
+        </div>
+        <div class="chart-wrap">
+          <canvas class="sleep-metric-chart" id="sleepMetricChart" width="640" height="480" aria-label="近七天睡眠单项变化图"></canvas>
+          <div class="chart-empty" id="sleepMetricEmpty">暂无睡眠数据</div>
+        </div>
+      </section>
+    </main>
+
     <main class="screen" id="historyScreen">
       <section class="panel chart-panel">
         <div class="section-head">
-          <h2 class="section-title">近七天分数</h2>
-          <span class="range-text" id="rangeText"></span>
+          <h2 class="section-title" id="scoreRangeTitle">近七天分数</h2>
+          <div class="section-actions">
+            <div class="chart-options">
+              <label for="scoreLabelsToggle">
+                <input id="scoreLabelsToggle" type="checkbox">
+                显示分数
+              </label>
+            </div>
+          </div>
         </div>
         <div class="chart-wrap">
           <canvas id="scoreChart" width="640" height="420" aria-label="近七天分数折线图"></canvas>
@@ -821,6 +1285,12 @@
       </svg>
       <span>今日记录</span>
     </button>
+    <button class="nav-button" type="button" data-tab="sleep" aria-label="睡眠记录">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 3a6 6 0 1 0 9 7.8A8 8 0 1 1 12 3Z"></path>
+      </svg>
+      <span>睡眠记录</span>
+    </button>
     <button class="nav-button" type="button" data-tab="history" aria-label="历史回顾">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M3 3v18h18"></path>
@@ -830,26 +1300,150 @@
     </button>
   </nav>
 
+  <div class="modal-backdrop" id="backupModal" aria-hidden="true">
+    <section class="backup-modal" role="dialog" aria-modal="true" aria-labelledby="backupModalTitle">
+      <header class="modal-head">
+        <h2 class="modal-title" id="backupModalTitle">数据备份</h2>
+        <div class="modal-actions">
+          <button class="icon-button" id="downloadBackupButton" type="button" aria-label="下载备份" title="下载">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <path d="M7 10 12 15l5-5"></path>
+              <path d="M12 15V3"></path>
+            </svg>
+          </button>
+          <button class="icon-button" id="copyBackupButton" type="button" aria-label="复制备份" title="复制">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+          </button>
+          <button class="icon-button" id="closeBackupButton" type="button" aria-label="关闭备份" title="关闭">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 6 6 18"></path>
+              <path d="m6 6 12 12"></path>
+            </svg>
+          </button>
+        </div>
+      </header>
+      <div class="backup-grid">
+        <section class="backup-column">
+          <h3>当前数据</h3>
+          <textarea id="backupCurrentText" rows="3" readonly></textarea>
+          <p class="backup-status" id="backupCurrentStatus"></p>
+        </section>
+        <section class="backup-column">
+          <h3>导入备份</h3>
+          <textarea id="backupImportText" rows="3" placeholder="可在此处粘贴 JSON 文件内容，粘贴后自动导入。"></textarea>
+          <p class="backup-status" id="backupPasteStatus"></p>
+        </section>
+        <section class="backup-column">
+          <h3>从文件导入</h3>
+          <label class="backup-import-box" for="backupFileInput">
+            点击此处选择 JSON 文件导入。
+          </label>
+          <input class="backup-file-input" id="backupFileInput" type="file" accept="application/json,.json">
+          <p class="backup-status" id="backupImportStatus"></p>
+        </section>
+      </div>
+    </section>
+  </div>
+
+  <div class="modal-backdrop" id="authModal" aria-hidden="true">
+    <section class="backup-modal auth-modal" role="dialog" aria-modal="true" aria-labelledby="authModalTitle">
+      <header class="modal-head">
+        <h2 class="modal-title" id="authModalTitle">账户同步</h2>
+        <div class="modal-actions">
+          <button class="icon-button" id="closeAuthButton" type="button" aria-label="关闭同步" title="关闭">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 6 6 18"></path>
+              <path d="m6 6 12 12"></path>
+            </svg>
+          </button>
+        </div>
+      </header>
+      <div class="auth-body">
+        <p class="auth-current" id="authUserText">未登录，登录后会自动云同步。</p>
+        <div class="auth-fields">
+          <input id="authEmail" type="email" inputmode="email" autocomplete="email" placeholder="邮箱">
+          <input id="authPassword" type="password" autocomplete="current-password" placeholder="密码">
+        </div>
+        <div class="auth-buttons">
+          <button class="action-button primary" id="authLoginButton" type="button">登录</button>
+          <button class="action-button" id="authSignupButton" type="button">注册</button>
+          <button class="action-button" id="authLogoutButton" type="button">退出登录</button>
+          <button class="action-button" id="authSyncButton" type="button">立即同步</button>
+        </div>
+        <p class="auth-status" id="authStatus"></p>
+      </div>
+    </section>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const STORAGE_KEY = "daily-record-site-v1";
+    const SUPABASE_URL = "https://hmpswhtimenyvnxotff.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_WW3rmZCePegJsIf6LeqFvQ_KRgHD9pz";
+    const SYNC_TABLE = "daily_record_sync";
     const state = loadState();
     const els = {
       pageTitle: document.querySelector("#pageTitle"),
       pageDate: document.querySelector("#pageDate"),
       saveState: document.querySelector("#saveState"),
-      todayButton: document.querySelector("#todayButton"),
+      syncButton: document.querySelector("#syncButton"),
+      backupButton: document.querySelector("#backupButton"),
+      backupModal: document.querySelector("#backupModal"),
+      backupCurrentText: document.querySelector("#backupCurrentText"),
+      backupImportText: document.querySelector("#backupImportText"),
+      backupCurrentStatus: document.querySelector("#backupCurrentStatus"),
+      backupPasteStatus: document.querySelector("#backupPasteStatus"),
+      backupImportStatus: document.querySelector("#backupImportStatus"),
+      downloadBackupButton: document.querySelector("#downloadBackupButton"),
+      copyBackupButton: document.querySelector("#copyBackupButton"),
+      closeBackupButton: document.querySelector("#closeBackupButton"),
+      backupFileInput: document.querySelector("#backupFileInput"),
+      authModal: document.querySelector("#authModal"),
+      authEmail: document.querySelector("#authEmail"),
+      authPassword: document.querySelector("#authPassword"),
+      authLoginButton: document.querySelector("#authLoginButton"),
+      authSignupButton: document.querySelector("#authSignupButton"),
+      authLogoutButton: document.querySelector("#authLogoutButton"),
+      authSyncButton: document.querySelector("#authSyncButton"),
+      closeAuthButton: document.querySelector("#closeAuthButton"),
+      authStatus: document.querySelector("#authStatus"),
+      authUserText: document.querySelector("#authUserText"),
       todayScreen: document.querySelector("#todayScreen"),
+      sleepScreen: document.querySelector("#sleepScreen"),
       historyScreen: document.querySelector("#historyScreen"),
       navButtons: document.querySelectorAll(".nav-button"),
       entryDate: document.querySelector("#entryDate"),
       entryDateText: document.querySelector("#entryDateText"),
       prevDateButton: document.querySelector("#prevDateButton"),
       nextDateButton: document.querySelector("#nextDateButton"),
+      sleepEntryDate: document.querySelector("#sleepEntryDate"),
+      sleepDateText: document.querySelector("#sleepDateText"),
+      sleepPrevDateButton: document.querySelector("#sleepPrevDateButton"),
+      sleepNextDateButton: document.querySelector("#sleepNextDateButton"),
+      bedTimeInput: document.querySelector("#bedTimeInput"),
+      sleepTimeInput: document.querySelector("#sleepTimeInput"),
+      wakeTimeInput: document.querySelector("#wakeTimeInput"),
+      riseTimeInput: document.querySelector("#riseTimeInput"),
+      sleepTotalInput: document.querySelector("#sleepTotalInput"),
+      sleepRangeTitle: document.querySelector("#sleepRangeTitle"),
+      sleepTimelineChart: document.querySelector("#sleepTimelineChart"),
+      sleepTimelineEmpty: document.querySelector("#sleepTimelineEmpty"),
+      timelineLabelsToggle: document.querySelector("#timelineLabelsToggle"),
+      sleepMetricTitle: document.querySelector("#sleepMetricTitle"),
+      sleepMetricTabs: document.querySelectorAll(".metric-tab"),
+      sleepMetricChart: document.querySelector("#sleepMetricChart"),
+      sleepMetricEmpty: document.querySelector("#sleepMetricEmpty"),
+      metricLabelsToggle: document.querySelector("#metricLabelsToggle"),
       scoreInput: document.querySelector("#scoreInput"),
       goodText: document.querySelector("#goodText"),
       improveText: document.querySelector("#improveText"),
       luckyText: document.querySelector("#luckyText"),
-      rangeText: document.querySelector("#rangeText"),
+      scoreRangeTitle: document.querySelector("#scoreRangeTitle"),
+      scoreLabelsToggle: document.querySelector("#scoreLabelsToggle"),
       chart: document.querySelector("#scoreChart"),
       chartEmpty: document.querySelector("#chartEmpty"),
       monthTitle: document.querySelector("#monthTitle"),
@@ -865,23 +1459,37 @@
 
     let activeTab = "today";
     let selectedDate = todayKey();
+    let selectedSleepDate = selectedDate;
     let selectedHistoryDate = selectedDate;
     let monthCursor = firstOfMonth(parseDateKey(selectedDate));
     let saveTimer = null;
     let chartFrame = 0;
+    let sleepChartFrame = 0;
+    let activeSleepMetric = "sleep";
+    let supabaseClient = null;
+    let currentUser = null;
+    let cloudSyncTimer = null;
+    let cloudSyncing = false;
+    let cloudSyncPending = false;
 
     init();
 
     function init() {
       syncDateInputs(selectedDate);
+      syncSleepDateInputs(selectedSleepDate);
       loadForm(selectedDate);
+      loadSleepForm(selectedSleepDate);
       bindEvents();
       renderAll();
+      initSupabase();
 
       if ("ResizeObserver" in window) {
         new ResizeObserver(queueDrawChart).observe(els.chart.parentElement);
+        new ResizeObserver(queueDrawSleepCharts).observe(els.sleepTimelineChart.parentElement);
+        new ResizeObserver(queueDrawSleepCharts).observe(els.sleepMetricChart.parentElement);
       } else {
         window.addEventListener("resize", queueDrawChart);
+        window.addEventListener("resize", queueDrawSleepCharts);
       }
     }
 
@@ -900,13 +1508,66 @@
 
       els.prevDateButton.addEventListener("click", () => shiftEntryDate(-1));
       els.nextDateButton.addEventListener("click", () => shiftEntryDate(1));
-      els.todayButton.addEventListener("click", () => {
-        selectedDate = todayKey();
-        selectedHistoryDate = selectedDate;
-        monthCursor = firstOfMonth(parseDateKey(selectedDate));
-        syncDateInputs(selectedDate);
-        loadForm(selectedDate);
+
+      els.sleepEntryDate.addEventListener("change", () => {
+        selectedSleepDate = els.sleepEntryDate.value || todayKey();
+        syncSleepDateInputs(selectedSleepDate);
+        loadSleepForm(selectedSleepDate);
         renderAll();
+      });
+
+      els.sleepDateText.addEventListener("change", commitSleepDateText);
+      els.sleepDateText.addEventListener("blur", commitSleepDateText);
+      els.sleepPrevDateButton.addEventListener("click", () => shiftSleepDate(-1));
+      els.sleepNextDateButton.addEventListener("click", () => shiftSleepDate(1));
+
+      [els.bedTimeInput, els.sleepTimeInput, els.wakeTimeInput, els.riseTimeInput].forEach((field) => {
+        field.addEventListener("input", saveSleepEntry);
+      });
+
+      els.sleepTotalInput.addEventListener("change", saveSleepTotalOverride);
+      els.sleepTotalInput.addEventListener("blur", saveSleepTotalOverride);
+
+      els.timelineLabelsToggle.addEventListener("change", renderSleepCharts);
+      els.metricLabelsToggle.addEventListener("change", renderSleepCharts);
+      els.scoreLabelsToggle.addEventListener("change", renderChart);
+
+      els.backupButton.addEventListener("click", openBackupModal);
+      els.closeBackupButton.addEventListener("click", closeBackupModal);
+      els.downloadBackupButton.addEventListener("click", downloadBackupData);
+      els.copyBackupButton.addEventListener("click", copyBackupData);
+      els.backupImportText.addEventListener("paste", () => {
+        window.setTimeout(importPastedBackup, 0);
+      });
+      els.backupImportText.addEventListener("change", importPastedBackup);
+      els.backupImportText.addEventListener("blur", importPastedBackup);
+      els.backupFileInput.addEventListener("change", importSelectedBackupFile);
+      els.backupModal.addEventListener("click", (event) => {
+        if (event.target === els.backupModal) {
+          closeBackupModal();
+        }
+      });
+
+      els.syncButton.addEventListener("click", openAuthModal);
+      els.closeAuthButton.addEventListener("click", closeAuthModal);
+      els.authLoginButton.addEventListener("click", signInWithEmail);
+      els.authSignupButton.addEventListener("click", signUpWithEmail);
+      els.authLogoutButton.addEventListener("click", signOutUser);
+      els.authSyncButton.addEventListener("click", syncCloudNow);
+      els.authModal.addEventListener("click", (event) => {
+        if (event.target === els.authModal) {
+          closeAuthModal();
+        }
+      });
+
+      els.sleepMetricTabs.forEach((button) => {
+        button.addEventListener("click", () => {
+          activeSleepMetric = button.dataset.sleepMetric;
+          els.sleepMetricTabs.forEach((tab) => {
+            tab.classList.toggle("is-active", tab === button);
+          });
+          renderSleepCharts();
+        });
       });
 
       [els.scoreInput, els.goodText, els.improveText, els.luckyText].forEach((field) => {
@@ -937,6 +1598,7 @@
     function switchTab(tab) {
       activeTab = tab;
       els.todayScreen.classList.toggle("is-active", tab === "today");
+      els.sleepScreen.classList.toggle("is-active", tab === "sleep");
       els.historyScreen.classList.toggle("is-active", tab === "history");
       els.navButtons.forEach((button) => {
         button.classList.toggle("is-active", button.dataset.tab === tab);
@@ -970,6 +1632,116 @@
     function syncDateInputs(key) {
       els.entryDate.value = key;
       els.entryDateText.value = key;
+    }
+
+    function shiftSleepDate(days) {
+      selectedSleepDate = dateKey(addDays(parseDateKey(selectedSleepDate), days));
+      syncSleepDateInputs(selectedSleepDate);
+      loadSleepForm(selectedSleepDate);
+      renderAll();
+    }
+
+    function commitSleepDateText() {
+      const nextDate = normalizeDateKey(els.sleepDateText.value);
+      if (!nextDate) {
+        syncSleepDateInputs(selectedSleepDate);
+        return;
+      }
+      selectedSleepDate = nextDate;
+      syncSleepDateInputs(nextDate);
+      loadSleepForm(nextDate);
+      renderAll();
+    }
+
+    function syncSleepDateInputs(key) {
+      els.sleepEntryDate.value = key;
+      els.sleepDateText.value = key;
+    }
+
+    function loadSleepForm(key) {
+      const entry = state.sleepEntries[key] || {};
+      els.bedTimeInput.value = entry.bed || "";
+      els.sleepTimeInput.value = entry.sleep || "";
+      els.wakeTimeInput.value = entry.wake || "";
+      els.riseTimeInput.value = entry.rise || "";
+      renderSleepTotal(entry);
+      els.saveState.textContent = "";
+    }
+
+    function saveSleepEntry() {
+      const key = selectedSleepDate;
+      const existing = state.sleepEntries[key] || {};
+      const entry = {
+        bed: els.bedTimeInput.value,
+        sleep: els.sleepTimeInput.value,
+        wake: els.wakeTimeInput.value,
+        rise: els.riseTimeInput.value,
+        totalOverride: typeof existing.totalOverride === "number" ? existing.totalOverride : null,
+        updatedAt: new Date().toISOString()
+      };
+
+      if (!entry.bed && !entry.sleep && !entry.wake && !entry.rise && entry.totalOverride === null) {
+        delete state.sleepEntries[key];
+      } else {
+        state.sleepEntries[key] = entry;
+      }
+
+      persistState();
+      renderSleepTotal(entry);
+      showSaved();
+      renderSleepCharts();
+    }
+
+    function saveSleepTotalOverride() {
+      const key = selectedSleepDate;
+      const entry = state.sleepEntries[key] || {
+        bed: els.bedTimeInput.value,
+        sleep: els.sleepTimeInput.value,
+        wake: els.wakeTimeInput.value,
+        rise: els.riseTimeInput.value
+      };
+      const trimmed = els.sleepTotalInput.value.trim();
+      if (!trimmed) {
+        delete entry.totalOverride;
+      } else {
+        const parsed = parseDurationInput(trimmed);
+        if (parsed === null) {
+          renderSleepTotal(entry);
+          return;
+        }
+        entry.totalOverride = parsed;
+      }
+      entry.bed = els.bedTimeInput.value;
+      entry.sleep = els.sleepTimeInput.value;
+      entry.wake = els.wakeTimeInput.value;
+      entry.rise = els.riseTimeInput.value;
+      entry.updatedAt = new Date().toISOString();
+
+      if (!entry.bed && !entry.sleep && !entry.wake && !entry.rise && typeof entry.totalOverride !== "number") {
+        delete state.sleepEntries[key];
+      } else {
+        state.sleepEntries[key] = entry;
+      }
+
+      persistState();
+      renderSleepTotal(entry);
+      showSaved();
+      renderSleepCharts();
+    }
+
+    function renderSleepTotal(entry = null) {
+      const sleepEntry = entry || {
+        bed: els.bedTimeInput.value,
+        sleep: els.sleepTimeInput.value,
+        wake: els.wakeTimeInput.value,
+        rise: els.riseTimeInput.value
+      };
+      const timeline = buildSleepTimeline(sleepEntry);
+      const totalMinutes = effectiveSleepTotal(sleepEntry, timeline);
+      els.sleepTotalInput.value = totalMinutes !== null ? formatDuration(totalMinutes) : "";
+      els.sleepTotalInput.placeholder = timeline?.computedTotal !== null && timeline?.computedTotal !== undefined
+        ? `自动 ${formatDuration(timeline.computedTotal)}`
+        : "未计算";
     }
 
     function loadForm(key) {
@@ -1016,24 +1788,309 @@
       }, 1200);
     }
 
+    function initSupabase() {
+      updateAuthUi();
+      if (!window.supabase?.createClient) {
+        setAuthStatus("Supabase 客户端未加载，请检查网络后刷新页面。");
+        return;
+      }
+
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      supabaseClient.auth.getSession()
+        .then(({ data, error }) => {
+          if (error) {
+            setAuthStatus(`读取登录状态失败：${formatSyncError(error)}`);
+            return;
+          }
+          handleAuthSession(data.session);
+        })
+        .catch((error) => {
+          setAuthStatus(`读取登录状态失败：${formatSyncError(error)}`);
+        });
+
+      supabaseClient.auth.onAuthStateChange((_event, session) => {
+        handleAuthSession(session);
+      });
+    }
+
+    function handleAuthSession(session) {
+      const nextUser = session?.user || null;
+      const userChanged = nextUser?.id !== currentUser?.id;
+      currentUser = nextUser;
+      updateAuthUi();
+      if (currentUser && userChanged) {
+        syncFromCloud();
+      }
+    }
+
+    function updateAuthUi() {
+      const signedIn = Boolean(currentUser);
+      els.syncButton.classList.toggle("is-signed-in", signedIn);
+      els.authUserText.textContent = signedIn
+        ? `已登录：${currentUser.email || currentUser.id}`
+        : "未登录，登录后会自动云同步。";
+      els.authLogoutButton.disabled = !signedIn;
+      els.authSyncButton.disabled = !signedIn;
+    }
+
+    function openAuthModal() {
+      updateAuthUi();
+      els.authStatus.textContent = !supabaseClient
+        ? "Supabase 还没有连接成功，请检查网络后刷新。"
+        : currentUser
+          ? "自动云同步已开启。"
+          : "登录或注册后，会自动合并云端和本地记录。";
+      els.authModal.classList.add("is-visible");
+      els.authModal.setAttribute("aria-hidden", "false");
+    }
+
+    function closeAuthModal() {
+      els.authModal.classList.remove("is-visible");
+      els.authModal.setAttribute("aria-hidden", "true");
+    }
+
+    function setAuthStatus(message) {
+      els.authStatus.textContent = message;
+    }
+
+    function authCredentials() {
+      const email = els.authEmail.value.trim();
+      const password = els.authPassword.value;
+      if (!email || !password) {
+        setAuthStatus("请输入邮箱和密码。");
+        return null;
+      }
+      return { email, password };
+    }
+
+    function authRedirectTo() {
+      const url = window.location.href.split("#")[0];
+      return /^https?:\/\//.test(url) ? url : undefined;
+    }
+
+    async function signInWithEmail() {
+      if (!ensureSupabaseClient()) {
+        return;
+      }
+      const credentials = authCredentials();
+      if (!credentials) {
+        return;
+      }
+      setAuthStatus("正在登录...");
+      const { error } = await supabaseClient.auth.signInWithPassword(credentials);
+      if (error) {
+        setAuthStatus(`登录失败：${formatSyncError(error)}`);
+        return;
+      }
+      setAuthStatus("登录成功，正在同步...");
+    }
+
+    async function signUpWithEmail() {
+      if (!ensureSupabaseClient()) {
+        return;
+      }
+      const credentials = authCredentials();
+      if (!credentials) {
+        return;
+      }
+      setAuthStatus("正在注册...");
+      const redirectTo = authRedirectTo();
+      const signUpPayload = redirectTo
+        ? { ...credentials, options: { emailRedirectTo: redirectTo } }
+        : credentials;
+      const { data, error } = await supabaseClient.auth.signUp(signUpPayload);
+      if (error) {
+        setAuthStatus(`注册失败：${formatSyncError(error)}`);
+        return;
+      }
+      if (data.session) {
+        setAuthStatus("注册成功，正在同步...");
+      } else {
+        setAuthStatus("注册成功，请按邮件提示确认后再登录。");
+      }
+    }
+
+    async function signOutUser() {
+      if (!ensureSupabaseClient()) {
+        return;
+      }
+      const { error } = await supabaseClient.auth.signOut();
+      if (error) {
+        setAuthStatus(`退出失败：${formatSyncError(error)}`);
+        return;
+      }
+      currentUser = null;
+      updateAuthUi();
+      setAuthStatus("已退出登录，本地记录仍会保留。");
+    }
+
+    function ensureSupabaseClient() {
+      if (supabaseClient) {
+        return true;
+      }
+      setAuthStatus("Supabase 还没有连接成功，请检查网络后刷新。");
+      return false;
+    }
+
+    function syncCloudNow() {
+      if (!ensureSupabaseClient() || !currentUser) {
+        setAuthStatus("请先登录后再同步。");
+        return;
+      }
+      syncFromCloud(true);
+    }
+
+    function scheduleCloudSync(delay = 900) {
+      if (!supabaseClient || !currentUser) {
+        return;
+      }
+      if (cloudSyncing) {
+        cloudSyncPending = true;
+        return;
+      }
+      window.clearTimeout(cloudSyncTimer);
+      cloudSyncTimer = window.setTimeout(() => {
+        uploadCloudState();
+      }, delay);
+    }
+
+    async function syncFromCloud(manual = false) {
+      if (!supabaseClient || !currentUser) {
+        return;
+      }
+      if (cloudSyncing) {
+        cloudSyncPending = true;
+        return;
+      }
+
+      cloudSyncing = true;
+      setAuthStatus(manual ? "正在手动同步..." : "正在同步云端数据...");
+      try {
+        const { data, error } = await supabaseClient
+          .from(SYNC_TABLE)
+          .select("data")
+          .eq("user_id", currentUser.id)
+          .limit(1);
+
+        if (error) {
+          throw error;
+        }
+
+        const cloudPayload = data?.[0]?.data || null;
+        let result = null;
+        if (hasBackupRecords(cloudPayload)) {
+          const mergeResult = mergeBackup(cloudPayload);
+          if (mergeResult.ok) {
+            result = mergeResult;
+            persistState({ sync: false });
+            loadForm(selectedDate);
+            loadSleepForm(selectedSleepDate);
+            renderAll();
+            if (els.backupModal.classList.contains("is-visible")) {
+              refreshBackupText();
+            }
+          }
+        }
+
+        await writeCloudState();
+        const mergedText = result ? `，已合并 ${result.added + result.merged} 天云端记录` : "";
+        setAuthStatus(`已同步到云端${mergedText}。`);
+      } catch (error) {
+        setAuthStatus(`同步失败：${formatSyncError(error)}`);
+      } finally {
+        cloudSyncing = false;
+        if (cloudSyncPending) {
+          cloudSyncPending = false;
+          scheduleCloudSync(300);
+        }
+      }
+    }
+
+    async function uploadCloudState() {
+      if (!supabaseClient || !currentUser) {
+        return;
+      }
+      if (cloudSyncing) {
+        cloudSyncPending = true;
+        return;
+      }
+      cloudSyncing = true;
+      try {
+        await writeCloudState();
+        setAuthStatus("已自动同步到云端。");
+      } catch (error) {
+        setAuthStatus(`自动同步失败：${formatSyncError(error)}`);
+      } finally {
+        cloudSyncing = false;
+        if (cloudSyncPending) {
+          cloudSyncPending = false;
+          scheduleCloudSync(300);
+        }
+      }
+    }
+
+    async function writeCloudState() {
+      const payload = backupPayload();
+      const { error } = await supabaseClient
+        .from(SYNC_TABLE)
+        .upsert({
+          user_id: currentUser.id,
+          data: payload,
+          updated_at: payload.exportedAt
+        }, { onConflict: "user_id" });
+
+      if (error) {
+        throw error;
+      }
+    }
+
+    function hasBackupRecords(payload) {
+      if (!payload || typeof payload !== "object") {
+        return false;
+      }
+      const entryCount = Object.keys(payload.entries || {}).length;
+      const sleepCount = Object.keys(payload.sleepEntries || {}).length;
+      return entryCount > 0 || sleepCount > 0;
+    }
+
+    function formatSyncError(error) {
+      const message = error?.message || String(error || "未知错误");
+      if (message.includes(SYNC_TABLE) || message.includes("does not exist")) {
+        return `${message}。请先在 Supabase 创建 ${SYNC_TABLE} 表并开启 RLS。`;
+      }
+      return message;
+    }
+
     function renderAll() {
       renderHeader();
       renderChart();
+      renderSleepCharts();
       renderCalendar();
       renderDetail();
     }
 
     function renderHeader() {
-      els.pageTitle.textContent = activeTab === "today" ? "今日记录" : "历史回顾";
-      const key = activeTab === "today" ? selectedDate : selectedHistoryDate;
+      const titles = {
+        today: "今日记录",
+        sleep: "睡眠记录",
+        history: "历史回顾"
+      };
+      els.pageTitle.textContent = titles[activeTab] || "今日记录";
+      const key = activeTab === "sleep"
+        ? selectedSleepDate
+        : activeTab === "today"
+          ? selectedDate
+          : selectedHistoryDate;
       els.pageDate.textContent = formatLongDate(key);
     }
 
     function renderChart() {
       const today = parseDateKey(todayKey());
       const days = Array.from({ length: 7 }, (_, index) => addDays(today, index - 6));
-      els.rangeText.textContent = `${formatShortDate(dateKey(days[0]))} - ${formatShortDate(dateKey(days[6]))}`;
-      els.chart.dataset.days = JSON.stringify(days.map(dateKey));
+      const keys = days.map(dateKey);
+      const rangeLabel = `${formatCompactDate(keys[0])}-${formatCompactDate(keys[6])}`;
+      els.scoreRangeTitle.textContent = `近七天分数（${rangeLabel}）`;
+      els.chart.dataset.days = JSON.stringify(keys);
       queueDrawChart();
     }
 
@@ -1049,21 +2106,11 @@
 
     function drawChart() {
       const canvas = els.chart;
-      const wrap = canvas.parentElement;
-      const width = Math.floor(wrap.clientWidth);
-      if (width < 80) {
+      const prepared = prepareCanvas(canvas, 210);
+      if (!prepared) {
         return;
       }
-      const height = 210;
-      if (canvas.width !== width) {
-        canvas.width = width;
-      }
-      if (canvas.height !== height) {
-        canvas.height = height;
-      }
-
-      const ctx = canvas.getContext("2d");
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      const { ctx, width, height } = prepared;
       ctx.clearRect(0, 0, width, height);
       const lineColor = cssVar("--line");
       const mutedColor = cssVar("--muted");
@@ -1152,11 +2199,553 @@
         ctx.arc(x, y, 5, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
+        if (els.scoreLabelsToggle.checked) {
+          drawScoreLabel(ctx, `${value}分`, x, y, index, width, pad);
+        }
       });
+    }
+
+    function drawScoreLabel(ctx, label, x, y, index, width, pad) {
+      ctx.save();
+      ctx.fillStyle = cssVar("--muted");
+      ctx.font = "11px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
+      ctx.textAlign = x > width - pad.right - 24 ? "right" : x < pad.left + 24 ? "left" : "center";
+      const placeBelow = y < pad.top + 18;
+      ctx.textBaseline = placeBelow ? "top" : "bottom";
+      const offsetY = placeBelow ? 9 : -9;
+      const stagger = index % 2 === 0 ? 0 : (placeBelow ? 5 : -5);
+      ctx.fillText(label, x, y + offsetY + stagger);
+      ctx.restore();
     }
 
     function cssVar(name) {
       return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    }
+
+    function prepareCanvas(canvas, cssHeight) {
+      const wrap = canvas.parentElement;
+      const width = Math.floor(wrap.clientWidth);
+      if (width < 80) {
+        return null;
+      }
+      const ratio = window.devicePixelRatio || 1;
+      const pixelWidth = Math.floor(width * ratio);
+      const pixelHeight = Math.floor(cssHeight * ratio);
+      if (canvas.width !== pixelWidth) {
+        canvas.width = pixelWidth;
+      }
+      if (canvas.height !== pixelHeight) {
+        canvas.height = pixelHeight;
+      }
+      const ctx = canvas.getContext("2d");
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+      return { ctx, width, height: cssHeight, ratio };
+    }
+
+    function renderSleepCharts() {
+      const keys = sleepWeekKeys();
+      const rangeLabel = `${formatCompactDate(keys[0])}-${formatCompactDate(keys[6])}`;
+      els.sleepRangeTitle.textContent = `近七天睡眠（${rangeLabel}）`;
+      els.sleepMetricTitle.textContent = `单项变化（${rangeLabel}）`;
+      els.sleepTimelineChart.dataset.keys = JSON.stringify(keys);
+      els.sleepMetricChart.dataset.keys = JSON.stringify(keys);
+      queueDrawSleepCharts();
+    }
+
+    function queueDrawSleepCharts() {
+      if (sleepChartFrame) {
+        return;
+      }
+      sleepChartFrame = window.requestAnimationFrame(() => {
+        sleepChartFrame = 0;
+        drawSleepTimelineChart();
+        drawSleepMetricChart();
+      });
+    }
+
+    function sleepWeekKeys() {
+      const today = parseDateKey(todayKey());
+      return Array.from({ length: 7 }, (_, index) => dateKey(addDays(today, index - 6)));
+    }
+
+    function sleepRows() {
+      const keys = JSON.parse(els.sleepTimelineChart.dataset.keys || "[]");
+      return keys.map((key) => {
+        const entry = state.sleepEntries[key] || {};
+        return {
+          key,
+          entry,
+          timeline: buildSleepTimeline(entry)
+        };
+      });
+    }
+
+    function drawSleepTimelineChart() {
+      const prepared = prepareCanvas(els.sleepTimelineChart, 320);
+      if (!prepared) {
+        return;
+      }
+      const { ctx, width, height } = prepared;
+      ctx.clearRect(0, 0, width, height);
+
+      const rows = sleepRows();
+      const timelines = rows.map((row) => row.timeline).filter(Boolean);
+      const points = timelines.flatMap((timeline) => [timeline.bed, timeline.sleep, timeline.wake, timeline.rise])
+        .filter((value) => value !== null);
+      const hasData = points.length > 0;
+      els.sleepTimelineEmpty.classList.toggle("is-visible", !hasData);
+
+      const lineColor = cssVar("--line");
+      const mutedColor = cssVar("--muted");
+      const accentColor = cssVar("--sleep-main");
+      const prePostColor = cssVar("--sleep-softer");
+
+      const pad = { top: 42, right: 16, bottom: 30, left: 54 };
+      const plotWidth = width - pad.left - pad.right;
+      const plotHeight = height - pad.top - pad.bottom;
+      const rowStep = plotHeight / rows.length;
+      const rowY = (index) => pad.top + rowStep * index + rowStep / 2;
+
+      let minTime = hasData ? Math.min(...points) : 0;
+      let maxTime = hasData ? Math.max(...points) : 1440;
+      minTime = Math.floor((minTime - 45) / 60) * 60;
+      maxTime = Math.ceil((maxTime + 45) / 60) * 60;
+      if (maxTime - minTime < 360) {
+        const center = (minTime + maxTime) / 2;
+        minTime = Math.floor((center - 180) / 60) * 60;
+        maxTime = Math.ceil((center + 180) / 60) * 60;
+      }
+      const xFor = (value) => pad.left + ((value - minTime) / (maxTime - minTime)) * plotWidth;
+      const tickStep = maxTime - minTime > 720 ? 180 : 120;
+
+      ctx.font = "12px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
+      ctx.fillStyle = mutedColor;
+      ctx.strokeStyle = lineColor;
+      ctx.lineWidth = 1;
+
+      for (let tick = Math.ceil(minTime / tickStep) * tickStep; tick <= maxTime; tick += tickStep) {
+        const x = crisp(xFor(tick));
+        ctx.beginPath();
+        ctx.moveTo(x, pad.top);
+        ctx.lineTo(x, height - pad.bottom);
+        ctx.stroke();
+        ctx.textAlign = "center";
+        ctx.textBaseline = "top";
+        ctx.fillText(formatClock(tick), x, height - pad.bottom + 8);
+      }
+
+      rows.forEach((row, index) => {
+        const y = rowY(index);
+        ctx.textAlign = "right";
+        ctx.textBaseline = "middle";
+        ctx.fillStyle = mutedColor;
+        ctx.fillText(formatShortDate(row.key), pad.left - 8, y);
+
+        if (!row.timeline) {
+          return;
+        }
+
+        const barHeight = 12;
+        drawSegment(ctx, row.timeline.bed, row.timeline.sleep, xFor, y, barHeight, prePostColor);
+        drawSegment(ctx, row.timeline.sleep, row.timeline.wake, xFor, y, barHeight + 3, accentColor);
+        drawSegment(ctx, row.timeline.wake, row.timeline.rise, xFor, y, barHeight, prePostColor);
+        if (els.timelineLabelsToggle.checked) {
+          drawTimelineLabels(ctx, row.timeline, xFor, y);
+        }
+      });
+
+      if (!hasData) {
+        return;
+      }
+
+      ctx.textBaseline = "middle";
+      ctx.textAlign = "left";
+      drawLegend(ctx, pad.left, 18, accentColor, "睡眠");
+      drawLegend(ctx, pad.left + 62, 18, prePostColor, "上床/起床缓冲");
+    }
+
+    function drawSleepMetricChart() {
+      const prepared = prepareCanvas(els.sleepMetricChart, 240);
+      if (!prepared) {
+        return;
+      }
+      const { ctx, width, height } = prepared;
+      ctx.clearRect(0, 0, width, height);
+
+      const rows = sleepRows();
+      const metric = activeSleepMetric;
+      if (metric === "total") {
+        drawSleepTotalBars(ctx, width, height, rows);
+        return;
+      }
+
+      const defs = sleepMetricDefs();
+      const activeDefs = defs.filter((def) => def.key === metric);
+      const values = [];
+      activeDefs.forEach((def) => {
+        rows.forEach((row) => {
+          const value = def.value(row.timeline);
+          if (value !== null) {
+            values.push(value);
+          }
+        });
+      });
+      const hasData = values.length > 0;
+      els.sleepMetricEmpty.classList.toggle("is-visible", !hasData);
+      if (!hasData) {
+        drawEmptyAxes(ctx, width, height, rows);
+        return;
+      }
+
+      const lineColor = cssVar("--line");
+      const mutedColor = cssVar("--muted");
+      const pad = { top: 20, right: 18, bottom: 36, left: 44 };
+      const plotWidth = width - pad.left - pad.right;
+      const plotHeight = height - pad.top - pad.bottom;
+      let minValue = Math.floor((Math.min(...values) - 45) / 60) * 60;
+      let maxValue = Math.ceil((Math.max(...values) + 45) / 60) * 60;
+      if (maxValue - minValue < 240) {
+        const center = (minValue + maxValue) / 2;
+        minValue = Math.floor((center - 120) / 60) * 60;
+        maxValue = Math.ceil((center + 120) / 60) * 60;
+      }
+      const xFor = (index) => pad.left + (plotWidth * index) / 6;
+      const yFor = (value) => pad.top + plotHeight - ((value - minValue) / (maxValue - minValue)) * plotHeight;
+
+      drawTimeGrid(ctx, width, height, pad, minValue, maxValue, yFor, lineColor, mutedColor);
+      drawDateAxis(ctx, rows, height, pad, xFor, mutedColor);
+
+      activeDefs.forEach((def) => {
+        drawMetricLine(ctx, rows, def, xFor, yFor, els.metricLabelsToggle.checked);
+      });
+    }
+
+    function drawSleepTotalBars(ctx, width, height, rows) {
+      const values = rows.map((row) => row.timeline?.totalMinutes ?? null);
+      const hasData = values.some((value) => value !== null);
+      els.sleepMetricEmpty.classList.toggle("is-visible", !hasData);
+      if (!hasData) {
+        drawEmptyAxes(ctx, width, height, rows);
+        return;
+      }
+
+      const lineColor = cssVar("--line");
+      const mutedColor = cssVar("--muted");
+      const accentColor = cssVar("--sleep-main");
+      const pad = { top: 20, right: 18, bottom: 36, left: 38 };
+      const plotWidth = width - pad.left - pad.right;
+      const plotHeight = height - pad.top - pad.bottom;
+      const maxHours = Math.max(1, Math.ceil(Math.max(...values.filter((value) => value !== null)) / 60));
+      const xFor = (index) => pad.left + (plotWidth * index) / 6;
+      const yFor = (hours) => pad.top + plotHeight - (hours / maxHours) * plotHeight;
+
+      ctx.font = "12px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = lineColor;
+      ctx.fillStyle = mutedColor;
+      ctx.textAlign = "right";
+      ctx.textBaseline = "middle";
+      for (let tick = 0; tick <= maxHours; tick += Math.max(1, Math.ceil(maxHours / 4))) {
+        const y = crisp(yFor(tick));
+        ctx.beginPath();
+        ctx.moveTo(pad.left, y);
+        ctx.lineTo(width - pad.right, y);
+        ctx.stroke();
+        ctx.fillText(`${tick}h`, pad.left - 6, y);
+      }
+
+      drawDateAxis(ctx, rows, height, pad, xFor, mutedColor);
+
+      const barWidth = Math.max(12, Math.min(28, plotWidth / 12));
+      values.forEach((value, index) => {
+        if (value === null) {
+          return;
+        }
+        const x = xFor(index) - barWidth / 2;
+        const y = yFor(value / 60);
+        ctx.fillStyle = accentColor;
+        ctx.fillRect(x, y, barWidth, height - pad.bottom - y);
+        if (els.metricLabelsToggle.checked) {
+          ctx.fillStyle = mutedColor;
+          ctx.font = "11px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "bottom";
+          ctx.fillText(formatDuration(value), x + barWidth / 2, y - 5);
+        }
+      });
+    }
+
+    function drawSegment(ctx, start, end, xFor, y, height, color) {
+      if (start === null || end === null || end <= start) {
+        return;
+      }
+      const x = xFor(start);
+      const width = Math.max(2, xFor(end) - x);
+      ctx.fillStyle = color;
+      ctx.fillRect(x, y - height / 2, width, height);
+    }
+
+    function drawTimelineLabels(ctx, timeline, xFor, y) {
+      if (!timeline || timeline.sleep === null || timeline.wake === null) {
+        return;
+      }
+      const sleepX = xFor(timeline.sleep);
+      const wakeX = xFor(timeline.wake);
+      const centerX = (sleepX + wakeX) / 2;
+      const label = `${formatClock(timeline.sleep)} - ${formatClock(timeline.wake)}`;
+      ctx.save();
+      ctx.font = "11px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
+      ctx.fillStyle = cssVar("--muted");
+      ctx.textAlign = "center";
+      ctx.textBaseline = "bottom";
+      ctx.fillText(label, centerX, y - 10);
+
+      if (timeline.bed !== null && timeline.bed !== timeline.sleep) {
+        ctx.textAlign = "left";
+        ctx.fillText(formatClock(timeline.bed), xFor(timeline.bed), y - 10);
+      }
+      if (timeline.rise !== null && timeline.rise !== timeline.wake) {
+        ctx.textAlign = "right";
+        ctx.fillText(formatClock(timeline.rise), xFor(timeline.rise), y - 10);
+      }
+      ctx.restore();
+    }
+
+    function drawMetricLine(ctx, rows, def, xFor, yFor, showLabels) {
+      ctx.strokeStyle = def.color;
+      ctx.fillStyle = def.color;
+      ctx.lineWidth = 2.3;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      let drawing = false;
+      rows.forEach((row, index) => {
+        const value = def.value(row.timeline);
+        if (value === null) {
+          if (drawing) {
+            ctx.stroke();
+          }
+          drawing = false;
+          return;
+        }
+        const x = xFor(index);
+        const y = yFor(value);
+        if (!drawing) {
+          ctx.beginPath();
+          ctx.moveTo(x, y);
+          drawing = true;
+        } else {
+          ctx.lineTo(x, y);
+        }
+      });
+      if (drawing) {
+        ctx.stroke();
+      }
+      rows.forEach((row, index) => {
+        const value = def.value(row.timeline);
+        if (value === null) {
+          return;
+        }
+        ctx.beginPath();
+        ctx.arc(xFor(index), yFor(value), 4, 0, Math.PI * 2);
+        ctx.fill();
+        if (showLabels) {
+          drawPointLabel(ctx, formatClock(value), xFor(index), yFor(value), index);
+        }
+      });
+    }
+
+    function drawPointLabel(ctx, label, x, y, index) {
+      ctx.save();
+      ctx.font = "11px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
+      ctx.fillStyle = cssVar("--muted");
+      ctx.textAlign = index >= 5 ? "right" : "left";
+      ctx.textBaseline = "middle";
+      const offsetX = index >= 5 ? -7 : 7;
+      const offsetY = index % 2 === 0 ? -9 : 9;
+      ctx.fillText(label, x + offsetX, y + offsetY);
+      ctx.restore();
+    }
+
+    function drawTimeGrid(ctx, width, height, pad, minValue, maxValue, yFor, lineColor, mutedColor) {
+      const step = maxValue - minValue > 720 ? 180 : 120;
+      ctx.font = "12px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = lineColor;
+      ctx.fillStyle = mutedColor;
+      ctx.textAlign = "right";
+      ctx.textBaseline = "middle";
+      for (let tick = Math.ceil(minValue / step) * step; tick <= maxValue; tick += step) {
+        const y = crisp(yFor(tick));
+        ctx.beginPath();
+        ctx.moveTo(pad.left, y);
+        ctx.lineTo(width - pad.right, y);
+        ctx.stroke();
+        ctx.fillText(formatClock(tick), pad.left - 6, y);
+      }
+    }
+
+    function drawDateAxis(ctx, rows, height, pad, xFor, mutedColor) {
+      ctx.fillStyle = mutedColor;
+      ctx.font = "12px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "top";
+      rows.forEach((row, index) => {
+        ctx.fillText(row.key.slice(5).replace("-", "/"), xFor(index), height - pad.bottom + 12);
+      });
+    }
+
+    function drawEmptyAxes(ctx, width, height, rows) {
+      const mutedColor = cssVar("--muted");
+      ctx.fillStyle = mutedColor;
+      ctx.font = "12px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
+      const pad = { left: 40, bottom: 36 };
+      const plotWidth = width - 58;
+      const xFor = (index) => pad.left + (plotWidth * index) / 6;
+      drawDateAxis(ctx, rows, height, pad, xFor, mutedColor);
+    }
+
+    function drawLegend(ctx, x, y, color, label) {
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(x + 4, y, 4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = cssVar("--muted");
+      ctx.font = "12px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
+      ctx.fillText(label, x + 12, y);
+    }
+
+    function sleepMetricDefs() {
+      return [
+        { key: "bed", label: "上床", color: "#9a8171", value: (timeline) => timeline?.bed ?? null },
+        { key: "sleep", label: "入睡", color: cssVar("--accent-strong"), value: (timeline) => timeline?.sleep ?? null },
+        { key: "wake", label: "醒来", color: cssVar("--good"), value: (timeline) => timeline?.wake ?? null },
+        { key: "rise", label: "起床", color: "#9f938b", value: (timeline) => timeline?.rise ?? null }
+      ];
+    }
+
+    function sleepMetricColor(metric) {
+      if (metric === "total") {
+        return cssVar("--sleep-main");
+      }
+      return sleepMetricDefs().find((def) => def.key === metric)?.color || cssVar("--accent-strong");
+    }
+
+    function sleepMetricLabel(metric) {
+      const labels = {
+        bed: "上床时间",
+        sleep: "入睡时间",
+        wake: "醒来时间",
+        rise: "起床时间",
+        total: "总睡眠时长"
+      };
+      return labels[metric] || labels.all;
+    }
+
+    function buildSleepTimeline(entry) {
+      const rawBed = timeToMinutes(entry.bed);
+      const rawSleep = timeToMinutes(entry.sleep);
+      const rawWake = timeToMinutes(entry.wake);
+      const rawRise = timeToMinutes(entry.rise);
+      if ([rawBed, rawSleep, rawWake, rawRise].every((value) => value === null)) {
+        return typeof entry.totalOverride === "number"
+          ? {
+              bed: null,
+              sleep: null,
+              wake: null,
+              rise: null,
+              computedTotal: null,
+              totalMinutes: entry.totalOverride
+            }
+          : null;
+      }
+
+      const base = rawBed ?? rawSleep ?? rawWake ?? rawRise;
+      const bed = rawBed !== null ? rawBed : rawSleep;
+      const sleep = rawSleep !== null
+        ? normalizeAfter(rawSleep, bed ?? base, true)
+        : null;
+      const wake = rawWake !== null
+        ? normalizeAfter(rawWake, sleep ?? bed ?? base, sleep === null)
+        : null;
+      const rise = rawRise !== null
+        ? normalizeAfter(rawRise, wake ?? sleep ?? bed ?? base, true)
+        : wake;
+      const computedTotal = sleep !== null && wake !== null && wake > sleep ? wake - sleep : null;
+
+      return {
+        bed,
+        sleep,
+        wake,
+        rise,
+        computedTotal,
+        totalMinutes: effectiveSleepTotal(entry, { totalMinutes: computedTotal })
+      };
+    }
+
+    function normalizeAfter(value, reference, allowEqual) {
+      let result = value;
+      while (allowEqual ? result < reference : result <= reference) {
+        result += 1440;
+      }
+      return result;
+    }
+
+    function timeToMinutes(value) {
+      if (!value) {
+        return null;
+      }
+      const [hours, minutes] = value.split(":").map(Number);
+      if (!Number.isFinite(hours) || !Number.isFinite(minutes)) {
+        return null;
+      }
+      return hours * 60 + minutes;
+    }
+
+    function effectiveSleepTotal(entry, timeline) {
+      return typeof entry.totalOverride === "number"
+        ? entry.totalOverride
+        : timeline?.totalMinutes ?? null;
+    }
+
+    function parseDurationInput(value) {
+      const text = String(value || "").trim();
+      if (!text) {
+        return null;
+      }
+      const colon = text.match(/^(\d{1,2})[:：](\d{1,2})$/);
+      if (colon) {
+        const hours = Number(colon[1]);
+        const minutes = Number(colon[2]);
+        return minutes < 60 ? hours * 60 + minutes : null;
+      }
+      const hourMinute = text.match(/(?:(\d+(?:\.\d+)?)\s*(?:小时|时|h))?\s*(?:(\d+)\s*(?:分钟|分|m))?/i);
+      if (hourMinute && (hourMinute[1] || hourMinute[2])) {
+        const hours = hourMinute[1] ? Number(hourMinute[1]) : 0;
+        const minutes = hourMinute[2] ? Number(hourMinute[2]) : 0;
+        return Math.round(hours * 60 + minutes);
+      }
+      const decimalHours = Number(text);
+      if (Number.isFinite(decimalHours) && decimalHours >= 0) {
+        return Math.round(decimalHours * 60);
+      }
+      return null;
+    }
+
+    function formatClock(minutes) {
+      const normalized = ((Math.round(minutes) % 1440) + 1440) % 1440;
+      const hours = String(Math.floor(normalized / 60)).padStart(2, "0");
+      const mins = String(normalized % 60).padStart(2, "0");
+      return `${hours}:${mins}`;
+    }
+
+    function formatDuration(minutes) {
+      const hours = Math.floor(minutes / 60);
+      const mins = minutes % 60;
+      return mins ? `${hours}小时${mins}分` : `${hours}小时`;
+    }
+
+    function crisp(value) {
+      return Math.round(value) + 0.5;
     }
 
     function renderCalendar() {
@@ -1248,14 +2837,163 @@
     function loadState() {
       try {
         const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
-        return { entries: saved.entries || {} };
+        return {
+          entries: saved.entries || {},
+          sleepEntries: saved.sleepEntries || {}
+        };
       } catch {
-        return { entries: {} };
+        return { entries: {}, sleepEntries: {} };
       }
     }
 
-    function persistState() {
+    function persistState(options = {}) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      if (options.sync !== false) {
+        scheduleCloudSync();
+      }
+    }
+
+    function backupPayload() {
+      return {
+        exportedAt: new Date().toISOString(),
+        version: 1,
+        entries: state.entries,
+        sleepEntries: state.sleepEntries
+      };
+    }
+
+    function backupText() {
+      return JSON.stringify(backupPayload(), null, 2);
+    }
+
+    function openBackupModal() {
+      refreshBackupText();
+      els.backupImportText.value = "";
+      els.backupCurrentStatus.textContent = "";
+      els.backupPasteStatus.textContent = "粘贴 JSON 后会自动合并。";
+      els.backupImportStatus.textContent = "导入会合并到当前数据，已有记录会保留。";
+      els.backupModal.classList.add("is-visible");
+      els.backupModal.setAttribute("aria-hidden", "false");
+    }
+
+    function closeBackupModal() {
+      els.backupModal.classList.remove("is-visible");
+      els.backupModal.setAttribute("aria-hidden", "true");
+    }
+
+    function refreshBackupText() {
+      els.backupCurrentText.value = backupText();
+    }
+
+    function downloadBackupData() {
+      refreshBackupText();
+      const payload = {
+        text: els.backupCurrentText.value,
+        filename: `daily-record-backup-${todayKey()}.json`
+      };
+      const blob = new Blob([payload.text], {
+        type: "application/json"
+      });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = payload.filename;
+      document.body.append(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      els.backupCurrentStatus.textContent = "已下载备份文件。";
+      showSaved();
+    }
+
+    async function copyBackupData() {
+      refreshBackupText();
+      const text = els.backupCurrentText.value;
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch {
+        els.backupCurrentText.focus();
+        els.backupCurrentText.select();
+        document.execCommand("copy");
+      }
+      els.backupCurrentStatus.textContent = "已复制当前数据。";
+      showSaved();
+    }
+
+    function importPastedBackup() {
+      if (!els.backupImportText.value.trim()) {
+        return;
+      }
+      importBackupText(els.backupImportText.value, els.backupPasteStatus);
+    }
+
+    function importSelectedBackupFile() {
+      const file = els.backupFileInput.files?.[0];
+      if (!file) {
+        return;
+      }
+      const reader = new FileReader();
+      reader.addEventListener("load", () => {
+        importBackupText(String(reader.result || ""), els.backupImportStatus);
+        els.backupFileInput.value = "";
+      });
+      reader.addEventListener("error", () => {
+        els.backupImportStatus.textContent = "文件读取失败。";
+      });
+      reader.readAsText(file);
+    }
+
+    function importBackupText(text, statusEl = els.backupImportStatus) {
+      let parsed;
+      try {
+        parsed = JSON.parse(String(text || "").trim());
+      } catch {
+        statusEl.textContent = "导入失败：JSON 格式不正确。";
+        return;
+      }
+
+      const result = mergeBackup(parsed);
+      if (!result.ok) {
+        statusEl.textContent = result.message;
+        return;
+      }
+
+      persistState();
+      loadForm(selectedDate);
+      loadSleepForm(selectedSleepDate);
+      renderAll();
+      refreshBackupText();
+      statusEl.textContent = `已合并：新增 ${result.added} 天，补充 ${result.merged} 天。`;
+      showSaved();
+    }
+
+    function mergeBackup(parsed) {
+      const incomingEntries = parsed.entries && typeof parsed.entries === "object" ? parsed.entries : {};
+      const incomingSleepEntries = parsed.sleepEntries && typeof parsed.sleepEntries === "object" ? parsed.sleepEntries : {};
+      if (!Object.keys(incomingEntries).length && !Object.keys(incomingSleepEntries).length) {
+        return { ok: false, message: "导入失败：没有找到可合并的记录。" };
+      }
+
+      let added = 0;
+      let merged = 0;
+      const mergeMap = (target, source) => {
+        Object.entries(source).forEach(([key, value]) => {
+          if (!normalizeDateKey(key) || !value || typeof value !== "object") {
+            return;
+          }
+          if (target[key]) {
+            target[key] = { ...value, ...target[key] };
+            merged += 1;
+          } else {
+            target[key] = value;
+            added += 1;
+          }
+        });
+      };
+
+      mergeMap(state.entries, incomingEntries);
+      mergeMap(state.sleepEntries, incomingSleepEntries);
+      return { ok: true, added, merged };
     }
 
     function todayKey() {
@@ -1300,6 +3038,11 @@
         month: "numeric",
         day: "numeric"
       }).format(date);
+    }
+
+    function formatCompactDate(key) {
+      const date = parseDateKey(key);
+      return `${date.getMonth() + 1}.${date.getDate()}`;
     }
   </script>
 </body>
