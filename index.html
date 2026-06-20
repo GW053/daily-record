@@ -349,6 +349,54 @@
       padding: 14px;
     }
 
+    .reminder-panel {
+      display: grid;
+      gap: 12px;
+      padding: 14px;
+    }
+
+    .reminder-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .reminder-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 112px 34px 34px;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .reminder-row input[type="text"],
+    .reminder-row input[type="time"] {
+      min-width: 0;
+      min-height: 38px;
+      padding: 0 10px;
+    }
+
+    .reminder-row input[type="checkbox"] {
+      width: 17px;
+      height: 17px;
+      accent-color: var(--accent);
+      justify-self: center;
+    }
+
+    .reminder-row .icon-button {
+      width: 34px;
+      height: 34px;
+    }
+
+    .reminder-row .icon-button svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .reminder-empty {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
     .sleep-panel,
     .sleep-chart-panel {
       display: grid;
@@ -365,6 +413,10 @@
     .time-field {
       display: grid;
       gap: 7px;
+      min-width: 0;
+    }
+
+    .time-field input {
       min-width: 0;
     }
 
@@ -506,6 +558,10 @@
       padding: 14px 12px 12px;
     }
 
+    .export-panel {
+      padding: 14px;
+    }
+
     .section-head,
     .detail-head,
     .calendar-top {
@@ -534,6 +590,13 @@
       border-radius: 8px;
       background: var(--surface-strong);
       overflow: hidden;
+      cursor: grab;
+      touch-action: pan-y;
+      user-select: none;
+    }
+
+    .chart-wrap:active {
+      cursor: grabbing;
     }
 
     canvas {
@@ -617,6 +680,10 @@
     }
 
     .backup-button {
+      display: inline-grid;
+    }
+
+    .export-button {
       display: inline-grid;
     }
 
@@ -772,6 +839,10 @@
       gap: 8px;
     }
 
+    .action-button.wide {
+      grid-column: 1 / -1;
+    }
+
     .action-button {
       min-height: 40px;
       color: var(--ink);
@@ -809,6 +880,60 @@
       white-space: pre-wrap;
     }
 
+    .export-modal {
+      width: min(100%, 430px);
+      max-height: min(86vh, 520px);
+    }
+
+    .export-body {
+      display: grid;
+      gap: 12px;
+      padding: 14px;
+    }
+
+    .export-options {
+      display: grid;
+      gap: 9px;
+    }
+
+    .export-options label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 34px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .export-options input {
+      width: 17px;
+      height: 17px;
+      flex: 0 0 auto;
+      accent-color: var(--accent);
+    }
+
+    .export-suboptions {
+      display: grid;
+      gap: 8px;
+      padding: 6px 0 2px 14px;
+      border-left: 1px solid var(--line);
+    }
+
+    .export-actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .export-status {
+      min-height: 18px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
     @media (max-width: 620px) {
       .backup-grid {
         grid-template-columns: 1fr;
@@ -816,6 +941,32 @@
 
       .backup-modal {
         max-height: 90vh;
+      }
+    }
+
+    @media (max-width: 430px) {
+      .sleep-time-grid,
+      .sleep-total-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 390px) {
+      .date-strip {
+        grid-template-columns: auto 34px minmax(0, 1fr) 34px 34px;
+        gap: 6px;
+        padding: 11px 12px;
+      }
+
+      .date-picker-control,
+      .icon-button {
+        width: 34px;
+        height: 34px;
+      }
+
+      .reminder-row {
+        grid-template-columns: minmax(0, 1fr) 96px 32px 32px;
+        gap: 6px;
       }
     }
 
@@ -1041,6 +1192,13 @@
             <path d="m16 20 2 2 2-2"></path>
           </svg>
         </button>
+        <button class="icon-button export-button" id="exportButton" type="button" aria-label="导出图片" title="导出图片">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+            <path d="m21 15-5-5L5 21"></path>
+          </svg>
+        </button>
         <button class="icon-button backup-button" id="backupButton" type="button" aria-label="备份数据" title="备份数据">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -1105,7 +1263,7 @@
                 <path d="m5 12 7-7 7 7"></path>
               </svg>
             </span>
-            渴望提高的事情
+            渴望做的事情
           </span>
           <textarea id="improveText"></textarea>
         </label>
@@ -1120,6 +1278,14 @@
           </span>
           <textarea id="luckyText"></textarea>
         </label>
+      </section>
+
+      <section class="panel reminder-panel">
+        <div class="section-head">
+          <h2 class="section-title">记录提醒</h2>
+          <button class="action-button" id="addReminderButton" type="button">新增</button>
+        </div>
+        <div class="reminder-list" id="reminderList"></div>
       </section>
     </main>
 
@@ -1176,7 +1342,7 @@
 
       <section class="panel sleep-chart-panel">
         <div class="section-head">
-          <h2 class="section-title" id="sleepRangeTitle">近七天睡眠</h2>
+          <h2 class="section-title" id="sleepRangeTitle">睡眠记录</h2>
           <div class="section-actions">
             <div class="chart-options">
               <label for="timelineLabelsToggle">
@@ -1221,7 +1387,7 @@
     <main class="screen" id="historyScreen">
       <section class="panel chart-panel">
         <div class="section-head">
-          <h2 class="section-title" id="scoreRangeTitle">近七天分数</h2>
+          <h2 class="section-title" id="scoreRangeTitle">分数统计</h2>
           <div class="section-actions">
             <div class="chart-options">
               <label for="scoreLabelsToggle">
@@ -1267,7 +1433,7 @@
           <p id="detailGood"></p>
         </article>
         <article class="detail-block detail-improve">
-          <h3>渴望提高的事情</h3>
+          <h3>渴望做的事情</h3>
           <p id="detailImprove"></p>
         </article>
         <article class="detail-block detail-lucky">
@@ -1350,6 +1516,67 @@
     </section>
   </div>
 
+  <div class="modal-backdrop" id="exportModal" aria-hidden="true">
+    <section class="backup-modal export-modal" role="dialog" aria-modal="true" aria-labelledby="exportModalTitle">
+      <header class="modal-head">
+        <h2 class="modal-title" id="exportModalTitle">导出图片</h2>
+        <div class="modal-actions">
+          <button class="icon-button" id="closeExportButton" type="button" aria-label="关闭导出" title="关闭">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 6 6 18"></path>
+              <path d="m6 6 12 12"></path>
+            </svg>
+          </button>
+        </div>
+      </header>
+      <div class="export-body">
+        <div class="export-options">
+          <div>
+            <label>
+              单项变化
+              <span></span>
+            </label>
+            <div class="export-suboptions">
+              <label for="exportMetricSleepToggle">
+                入睡时间
+                <input id="exportMetricSleepToggle" type="checkbox" checked>
+              </label>
+              <label for="exportMetricWakeToggle">
+                醒来时间
+                <input id="exportMetricWakeToggle" type="checkbox" checked>
+              </label>
+              <label for="exportMetricBedToggle">
+                上床时间
+                <input id="exportMetricBedToggle" type="checkbox">
+              </label>
+              <label for="exportMetricRiseToggle">
+                起床时间
+                <input id="exportMetricRiseToggle" type="checkbox">
+              </label>
+            </div>
+          </div>
+          <label for="exportSleepTimelineToggle">
+            近七天睡眠
+            <input id="exportSleepTimelineToggle" type="checkbox" checked>
+          </label>
+          <label for="exportScoreToggle">
+            近七天分数
+            <input id="exportScoreToggle" type="checkbox" checked>
+          </label>
+          <label for="exportDetailToggle">
+            文字记录
+            <input id="exportDetailToggle" type="checkbox" checked>
+          </label>
+        </div>
+        <div class="export-actions">
+          <button class="action-button primary" id="copyExportButton" type="button">复制图片</button>
+          <button class="action-button" id="saveExportButton" type="button">保存图片</button>
+        </div>
+        <p class="export-status" id="exportStatus"></p>
+      </div>
+    </section>
+  </div>
+
   <div class="modal-backdrop" id="authModal" aria-hidden="true">
     <section class="backup-modal auth-modal" role="dialog" aria-modal="true" aria-labelledby="authModalTitle">
       <header class="modal-head">
@@ -1374,6 +1601,7 @@
           <button class="action-button" id="authSignupButton" type="button">注册</button>
           <button class="action-button" id="authLogoutButton" type="button">退出登录</button>
           <button class="action-button" id="authSyncButton" type="button">立即同步</button>
+          <button class="action-button wide" id="authDiagnoseButton" type="button">诊断连接</button>
         </div>
         <p class="auth-status" id="authStatus"></p>
       </div>
@@ -1392,6 +1620,7 @@
       pageDate: document.querySelector("#pageDate"),
       saveState: document.querySelector("#saveState"),
       syncButton: document.querySelector("#syncButton"),
+      exportButton: document.querySelector("#exportButton"),
       backupButton: document.querySelector("#backupButton"),
       backupModal: document.querySelector("#backupModal"),
       backupCurrentText: document.querySelector("#backupCurrentText"),
@@ -1403,6 +1632,18 @@
       copyBackupButton: document.querySelector("#copyBackupButton"),
       closeBackupButton: document.querySelector("#closeBackupButton"),
       backupFileInput: document.querySelector("#backupFileInput"),
+      exportModal: document.querySelector("#exportModal"),
+      closeExportButton: document.querySelector("#closeExportButton"),
+      copyExportButton: document.querySelector("#copyExportButton"),
+      saveExportButton: document.querySelector("#saveExportButton"),
+      exportStatus: document.querySelector("#exportStatus"),
+      exportDetailToggle: document.querySelector("#exportDetailToggle"),
+      exportScoreToggle: document.querySelector("#exportScoreToggle"),
+      exportSleepTimelineToggle: document.querySelector("#exportSleepTimelineToggle"),
+      exportMetricSleepToggle: document.querySelector("#exportMetricSleepToggle"),
+      exportMetricWakeToggle: document.querySelector("#exportMetricWakeToggle"),
+      exportMetricBedToggle: document.querySelector("#exportMetricBedToggle"),
+      exportMetricRiseToggle: document.querySelector("#exportMetricRiseToggle"),
       authModal: document.querySelector("#authModal"),
       authEmail: document.querySelector("#authEmail"),
       authPassword: document.querySelector("#authPassword"),
@@ -1410,6 +1651,7 @@
       authSignupButton: document.querySelector("#authSignupButton"),
       authLogoutButton: document.querySelector("#authLogoutButton"),
       authSyncButton: document.querySelector("#authSyncButton"),
+      authDiagnoseButton: document.querySelector("#authDiagnoseButton"),
       closeAuthButton: document.querySelector("#closeAuthButton"),
       authStatus: document.querySelector("#authStatus"),
       authUserText: document.querySelector("#authUserText"),
@@ -1445,6 +1687,8 @@
       luckyText: document.querySelector("#luckyText"),
       scoreRangeTitle: document.querySelector("#scoreRangeTitle"),
       scoreLabelsToggle: document.querySelector("#scoreLabelsToggle"),
+      addReminderButton: document.querySelector("#addReminderButton"),
+      reminderList: document.querySelector("#reminderList"),
       chart: document.querySelector("#scoreChart"),
       chartEmpty: document.querySelector("#chartEmpty"),
       monthTitle: document.querySelector("#monthTitle"),
@@ -1472,6 +1716,9 @@
     let cloudSyncTimer = null;
     let cloudSyncing = false;
     let cloudSyncPending = false;
+    let reminderTimer = null;
+    let scoreWindowOffset = 0;
+    let sleepWindowOffset = 0;
 
     init();
 
@@ -1482,6 +1729,8 @@
       loadSleepForm(selectedSleepDate);
       bindEvents();
       renderAll();
+      renderReminders();
+      startReminderTimer();
       initSupabase();
 
       if ("ResizeObserver" in window) {
@@ -1532,6 +1781,9 @@
       els.timelineLabelsToggle.addEventListener("change", renderSleepCharts);
       els.metricLabelsToggle.addEventListener("change", renderSleepCharts);
       els.scoreLabelsToggle.addEventListener("change", renderChart);
+      bindChartDrag(els.chart.parentElement, "score");
+      bindChartDrag(els.sleepTimelineChart.parentElement, "sleep");
+      bindChartDrag(els.sleepMetricChart.parentElement, "sleep");
 
       els.backupButton.addEventListener("click", openBackupModal);
       els.closeBackupButton.addEventListener("click", closeBackupModal);
@@ -1549,12 +1801,23 @@
         }
       });
 
+      els.exportButton.addEventListener("click", openExportModal);
+      els.closeExportButton.addEventListener("click", closeExportModal);
+      els.copyExportButton.addEventListener("click", () => exportSelectedImages("copy"));
+      els.saveExportButton.addEventListener("click", () => exportSelectedImages("save"));
+      els.exportModal.addEventListener("click", (event) => {
+        if (event.target === els.exportModal) {
+          closeExportModal();
+        }
+      });
+
       els.syncButton.addEventListener("click", openAuthModal);
       els.closeAuthButton.addEventListener("click", closeAuthModal);
       els.authLoginButton.addEventListener("click", signInWithEmail);
       els.authSignupButton.addEventListener("click", signUpWithEmail);
       els.authLogoutButton.addEventListener("click", signOutUser);
       els.authSyncButton.addEventListener("click", syncCloudNow);
+      els.authDiagnoseButton.addEventListener("click", diagnoseSupabaseConnection);
       els.authModal.addEventListener("click", (event) => {
         if (event.target === els.authModal) {
           closeAuthModal();
@@ -1574,6 +1837,9 @@
       [els.scoreInput, els.goodText, els.improveText, els.luckyText].forEach((field) => {
         field.addEventListener("input", saveCurrentEntry);
       });
+
+      [els.goodText, els.improveText, els.luckyText].forEach(bindBulletTextarea);
+      els.addReminderButton.addEventListener("click", addReminder);
 
       els.scoreInput.addEventListener("blur", () => {
         const score = normalizeScore(els.scoreInput.value);
@@ -1781,6 +2047,183 @@
       renderAll();
     }
 
+    function bindBulletTextarea(textarea) {
+      textarea.addEventListener("focus", () => {
+        if (!textarea.value) {
+          textarea.value = "· ";
+          textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+          textarea.dispatchEvent(new Event("input", { bubbles: true }));
+        }
+      });
+      textarea.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter" || event.isComposing) {
+          return;
+        }
+        event.preventDefault();
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        textarea.setRangeText("\n· ", start, end, "end");
+        textarea.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+    }
+
+    function addReminder() {
+      const reminder = {
+        id: `reminder-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+        name: "记录提醒",
+        time: "21:00",
+        enabled: true,
+        lastFired: ""
+      };
+      state.reminders.push(reminder);
+      persistState();
+      renderReminders();
+      requestReminderPermission();
+      showSaved();
+    }
+
+    function renderReminders() {
+      els.reminderList.replaceChildren();
+      if (!state.reminders.length) {
+        const empty = document.createElement("p");
+        empty.className = "reminder-empty";
+        empty.textContent = "暂无提醒";
+        els.reminderList.append(empty);
+        return;
+      }
+
+      const fragment = document.createDocumentFragment();
+      state.reminders.forEach((reminder) => {
+        const row = document.createElement("div");
+        row.className = "reminder-row";
+
+        const nameInput = document.createElement("input");
+        nameInput.type = "text";
+        nameInput.value = reminder.name || "";
+        nameInput.placeholder = "提醒名称";
+        nameInput.setAttribute("aria-label", "提醒名称");
+        nameInput.addEventListener("input", () => {
+          reminder.name = nameInput.value;
+          persistState();
+        });
+
+        const timeInput = document.createElement("input");
+        timeInput.type = "time";
+        timeInput.value = reminder.time || "21:00";
+        timeInput.setAttribute("aria-label", "提醒时间");
+        timeInput.addEventListener("input", () => {
+          reminder.time = timeInput.value;
+          reminder.lastFired = "";
+          persistState();
+        });
+
+        const enabledInput = document.createElement("input");
+        enabledInput.type = "checkbox";
+        enabledInput.checked = reminder.enabled !== false;
+        enabledInput.setAttribute("aria-label", "启用提醒");
+        enabledInput.addEventListener("change", () => {
+          reminder.enabled = enabledInput.checked;
+          reminder.lastFired = "";
+          persistState();
+          if (enabledInput.checked) {
+            requestReminderPermission();
+          }
+        });
+
+        const deleteButton = document.createElement("button");
+        deleteButton.className = "icon-button";
+        deleteButton.type = "button";
+        deleteButton.setAttribute("aria-label", "删除提醒");
+        deleteButton.title = "删除";
+        deleteButton.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="m10 11 0 6"></path><path d="m14 11 0 6"></path><path d="M5 6l1 14h12l1-14"></path></svg>';
+        deleteButton.addEventListener("click", () => {
+          state.reminders = state.reminders.filter((item) => item.id !== reminder.id);
+          persistState();
+          renderReminders();
+        });
+
+        row.append(nameInput, timeInput, enabledInput, deleteButton);
+        fragment.append(row);
+      });
+      els.reminderList.append(fragment);
+    }
+
+    function startReminderTimer() {
+      window.clearInterval(reminderTimer);
+      checkReminders();
+      reminderTimer = window.setInterval(checkReminders, 30000);
+    }
+
+    function checkReminders() {
+      if (!state.reminders.length) {
+        return;
+      }
+      const now = new Date();
+      const currentTime = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+      const currentDay = dateKey(now);
+      let changed = false;
+      state.reminders.forEach((reminder) => {
+        if (reminder.enabled === false || reminder.time !== currentTime || reminder.lastFired === currentDay) {
+          return;
+        }
+        reminder.lastFired = currentDay;
+        changed = true;
+        fireReminder(reminder);
+      });
+      if (changed) {
+        persistState();
+      }
+    }
+
+    function requestReminderPermission() {
+      if (!("Notification" in window) || Notification.permission !== "default") {
+        return;
+      }
+      Notification.requestPermission().catch(() => {});
+    }
+
+    function fireReminder(reminder) {
+      const title = reminder.name?.trim() || "记录提醒";
+      if ("Notification" in window && Notification.permission === "granted") {
+        new Notification(title, { body: "到了记录时间。" });
+        return;
+      }
+      window.setTimeout(() => {
+        window.alert(title);
+      }, 0);
+    }
+
+    function bindChartDrag(wrap, type) {
+      let startX = 0;
+      let pointerId = null;
+      wrap.addEventListener("pointerdown", (event) => {
+        startX = event.clientX;
+        pointerId = event.pointerId;
+        wrap.setPointerCapture?.(pointerId);
+      });
+      wrap.addEventListener("pointerup", (event) => {
+        if (pointerId !== event.pointerId) {
+          return;
+        }
+        const deltaX = event.clientX - startX;
+        pointerId = null;
+        if (Math.abs(deltaX) < 36) {
+          return;
+        }
+        const days = Math.max(1, Math.min(7, Math.round(Math.abs(deltaX) / 70)));
+        if (type === "score") {
+          scoreWindowOffset = Math.max(0, scoreWindowOffset + (deltaX < 0 ? days : -days));
+          renderChart();
+        } else {
+          sleepWindowOffset = Math.max(0, sleepWindowOffset + (deltaX < 0 ? days : -days));
+          renderSleepCharts();
+        }
+      });
+      wrap.addEventListener("pointercancel", () => {
+        pointerId = null;
+      });
+    }
+
     function showSaved() {
       els.saveState.textContent = "已保存";
       window.clearTimeout(saveTimer);
@@ -1958,6 +2401,23 @@
       syncFromCloud(true);
     }
 
+    async function diagnoseSupabaseConnection() {
+      setAuthStatus("正在诊断连接...");
+      try {
+        const response = await fetch(`${SUPABASE_URL}/auth/v1/settings`, {
+          headers: {
+            apikey: SUPABASE_KEY,
+            Authorization: `Bearer ${SUPABASE_KEY}`
+          }
+        });
+        const text = await response.text();
+        const preview = text ? `\n返回内容：${text.slice(0, 180)}` : "";
+        setAuthStatus(`连接成功：HTTP ${response.status}\n当前页面：${window.location.origin}\nSupabase：${SUPABASE_URL}${preview}`);
+      } catch (error) {
+        setAuthStatus(`连接失败：${formatSyncError(error)}\n当前页面：${window.location.origin}\nSupabase：${SUPABASE_URL}`);
+      }
+    }
+
     function scheduleCloudSync(delay = 900) {
       if (!supabaseClient || !currentUser) {
         return;
@@ -2003,6 +2463,7 @@
             persistState({ sync: false });
             loadForm(selectedDate);
             loadSleepForm(selectedSleepDate);
+            renderReminders();
             renderAll();
             if (els.backupModal.classList.contains("is-visible")) {
               refreshBackupText();
@@ -2085,7 +2546,7 @@
       } else if (normalized.includes("invalid api key") || normalized.includes("api key")) {
         hint = "请检查 Project URL 和 Publishable key 是否来自同一个 Supabase 项目。";
       } else if (normalized.includes("failed to fetch") || normalized.includes("networkerror")) {
-        hint = "请用已部署的 https 网站地址测试，并检查网络是否能访问 Supabase 和 jsDelivr。";
+        hint = `请求没有成功到达 Supabase。请核对 Project URL 是否完全来自 Supabase 后台、项目是否暂停、Publishable key 是否匹配，并检查浏览器/网络是否拦截了 Supabase 请求。当前页面：${window.location.origin || window.location.href}`;
       } else if (normalized.includes("signup") && (normalized.includes("disabled") || normalized.includes("not allowed"))) {
         hint = "请在 Authentication > Providers > Email 中允许新用户注册。";
       } else if (normalized.includes("password")) {
@@ -2126,13 +2587,60 @@
     }
 
     function renderChart() {
-      const today = parseDateKey(todayKey());
-      const days = Array.from({ length: 7 }, (_, index) => addDays(today, index - 6));
-      const keys = days.map(dateKey);
-      const rangeLabel = `${formatCompactDate(keys[0])}-${formatCompactDate(keys[6])}`;
-      els.scoreRangeTitle.textContent = `近七天分数（${rangeLabel}）`;
+      const keys = scoreWeekKeys();
+      els.scoreRangeTitle.textContent = "分数统计";
       els.chart.dataset.days = JSON.stringify(keys);
       queueDrawChart();
+    }
+
+    function scoreWeekKeys(offset = scoreWindowOffset) {
+      return weekKeysEndingAt(offsetDateKey(latestRecordKey(), offset));
+    }
+
+    function sleepWeekKeys(offset = sleepWindowOffset) {
+      return weekKeysEndingAt(offsetDateKey(latestSleepRecordKey(), offset));
+    }
+
+    function offsetDateKey(key, offset) {
+      return dateKey(addDays(parseDateKey(key || todayKey()), -Math.max(0, offset)));
+    }
+
+    function weekKeysEndingAt(endKey) {
+      const endDate = parseDateKey(endKey || todayKey());
+      return Array.from({ length: 7 }, (_, index) => dateKey(addDays(endDate, index - 6)));
+    }
+
+    function latestRecordKey() {
+      const keys = Object.keys(state.entries)
+        .filter((key) => normalizeDateKey(key) && hasEntryData(state.entries[key]))
+        .sort();
+      return keys[keys.length - 1] || todayKey();
+    }
+
+    function latestSleepRecordKey() {
+      const keys = Object.keys(state.sleepEntries)
+        .filter((key) => normalizeDateKey(key) && hasSleepEntryData(state.sleepEntries[key]))
+        .sort();
+      return keys[keys.length - 1] || todayKey();
+    }
+
+    function hasEntryData(entry) {
+      return Boolean(entry && (
+        typeof entry.score === "number" ||
+        entry.good?.trim() ||
+        entry.improve?.trim() ||
+        entry.lucky?.trim()
+      ));
+    }
+
+    function hasSleepEntryData(entry) {
+      return Boolean(entry && (
+        entry.bed ||
+        entry.sleep ||
+        entry.wake ||
+        entry.rise ||
+        typeof entry.totalOverride === "number"
+      ));
     }
 
     function queueDrawChart() {
@@ -2285,9 +2793,8 @@
 
     function renderSleepCharts() {
       const keys = sleepWeekKeys();
-      const rangeLabel = `${formatCompactDate(keys[0])}-${formatCompactDate(keys[6])}`;
-      els.sleepRangeTitle.textContent = `近七天睡眠（${rangeLabel}）`;
-      els.sleepMetricTitle.textContent = `单项变化（${rangeLabel}）`;
+      els.sleepRangeTitle.textContent = "睡眠记录";
+      els.sleepMetricTitle.textContent = "单项变化";
       els.sleepTimelineChart.dataset.keys = JSON.stringify(keys);
       els.sleepMetricChart.dataset.keys = JSON.stringify(keys);
       queueDrawSleepCharts();
@@ -2302,11 +2809,6 @@
         drawSleepTimelineChart();
         drawSleepMetricChart();
       });
-    }
-
-    function sleepWeekKeys() {
-      const today = parseDateKey(todayKey());
-      return Array.from({ length: 7 }, (_, index) => dateKey(addDays(today, index - 6)));
     }
 
     function sleepRows() {
@@ -2455,6 +2957,9 @@
 
       drawTimeGrid(ctx, width, height, pad, minValue, maxValue, yFor, lineColor, mutedColor);
       drawDateAxis(ctx, rows, height, pad, xFor, mutedColor);
+      activeDefs.forEach((def) => {
+        drawMetricExtremes(ctx, values, width, pad, yFor, def.color);
+      });
 
       activeDefs.forEach((def) => {
         drawMetricLine(ctx, rows, def, xFor, yFor, els.metricLabelsToggle.checked);
@@ -2473,7 +2978,7 @@
       const lineColor = cssVar("--line");
       const mutedColor = cssVar("--muted");
       const accentColor = cssVar("--sleep-main");
-      const pad = { top: 20, right: 18, bottom: 36, left: 38 };
+      const pad = { top: 24, right: 44, bottom: 36, left: 48 };
       const plotWidth = width - pad.left - pad.right;
       const plotHeight = height - pad.top - pad.bottom;
       const maxHours = Math.max(1, Math.ceil(Math.max(...values.filter((value) => value !== null)) / 60));
@@ -2498,6 +3003,11 @@
       drawDateAxis(ctx, rows, height, pad, xFor, mutedColor);
 
       const barWidth = Math.max(12, Math.min(28, plotWidth / 12));
+      const valueIndexes = values
+        .map((value, index) => value !== null ? index : null)
+        .filter((index) => index !== null);
+      const firstValueIndex = valueIndexes[0];
+      const lastValueIndex = valueIndexes[valueIndexes.length - 1];
       values.forEach((value, index) => {
         if (value === null) {
           return;
@@ -2509,9 +3019,10 @@
         if (els.metricLabelsToggle.checked) {
           ctx.fillStyle = mutedColor;
           ctx.font = "11px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
-          ctx.textAlign = "center";
+          ctx.textAlign = index === firstValueIndex ? "left" : index === lastValueIndex ? "right" : "center";
           ctx.textBaseline = "bottom";
-          ctx.fillText(formatDuration(value), x + barWidth / 2, y - 5);
+          const labelX = index === firstValueIndex ? x : index === lastValueIndex ? x + barWidth : x + barWidth / 2;
+          ctx.fillText(formatDuration(value), labelX, y - 5);
         }
       });
     }
@@ -2593,6 +3104,36 @@
           drawPointLabel(ctx, formatClock(value), xFor(index), yFor(value), index);
         }
       });
+    }
+
+    function drawMetricExtremes(ctx, values, width, pad, yFor, color) {
+      const unique = [...new Set(values)];
+      if (unique.length < 2) {
+        return;
+      }
+      const earliest = Math.min(...values);
+      const latest = Math.max(...values);
+      const items = [
+        { value: latest, label: `最晚 ${formatClock(latest)}`, baseline: "bottom", offset: -5 },
+        { value: earliest, label: `最早 ${formatClock(earliest)}`, baseline: "top", offset: 5 }
+      ];
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.fillStyle = cssVar("--muted");
+      ctx.lineWidth = 1;
+      ctx.setLineDash([5, 5]);
+      ctx.font = "11px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
+      items.forEach((item) => {
+        const y = crisp(yFor(item.value));
+        ctx.beginPath();
+        ctx.moveTo(pad.left, y);
+        ctx.lineTo(width - pad.right, y);
+        ctx.stroke();
+        ctx.textAlign = "right";
+        ctx.textBaseline = item.baseline;
+        ctx.fillText(item.label, width - pad.right - 2, y + item.offset);
+      });
+      ctx.restore();
     }
 
     function drawPointLabel(ctx, label, x, y, index) {
@@ -2880,10 +3421,11 @@
         const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
         return {
           entries: saved.entries || {},
-          sleepEntries: saved.sleepEntries || {}
+          sleepEntries: saved.sleepEntries || {},
+          reminders: Array.isArray(saved.reminders) ? saved.reminders : []
         };
       } catch {
-        return { entries: {}, sleepEntries: {} };
+        return { entries: {}, sleepEntries: {}, reminders: [] };
       }
     }
 
@@ -2899,12 +3441,335 @@
         exportedAt: new Date().toISOString(),
         version: 1,
         entries: state.entries,
-        sleepEntries: state.sleepEntries
+        sleepEntries: state.sleepEntries,
+        reminders: state.reminders
       };
     }
 
     function backupText() {
       return JSON.stringify(backupPayload(), null, 2);
+    }
+
+    function openExportModal() {
+      els.exportStatus.textContent = "";
+      els.exportModal.classList.add("is-visible");
+      els.exportModal.setAttribute("aria-hidden", "false");
+    }
+
+    function closeExportModal() {
+      els.exportModal.classList.remove("is-visible");
+      els.exportModal.setAttribute("aria-hidden", "true");
+    }
+
+    async function exportSelectedImages(mode) {
+      const items = [];
+      const scoreKeys = scoreWeekKeys(0);
+      const sleepKeys = sleepWeekKeys(0);
+      const scoreRange = formatRangeLabel(scoreKeys);
+      const sleepRange = formatRangeLabel(sleepKeys);
+
+      const metricSelections = [
+        { toggle: els.exportMetricSleepToggle, metric: "sleep" },
+        { toggle: els.exportMetricWakeToggle, metric: "wake" },
+        { toggle: els.exportMetricBedToggle, metric: "bed" },
+        { toggle: els.exportMetricRiseToggle, metric: "rise" }
+      ].filter((item) => item.toggle.checked);
+
+      if (metricSelections.length || els.exportSleepTimelineToggle.checked) {
+        withSleepChartsReady(() => {
+          const previousMetric = activeSleepMetric;
+          const previousTimelineKeys = els.sleepTimelineChart.dataset.keys;
+          const previousKeys = els.sleepMetricChart.dataset.keys;
+          els.sleepTimelineChart.dataset.keys = JSON.stringify(sleepKeys);
+          els.sleepMetricChart.dataset.keys = JSON.stringify(sleepKeys);
+
+          metricSelections.forEach((item) => {
+            activeSleepMetric = item.metric;
+            drawSleepMetricChart();
+            const label = sleepMetricLabel(item.metric);
+            items.push({
+              name: `单项变化-${label}-${latestSleepRecordKey()}`,
+              canvas: makeChartExportCanvas(`单项变化-${label}（${sleepRange}）`, els.sleepMetricChart)
+            });
+          });
+
+          if (els.exportSleepTimelineToggle.checked) {
+            drawSleepTimelineChart();
+            items.push({
+              name: `睡眠记录-${latestSleepRecordKey()}`,
+              canvas: makeChartExportCanvas(`睡眠记录（${sleepRange}）`, els.sleepTimelineChart)
+            });
+          }
+
+          activeSleepMetric = previousMetric;
+          els.sleepTimelineChart.dataset.keys = previousTimelineKeys;
+          els.sleepMetricChart.dataset.keys = previousKeys;
+          drawSleepTimelineChart();
+          drawSleepMetricChart();
+        });
+      }
+
+      if (els.exportScoreToggle.checked) {
+        withHistoryChartReady(() => {
+          const previousKeys = els.chart.dataset.days;
+          els.chart.dataset.days = JSON.stringify(scoreKeys);
+          drawChart();
+          items.push({
+            name: `分数统计-${latestRecordKey()}`,
+            canvas: makeChartExportCanvas(`分数统计（${scoreRange}）`, els.chart)
+          });
+          els.chart.dataset.days = previousKeys;
+          drawChart();
+        });
+      }
+
+      if (els.exportDetailToggle.checked) {
+        items.push({ name: `文字记录-${selectedHistoryDate}`, canvas: makeDetailExportCanvas() });
+      }
+
+      if (!items.length) {
+        els.exportStatus.textContent = "请至少选择一项。";
+        return;
+      }
+
+      const canvas = combineExportCanvases(items.map((item) => item.canvas));
+      const filename = items.length === 1 ? `${items[0].name}.png` : `记录长图-${todayKey()}.png`;
+      if (mode === "copy") {
+        await copyCanvasImage(canvas);
+        return;
+      }
+      await saveCanvasImage(canvas, filename);
+    }
+
+    function withSleepChartsReady(callback) {
+      const originalClass = els.sleepScreen.className;
+      const originalStyle = els.sleepScreen.getAttribute("style") || "";
+      if (!els.sleepScreen.classList.contains("is-active")) {
+        els.sleepScreen.classList.add("is-active");
+        els.sleepScreen.style.position = "absolute";
+        els.sleepScreen.style.left = "-10000px";
+        els.sleepScreen.style.top = "0";
+        els.sleepScreen.style.width = `${els.historyScreen.getBoundingClientRect().width || 452}px`;
+        els.sleepScreen.style.pointerEvents = "none";
+      }
+      drawSleepTimelineChart();
+      drawSleepMetricChart();
+      try {
+        callback();
+      } finally {
+        els.sleepScreen.className = originalClass;
+        if (originalStyle) {
+          els.sleepScreen.setAttribute("style", originalStyle);
+        } else {
+          els.sleepScreen.removeAttribute("style");
+        }
+      }
+    }
+
+    function withHistoryChartReady(callback) {
+      const originalClass = els.historyScreen.className;
+      const originalStyle = els.historyScreen.getAttribute("style") || "";
+      if (!els.historyScreen.classList.contains("is-active")) {
+        els.historyScreen.classList.add("is-active");
+        els.historyScreen.style.position = "absolute";
+        els.historyScreen.style.left = "-10000px";
+        els.historyScreen.style.top = "0";
+        els.historyScreen.style.width = `${els.todayScreen.getBoundingClientRect().width || 452}px`;
+        els.historyScreen.style.pointerEvents = "none";
+      }
+      try {
+        callback();
+      } finally {
+        els.historyScreen.className = originalClass;
+        if (originalStyle) {
+          els.historyScreen.setAttribute("style", originalStyle);
+        } else {
+          els.historyScreen.removeAttribute("style");
+        }
+      }
+    }
+
+    function makeChartExportCanvas(title, sourceCanvas) {
+      const outputWidth = 900;
+      const padding = 36;
+      const titleHeight = 48;
+      const chartWidth = outputWidth - padding * 2;
+      const chartHeight = Math.round((sourceCanvas.height / sourceCanvas.width) * chartWidth);
+      const canvas = document.createElement("canvas");
+      canvas.width = outputWidth;
+      canvas.height = padding + titleHeight + chartHeight + padding;
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle = cssVar("--surface");
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = cssVar("--ink");
+      ctx.font = "700 28px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
+      ctx.textBaseline = "top";
+      ctx.fillText(title, padding, padding);
+      ctx.drawImage(sourceCanvas, padding, padding + titleHeight, chartWidth, chartHeight);
+      return canvas;
+    }
+
+    function makeDetailExportCanvas() {
+      const entry = state.entries[selectedHistoryDate] || {};
+      const width = 900;
+      const padding = 38;
+      const sectionGap = 28;
+      const bodyWidth = width - padding * 2;
+      const canvas = document.createElement("canvas");
+      const measure = canvas.getContext("2d");
+      measure.font = "24px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
+      const sections = [
+        { title: "做得好的事情", text: entry.good || "暂无记录", color: cssVar("--good") },
+        { title: "渴望做的事情", text: entry.improve || "暂无记录", color: cssVar("--improve") },
+        { title: "幸运的事情", text: entry.lucky || "暂无记录", color: cssVar("--lucky") }
+      ].map((section) => ({
+        ...section,
+        lines: wrapCanvasText(measure, section.text, bodyWidth)
+      }));
+      const height = padding + 72 + sections.reduce((sum, section) => sum + 34 + section.lines.length * 34 + sectionGap, 0) + padding;
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle = cssVar("--surface");
+      ctx.fillRect(0, 0, width, height);
+      ctx.fillStyle = cssVar("--ink");
+      ctx.font = "700 30px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
+      ctx.textBaseline = "top";
+      ctx.fillText(formatLongDate(selectedHistoryDate), padding, padding);
+      ctx.fillStyle = cssVar("--accent-strong");
+      ctx.font = "700 20px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
+      ctx.fillText(typeof entry.score === "number" ? `${entry.score} 分` : "未打分", padding, padding + 42);
+
+      let y = padding + 92;
+      sections.forEach((section) => {
+        ctx.fillStyle = section.color;
+        ctx.font = "700 22px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
+        ctx.fillText(section.title, padding, y);
+        y += 36;
+        ctx.fillStyle = cssVar("--ink");
+        ctx.font = "24px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
+        section.lines.forEach((line) => {
+          ctx.fillText(line, padding, y);
+          y += 34;
+        });
+        y += sectionGap;
+      });
+      return canvas;
+    }
+
+    function wrapCanvasText(ctx, text, maxWidth) {
+      const lines = [];
+      String(text || "").split("\n").forEach((paragraph) => {
+        let line = "";
+        [...paragraph].forEach((char) => {
+          const next = line + char;
+          if (line && ctx.measureText(next).width > maxWidth) {
+            lines.push(line);
+            line = char;
+          } else {
+            line = next;
+          }
+        });
+        lines.push(line || " ");
+      });
+      return lines;
+    }
+
+    function combineExportCanvases(canvases) {
+      const width = Math.max(...canvases.map((canvas) => canvas.width));
+      const gap = 24;
+      const height = canvases.reduce((sum, canvas) => sum + canvas.height, 0) + gap * (canvases.length - 1);
+      const output = document.createElement("canvas");
+      output.width = width;
+      output.height = height;
+      const ctx = output.getContext("2d");
+      ctx.fillStyle = cssVar("--bg");
+      ctx.fillRect(0, 0, width, height);
+      let y = 0;
+      canvases.forEach((canvas) => {
+        const x = Math.round((width - canvas.width) / 2);
+        ctx.drawImage(canvas, x, y);
+        y += canvas.height + gap;
+      });
+      return output;
+    }
+
+    async function copyCanvasImage(canvas) {
+      try {
+        const blob = await canvasToBlob(canvas);
+        if (!navigator.clipboard?.write || typeof ClipboardItem === "undefined") {
+          throw new Error("当前浏览器不支持复制图片到剪贴板。");
+        }
+        await navigator.clipboard.write([
+          new ClipboardItem({ "image/png": blob })
+        ]);
+        els.exportStatus.textContent = "已复制图片，可直接粘贴。";
+      } catch (error) {
+        els.exportStatus.textContent = `复制失败：${error.message || error}。可改用保存图片。`;
+      }
+    }
+
+    async function saveCanvasImage(canvas, filename) {
+      const blob = await canvasToBlob(canvas);
+      const safeName = sanitizeFilename(filename);
+      const file = new File([blob], safeName, { type: "image/png" });
+      try {
+        if (navigator.canShare?.({ files: [file] })) {
+          await navigator.share({ files: [file], title: "记录图片" });
+          els.exportStatus.textContent = "已打开系统保存/分享面板。";
+          return;
+        }
+      } catch {
+        // Fall back to download below.
+      }
+      downloadBlob(blob, safeName);
+      els.exportStatus.textContent = "已保存图片。手机上可能会保存到下载或文件中，是否进相册取决于浏览器。";
+    }
+
+    function canvasToBlob(canvas) {
+      return new Promise((resolve, reject) => {
+        canvas.toBlob((blob) => {
+          if (blob) {
+            resolve(blob);
+          } else {
+            reject(new Error("图片生成失败"));
+          }
+        }, "image/png");
+      });
+    }
+
+    function downloadCanvas(canvas, filename) {
+      downloadBlob(dataUrlToBlob(canvas.toDataURL("image/png")), sanitizeFilename(filename));
+    }
+
+    function downloadBlob(blob, filename) {
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.href = url;
+      link.download = filename;
+      document.body.append(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function dataUrlToBlob(dataUrl) {
+      const [meta, content] = dataUrl.split(",");
+      const mime = meta.match(/:(.*?);/)?.[1] || "image/png";
+      const binary = atob(content);
+      const bytes = new Uint8Array(binary.length);
+      for (let index = 0; index < binary.length; index += 1) {
+        bytes[index] = binary.charCodeAt(index);
+      }
+      return new Blob([bytes], { type: mime });
+    }
+
+    function sanitizeFilename(filename) {
+      return filename.replace(/[\\/:*?"<>|]/g, "-");
+    }
+
+    function formatRangeLabel(keys) {
+      return `${formatCompactDate(keys[0])}-${formatCompactDate(keys[6])}`;
     }
 
     function openBackupModal() {
@@ -3002,6 +3867,7 @@
       persistState();
       loadForm(selectedDate);
       loadSleepForm(selectedSleepDate);
+      renderReminders();
       renderAll();
       refreshBackupText();
       statusEl.textContent = `已合并：新增 ${result.added} 天，补充 ${result.merged} 天。`;
@@ -3011,7 +3877,8 @@
     function mergeBackup(parsed) {
       const incomingEntries = parsed.entries && typeof parsed.entries === "object" ? parsed.entries : {};
       const incomingSleepEntries = parsed.sleepEntries && typeof parsed.sleepEntries === "object" ? parsed.sleepEntries : {};
-      if (!Object.keys(incomingEntries).length && !Object.keys(incomingSleepEntries).length) {
+      const incomingReminders = Array.isArray(parsed.reminders) ? parsed.reminders : [];
+      if (!Object.keys(incomingEntries).length && !Object.keys(incomingSleepEntries).length && !incomingReminders.length) {
         return { ok: false, message: "导入失败：没有找到可合并的记录。" };
       }
 
@@ -3034,6 +3901,22 @@
 
       mergeMap(state.entries, incomingEntries);
       mergeMap(state.sleepEntries, incomingSleepEntries);
+      incomingReminders.forEach((reminder) => {
+        if (!reminder || typeof reminder !== "object" || !reminder.time) {
+          return;
+        }
+        const exists = state.reminders.some((item) => item.id === reminder.id || (item.name === reminder.name && item.time === reminder.time));
+        if (!exists) {
+          state.reminders.push({
+            id: reminder.id || `reminder-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+            name: reminder.name || "记录提醒",
+            time: reminder.time,
+            enabled: reminder.enabled !== false,
+            lastFired: reminder.lastFired || ""
+          });
+          added += 1;
+        }
+      });
       return { ok: true, added, merged };
     }
 
