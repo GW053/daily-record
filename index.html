@@ -259,7 +259,8 @@
     input[type="date"],
     input[type="time"],
     input[type="number"],
-    textarea {
+    textarea,
+    .note-editor {
       width: 100%;
       color: var(--ink);
       background: var(--surface-strong);
@@ -274,7 +275,8 @@
     input[type="date"]:focus,
     input[type="time"]:focus,
     input[type="number"]:focus,
-    textarea:focus {
+    textarea:focus,
+    .note-editor:focus-within {
       background: #fff;
       border-color: var(--accent);
       box-shadow: 0 0 0 3px rgba(182, 90, 43, 0.14);
@@ -407,7 +409,8 @@
     .sleep-time-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
+      column-gap: 8px;
+      row-gap: 12px;
     }
 
     .time-field {
@@ -417,7 +420,10 @@
     }
 
     .time-field input {
+      width: min(100%, 112px);
       min-width: 0;
+      justify-self: start;
+      font-size: 13px;
     }
 
     .time-field span,
@@ -547,11 +553,47 @@
       background: var(--lucky-soft);
     }
 
-    textarea {
+    textarea,
+    .note-editor {
       min-height: 132px;
       padding: 12px;
       line-height: 1.55;
+    }
+
+    textarea {
       resize: vertical;
+    }
+
+    .note-editor {
+      overflow-y: auto;
+      cursor: text;
+    }
+
+    .note-line {
+      display: flex;
+      align-items: flex-start;
+      min-height: 1.55em;
+    }
+
+    .note-bullet {
+      flex: 0 0 14px;
+      color: #8a5a3d;
+      font-size: 0.8em;
+      line-height: 1.55;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .note-line-text {
+      flex: 1 1 auto;
+      min-width: 0;
+      outline: none;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .note-line-text:empty::after {
+      content: "\00a0";
     }
 
     .chart-panel {
@@ -934,6 +976,20 @@
       line-height: 1.45;
     }
 
+    .export-preview {
+      display: none;
+      width: 100%;
+      max-height: 180px;
+      object-fit: contain;
+      background: var(--surface-strong);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    .export-preview.is-visible {
+      display: block;
+    }
+
     @media (max-width: 620px) {
       .backup-grid {
         grid-template-columns: 1fr;
@@ -941,13 +997,6 @@
 
       .backup-modal {
         max-height: 90vh;
-      }
-    }
-
-    @media (max-width: 430px) {
-      .sleep-time-grid,
-      .sleep-total-row {
-        grid-template-columns: 1fr;
       }
     }
 
@@ -967,6 +1016,15 @@
       .reminder-row {
         grid-template-columns: minmax(0, 1fr) 96px 32px 32px;
         gap: 6px;
+      }
+
+      .sleep-time-grid {
+        column-gap: 6px;
+      }
+
+      .time-field input {
+        width: min(100%, 98px);
+        padding: 0 6px;
       }
     }
 
@@ -1188,8 +1246,6 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
             <path d="M20 17.5A4.5 4.5 0 0 0 15.5 13h-7A4.5 4.5 0 0 0 4 17.5"></path>
             <circle cx="12" cy="7" r="4"></circle>
-            <path d="M18 22v-4"></path>
-            <path d="m16 20 2 2 2-2"></path>
           </svg>
         </button>
         <button class="icon-button export-button" id="exportButton" type="button" aria-label="导出图片" title="导出图片">
@@ -1253,7 +1309,7 @@
             </span>
             做得好的事情
           </span>
-          <textarea id="goodText"></textarea>
+          <div class="note-editor" id="goodText" role="textbox" aria-multiline="true"></div>
         </label>
         <label class="note-block note-improve" for="improveText">
           <span class="note-title">
@@ -1265,7 +1321,7 @@
             </span>
             渴望做的事情
           </span>
-          <textarea id="improveText"></textarea>
+          <div class="note-editor" id="improveText" role="textbox" aria-multiline="true"></div>
         </label>
         <label class="note-block note-lucky" for="luckyText">
           <span class="note-title">
@@ -1276,16 +1332,8 @@
             </span>
             幸运的事情
           </span>
-          <textarea id="luckyText"></textarea>
+          <div class="note-editor" id="luckyText" role="textbox" aria-multiline="true"></div>
         </label>
-      </section>
-
-      <section class="panel reminder-panel">
-        <div class="section-head">
-          <h2 class="section-title">记录提醒</h2>
-          <button class="action-button" id="addReminderButton" type="button">新增</button>
-        </div>
-        <div class="reminder-list" id="reminderList"></div>
       </section>
     </main>
 
@@ -1573,6 +1621,7 @@
           <button class="action-button" id="saveExportButton" type="button">保存图片</button>
         </div>
         <p class="export-status" id="exportStatus"></p>
+        <img class="export-preview" id="exportPreview" alt="导出图片预览">
       </div>
     </section>
   </div>
@@ -1611,9 +1660,10 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const STORAGE_KEY = "daily-record-site-v1";
-    const SUPABASE_URL = "https://hmpswhtimenyvnxotff.supabase.co";
+    const SUPABASE_URL = "https://hgmpswhitmenyvnxotff.supabase.co";
     const SUPABASE_KEY = "sb_publishable_WW3rmZCePegJsIf6LeqFvQ_KRgHD9pz";
     const SYNC_TABLE = "daily_record_sync";
+    const NOTE_BULLET = "• ";
     const state = loadState();
     const els = {
       pageTitle: document.querySelector("#pageTitle"),
@@ -1637,6 +1687,7 @@
       copyExportButton: document.querySelector("#copyExportButton"),
       saveExportButton: document.querySelector("#saveExportButton"),
       exportStatus: document.querySelector("#exportStatus"),
+      exportPreview: document.querySelector("#exportPreview"),
       exportDetailToggle: document.querySelector("#exportDetailToggle"),
       exportScoreToggle: document.querySelector("#exportScoreToggle"),
       exportSleepTimelineToggle: document.querySelector("#exportSleepTimelineToggle"),
@@ -1723,14 +1774,13 @@
     init();
 
     function init() {
+      setupNoteEditors();
       syncDateInputs(selectedDate);
       syncSleepDateInputs(selectedSleepDate);
       loadForm(selectedDate);
       loadSleepForm(selectedSleepDate);
       bindEvents();
       renderAll();
-      renderReminders();
-      startReminderTimer();
       initSupabase();
 
       if ("ResizeObserver" in window) {
@@ -1838,8 +1888,7 @@
         field.addEventListener("input", saveCurrentEntry);
       });
 
-      [els.goodText, els.improveText, els.luckyText].forEach(bindBulletTextarea);
-      els.addReminderButton.addEventListener("click", addReminder);
+      els.addReminderButton?.addEventListener("click", addReminder);
 
       els.scoreInput.addEventListener("blur", () => {
         const score = normalizeScore(els.scoreInput.value);
@@ -2047,10 +2096,185 @@
       renderAll();
     }
 
+    function setupNoteEditors() {
+      [els.goodText, els.improveText, els.luckyText].forEach((editor) => {
+        if (!editor) {
+          return;
+        }
+        Object.defineProperty(editor, "value", {
+          configurable: true,
+          get() {
+            return noteEditorValue(editor);
+          },
+          set(value) {
+            renderNoteEditor(editor, value);
+          }
+        });
+        editor.tabIndex = 0;
+        editor.addEventListener("focus", () => {
+          ensureNoteLine(editor);
+          const lines = editor.querySelectorAll(".note-line-text");
+          focusNoteLine(lines[lines.length - 1]);
+        });
+        editor.addEventListener("click", (event) => {
+          if (!event.target.closest(".note-line-text")) {
+            ensureNoteLine(editor);
+            const lines = editor.querySelectorAll(".note-line-text");
+            focusNoteLine(lines[lines.length - 1]);
+          }
+        });
+        editor.addEventListener("keydown", handleNoteEditorKeydown);
+        editor.addEventListener("paste", handleNoteEditorPaste);
+        editor.addEventListener("focusout", () => {
+          window.setTimeout(() => {
+            if (!editor.contains(document.activeElement)) {
+              cleanupNoteEditor(editor);
+            }
+          }, 0);
+        });
+      });
+    }
+
+    function renderNoteEditor(editor, value) {
+      const lines = noteTextLines(value);
+      editor.replaceChildren(...lines.map((line) => createNoteLine(line)));
+    }
+
+    function noteTextLines(value) {
+      return String(value || "")
+        .split("\n")
+        .map((line) => line.replace(/^\s*[·•●]\s*/, "").trimEnd())
+        .filter((line) => line.trim());
+    }
+
+    function createNoteLine(text = "") {
+      const row = document.createElement("div");
+      row.className = "note-line";
+      const bullet = document.createElement("span");
+      bullet.className = "note-bullet";
+      bullet.textContent = "•";
+      const content = document.createElement("span");
+      content.className = "note-line-text";
+      content.contentEditable = "true";
+      content.spellcheck = true;
+      content.textContent = text;
+      row.append(bullet, content);
+      return row;
+    }
+
+    function ensureNoteLine(editor) {
+      if (!editor.querySelector(".note-line")) {
+        editor.append(createNoteLine());
+      }
+    }
+
+    function noteEditorValue(editor) {
+      return [...editor.querySelectorAll(".note-line-text")]
+        .map((line) => line.textContent.trimEnd())
+        .filter((line) => line.trim())
+        .map((line) => `${NOTE_BULLET}${line}`)
+        .join("\n");
+    }
+
+    function handleNoteEditorKeydown(event) {
+      const textEl = event.target.closest(".note-line-text");
+      if (!textEl) {
+        return;
+      }
+      if (event.key === "Enter") {
+        event.preventDefault();
+        if (!textEl.textContent.trim()) {
+          return;
+        }
+        const nextLine = createNoteLine();
+        textEl.closest(".note-line").after(nextLine);
+        focusNoteLine(nextLine.querySelector(".note-line-text"));
+        event.currentTarget.dispatchEvent(new Event("input", { bubbles: true }));
+        return;
+      }
+      if (event.key === "Backspace" && !textEl.textContent.trim()) {
+        const row = textEl.closest(".note-line");
+        const fallback = row.previousElementSibling?.querySelector(".note-line-text")
+          || row.nextElementSibling?.querySelector(".note-line-text");
+        if (fallback) {
+          event.preventDefault();
+          row.remove();
+          focusNoteLine(fallback);
+          event.currentTarget.dispatchEvent(new Event("input", { bubbles: true }));
+        }
+      }
+    }
+
+    function handleNoteEditorPaste(event) {
+      const textEl = event.target.closest(".note-line-text");
+      if (!textEl) {
+        return;
+      }
+      const text = event.clipboardData?.getData("text/plain") || "";
+      if (!text) {
+        return;
+      }
+      event.preventDefault();
+      const parts = text
+        .replace(/\r/g, "")
+        .split("\n")
+        .map((line) => line.replace(/^\s*[·•●]\s*/, "").trimEnd());
+      insertTextAtSelection(parts.shift() || "");
+      let row = textEl.closest(".note-line");
+      let lastText = textEl;
+      parts.filter((line) => line.trim()).forEach((line) => {
+        const nextLine = createNoteLine(line);
+        row.after(nextLine);
+        row = nextLine;
+        lastText = nextLine.querySelector(".note-line-text");
+      });
+      focusNoteLine(lastText);
+      event.currentTarget.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+
+    function insertTextAtSelection(text) {
+      const selection = window.getSelection();
+      if (!selection.rangeCount) {
+        return;
+      }
+      const range = selection.getRangeAt(0);
+      range.deleteContents();
+      range.insertNode(document.createTextNode(text));
+      range.collapse(false);
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
+
+    function focusNoteLine(textEl) {
+      if (!textEl) {
+        return;
+      }
+      textEl.focus();
+      const range = document.createRange();
+      range.selectNodeContents(textEl);
+      range.collapse(false);
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
+
+    function cleanupNoteEditor(editor) {
+      const before = noteEditorValue(editor);
+      [...editor.querySelectorAll(".note-line")].forEach((row) => {
+        const text = row.querySelector(".note-line-text")?.textContent || "";
+        if (!text.trim()) {
+          row.remove();
+        }
+      });
+      if (noteEditorValue(editor) !== before) {
+        editor.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+    }
+
     function bindBulletTextarea(textarea) {
       textarea.addEventListener("focus", () => {
         if (!textarea.value) {
-          textarea.value = "· ";
+          textarea.value = NOTE_BULLET;
           textarea.setSelectionRange(textarea.value.length, textarea.value.length);
           textarea.dispatchEvent(new Event("input", { bubbles: true }));
         }
@@ -2059,15 +2283,52 @@
         if (event.key !== "Enter" || event.isComposing) {
           return;
         }
+        if (isBlankBulletLine(currentTextareaLine(textarea))) {
+          event.preventDefault();
+          return;
+        }
         event.preventDefault();
         const start = textarea.selectionStart;
         const end = textarea.selectionEnd;
-        textarea.setRangeText("\n· ", start, end, "end");
+        textarea.setRangeText(`\n${NOTE_BULLET}`, start, end, "end");
         textarea.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+      textarea.addEventListener("blur", () => {
+        const cleaned = cleanupBulletText(textarea.value);
+        if (cleaned !== textarea.value) {
+          textarea.value = cleaned;
+          textarea.dispatchEvent(new Event("input", { bubbles: true }));
+        }
       });
     }
 
+    function currentTextareaLine(textarea) {
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const value = textarea.value;
+      const lineStart = value.lastIndexOf("\n", Math.max(0, start - 1)) + 1;
+      const nextBreak = value.indexOf("\n", end);
+      const lineEnd = nextBreak === -1 ? value.length : nextBreak;
+      return value.slice(lineStart, lineEnd);
+    }
+
+    function isBlankBulletLine(line) {
+      const text = String(line || "").trim();
+      return !text || /^[·•●]\s*$/.test(text);
+    }
+
+    function cleanupBulletText(text) {
+      const lines = String(text || "").split("\n");
+      while (lines.length && isBlankBulletLine(lines[lines.length - 1])) {
+        lines.pop();
+      }
+      return lines.join("\n");
+    }
+
     function addReminder() {
+      if (!els.reminderList) {
+        return;
+      }
       const reminder = {
         id: `reminder-${Date.now()}-${Math.random().toString(16).slice(2)}`,
         name: "记录提醒",
@@ -2083,6 +2344,9 @@
     }
 
     function renderReminders() {
+      if (!els.reminderList) {
+        return;
+      }
       els.reminderList.replaceChildren();
       if (!state.reminders.length) {
         const empty = document.createElement("p");
@@ -2149,6 +2413,9 @@
     }
 
     function startReminderTimer() {
+      if (!els.reminderList) {
+        return;
+      }
       window.clearInterval(reminderTimer);
       checkReminders();
       reminderTimer = window.setInterval(checkReminders, 30000);
@@ -2546,7 +2813,7 @@
       } else if (normalized.includes("invalid api key") || normalized.includes("api key")) {
         hint = "请检查 Project URL 和 Publishable key 是否来自同一个 Supabase 项目。";
       } else if (normalized.includes("failed to fetch") || normalized.includes("networkerror")) {
-        hint = `请求没有成功到达 Supabase。请核对 Project URL 是否完全来自 Supabase 后台、项目是否暂停、Publishable key 是否匹配，并检查浏览器/网络是否拦截了 Supabase 请求。当前页面：${window.location.origin || window.location.href}`;
+        hint = `请求没有成功到达 Supabase。请重新复制 Supabase 后台 Project Settings > API 里的 Project URL；当前代码使用：${SUPABASE_URL}。如果这个地址无法打开，通常是项目地址/ref 不存在、项目暂停，或网络拦截了 Supabase 请求。当前页面：${window.location.origin || window.location.href}`;
       } else if (normalized.includes("signup") && (normalized.includes("disabled") || normalized.includes("not allowed"))) {
         hint = "请在 Authentication > Providers > Email 中允许新用户注册。";
       } else if (normalized.includes("password")) {
@@ -3452,6 +3719,7 @@
 
     function openExportModal() {
       els.exportStatus.textContent = "";
+      resetExportPreview();
       els.exportModal.classList.add("is-visible");
       els.exportModal.setAttribute("aria-hidden", "false");
     }
@@ -3459,6 +3727,11 @@
     function closeExportModal() {
       els.exportModal.classList.remove("is-visible");
       els.exportModal.setAttribute("aria-hidden", "true");
+    }
+
+    function resetExportPreview() {
+      els.exportPreview.removeAttribute("src");
+      els.exportPreview.classList.remove("is-visible");
     }
 
     async function exportSelectedImages(mode) {
@@ -3524,7 +3797,7 @@
       }
 
       if (els.exportDetailToggle.checked) {
-        items.push({ name: `文字记录-${selectedHistoryDate}`, canvas: makeDetailExportCanvas() });
+        items.push({ name: `文字记录-${exportRecordKey()}`, canvas: makeDetailExportCanvas() });
       }
 
       if (!items.length) {
@@ -3533,12 +3806,18 @@
       }
 
       const canvas = combineExportCanvases(items.map((item) => item.canvas));
+      showExportPreview(canvas);
       const filename = items.length === 1 ? `${items[0].name}.png` : `记录长图-${todayKey()}.png`;
       if (mode === "copy") {
         await copyCanvasImage(canvas);
         return;
       }
       await saveCanvasImage(canvas, filename);
+    }
+
+    function showExportPreview(canvas) {
+      els.exportPreview.src = canvas.toDataURL("image/png");
+      els.exportPreview.classList.add("is-visible");
     }
 
     function withSleepChartsReady(callback) {
@@ -3610,14 +3889,16 @@
     }
 
     function makeDetailExportCanvas() {
-      const entry = state.entries[selectedHistoryDate] || {};
-      const width = 900;
-      const padding = 38;
-      const sectionGap = 28;
+      const key = exportRecordKey();
+      const entry = state.entries[key] || {};
+      const width = exportDetailCssWidth();
+      const scale = Math.min(3, Math.max(2, window.devicePixelRatio || 2));
+      const padding = 16;
+      const sectionGap = 18;
       const bodyWidth = width - padding * 2;
       const canvas = document.createElement("canvas");
       const measure = canvas.getContext("2d");
-      measure.font = "24px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
+      measure.font = "15px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
       const sections = [
         { title: "做得好的事情", text: entry.good || "暂无记录", color: cssVar("--good") },
         { title: "渴望做的事情", text: entry.improve || "暂无记录", color: cssVar("--improve") },
@@ -3626,35 +3907,74 @@
         ...section,
         lines: wrapCanvasText(measure, section.text, bodyWidth)
       }));
-      const height = padding + 72 + sections.reduce((sum, section) => sum + 34 + section.lines.length * 34 + sectionGap, 0) + padding;
-      canvas.width = width;
-      canvas.height = height;
+      const lineHeight = 24;
+      const height = padding + 58 + sections.reduce((sum, section) => {
+        return sum + 28 + section.lines.length * lineHeight + sectionGap;
+      }, 0) + 4;
+      canvas.width = Math.round(width * scale);
+      canvas.height = Math.round(height * scale);
       const ctx = canvas.getContext("2d");
+      ctx.scale(scale, scale);
       ctx.fillStyle = cssVar("--surface");
       ctx.fillRect(0, 0, width, height);
       ctx.fillStyle = cssVar("--ink");
-      ctx.font = "700 30px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
+      ctx.font = "700 18px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
       ctx.textBaseline = "top";
-      ctx.fillText(formatLongDate(selectedHistoryDate), padding, padding);
+      ctx.fillText(formatLongDate(key), padding, padding);
       ctx.fillStyle = cssVar("--accent-strong");
-      ctx.font = "700 20px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
-      ctx.fillText(typeof entry.score === "number" ? `${entry.score} 分` : "未打分", padding, padding + 42);
+      ctx.font = "700 13px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
+      ctx.fillText(typeof entry.score === "number" ? `${entry.score} 分` : "未打分", padding, padding + 30);
 
-      let y = padding + 92;
+      let y = padding + 62;
       sections.forEach((section) => {
         ctx.fillStyle = section.color;
-        ctx.font = "700 22px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
+        ctx.font = "700 15px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
         ctx.fillText(section.title, padding, y);
-        y += 36;
+        y += 27;
         ctx.fillStyle = cssVar("--ink");
-        ctx.font = "24px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
+        ctx.font = "15px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
         section.lines.forEach((line) => {
-          ctx.fillText(line, padding, y);
-          y += 34;
+          drawRecordExportLine(ctx, line, padding, y);
+          y += lineHeight;
         });
         y += sectionGap;
       });
       return canvas;
+    }
+
+    function exportRecordKey() {
+      if (activeTab === "today") {
+        return selectedDate;
+      }
+      if (activeTab === "sleep") {
+        return selectedSleepDate;
+      }
+      return selectedHistoryDate;
+    }
+
+    function exportDetailCssWidth() {
+      const candidates = [
+        els.detailGood?.getBoundingClientRect().width,
+        els.historyScreen?.getBoundingClientRect().width,
+        document.querySelector(".app-shell")?.getBoundingClientRect().width,
+        document.documentElement.clientWidth
+      ].filter((value) => value && value > 0);
+      return Math.round(Math.min(430, Math.max(320, candidates[0] || 390)));
+    }
+
+    function drawRecordExportLine(ctx, line, x, y) {
+      const match = String(line || "").match(/^\s*([·•●])\s*(.*)$/);
+      if (!match) {
+        ctx.fillText(line, x, y);
+        return;
+      }
+      ctx.save();
+      ctx.fillStyle = cssVar("--accent-strong");
+      ctx.beginPath();
+      ctx.arc(x + 5, y + 9, 3.6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+      ctx.fillText(match[2] || "", x + 16, y);
     }
 
     function wrapCanvasText(ctx, text, maxWidth) {
@@ -3700,12 +4020,15 @@
         if (!navigator.clipboard?.write || typeof ClipboardItem === "undefined") {
           throw new Error("当前浏览器不支持复制图片到剪贴板。");
         }
+        if (ClipboardItem.supports && !ClipboardItem.supports("image/png")) {
+          throw new Error("当前浏览器不支持复制 PNG 图片。");
+        }
         await navigator.clipboard.write([
           new ClipboardItem({ "image/png": blob })
         ]);
-        els.exportStatus.textContent = "已复制图片，可直接粘贴。";
+        els.exportStatus.textContent = "已请求复制图片；如果目标 App 无法粘贴，请长按下方预览图或改用保存图片。";
       } catch (error) {
-        els.exportStatus.textContent = `复制失败：${error.message || error}。可改用保存图片。`;
+        els.exportStatus.textContent = `复制受限：${error.message || error}。可长按下方预览图，或改用保存图片。`;
       }
     }
 
