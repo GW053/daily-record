@@ -3508,17 +3508,17 @@
           : null;
       }
 
-      const base = rawBed ?? rawSleep ?? rawWake ?? rawRise;
-      const bed = rawBed !== null ? rawBed : rawSleep;
-      const sleep = rawSleep !== null
-        ? normalizeAfter(rawSleep, bed ?? base, true)
-        : null;
-      const wake = rawWake !== null
-        ? normalizeAfter(rawWake, sleep ?? bed ?? base, sleep === null)
-        : null;
+      const morningAnchor = rawWake ?? rawRise;
+      const wake = rawWake !== null ? rawWake : null;
       const rise = rawRise !== null
-        ? normalizeAfter(rawRise, wake ?? sleep ?? bed ?? base, true)
+        ? (wake !== null ? normalizeAfter(rawRise, wake, true) : rawRise)
         : wake;
+      const sleep = rawSleep !== null
+        ? (morningAnchor !== null ? normalizeBefore(rawSleep, morningAnchor) : normalizeNightStart(rawSleep))
+        : null;
+      const bed = rawBed !== null
+        ? normalizeBefore(rawBed, sleep ?? morningAnchor ?? normalizeNightStart(rawBed))
+        : sleep;
       const computedTotal = sleep !== null && wake !== null && wake > sleep ? wake - sleep : null;
 
       return {
@@ -3537,6 +3537,18 @@
         result += 1440;
       }
       return result;
+    }
+
+    function normalizeBefore(value, reference) {
+      let result = value;
+      while (result > reference) {
+        result -= 1440;
+      }
+      return result;
+    }
+
+    function normalizeNightStart(value) {
+      return value >= 18 * 60 ? value - 1440 : value;
     }
 
     function timeToMinutes(value) {
