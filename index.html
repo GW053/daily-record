@@ -98,6 +98,30 @@
       height: 21px;
     }
 
+    .brand-copy {
+      min-width: 0;
+    }
+
+    .title-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      min-width: 0;
+    }
+
+    .version-link {
+      padding: 0;
+      color: var(--accent-strong);
+      background: transparent;
+      border: 0;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1.2;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
     h1,
     h2,
     h3,
@@ -441,6 +465,19 @@
       align-items: center;
       padding-top: 12px;
       border-top: 1px solid var(--line);
+    }
+
+    .sleep-target-panel {
+      display: grid;
+      gap: 8px;
+      padding: 14px;
+    }
+
+    .sleep-target-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(112px, 150px);
+      gap: 12px;
+      align-items: center;
     }
 
     .total-value {
@@ -875,6 +912,21 @@
       padding: 0 11px;
     }
 
+    .version-body {
+      display: grid;
+      gap: 12px;
+      padding: 14px;
+      color: var(--ink);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .version-list {
+      display: grid;
+      gap: 7px;
+      padding-left: 18px;
+    }
+
     .auth-buttons {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1235,8 +1287,11 @@
             <path d="m8 15 2 2 5-6"></path>
           </svg>
         </div>
-        <div>
-          <h1 id="pageTitle">今日记录</h1>
+        <div class="brand-copy">
+          <div class="title-row">
+            <h1 id="pageTitle">今日记录</h1>
+            <button class="version-link" id="versionButton" type="button">v1.1</button>
+          </div>
           <p class="page-date" id="pageDate"></p>
         </div>
       </div>
@@ -1429,6 +1484,13 @@
           <canvas class="sleep-metric-chart" id="sleepMetricChart" width="640" height="480" aria-label="近七天睡眠单项变化图"></canvas>
           <div class="chart-empty" id="sleepMetricEmpty">暂无睡眠数据</div>
         </div>
+      </section>
+
+      <section class="panel sleep-target-panel">
+        <label class="sleep-target-row" for="sleepTargetInput">
+          <span class="total-label">期望睡眠时长</span>
+          <input class="duration-input" id="sleepTargetInput" type="text" placeholder="例如 8h" aria-label="期望睡眠时长">
+        </label>
       </section>
     </main>
 
@@ -1657,6 +1719,31 @@
     </section>
   </div>
 
+  <div class="modal-backdrop" id="versionModal" aria-hidden="true">
+    <section class="backup-modal auth-modal" role="dialog" aria-modal="true" aria-labelledby="versionModalTitle">
+      <header class="modal-head">
+        <h2 class="modal-title" id="versionModalTitle">新版本修复了什么</h2>
+        <div class="modal-actions">
+          <button class="icon-button" id="closeVersionButton" type="button" aria-label="关闭版本说明" title="关闭">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 6 6 18"></path>
+              <path d="m6 6 12 12"></path>
+            </svg>
+          </button>
+        </div>
+      </header>
+      <div class="version-body">
+        <p><strong>v1.1 更新时间：2026-06-24。</strong></p>
+        <ol class="version-list">
+          <li>修复跨天睡眠记录，22:00 到 08:00 会自动识别为前一晚到今早。</li>
+          <li>新增期望睡眠时长，并在总睡眠时长图表中显示参考线。</li>
+          <li>调整总睡眠时长图表间距和标签格式，减少显示时间时的遮挡。</li>
+          <li>默认记录日期改为凌晨 4 点切换。</li>
+        </ol>
+      </div>
+    </section>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const STORAGE_KEY = "daily-record-site-v1";
@@ -1664,10 +1751,13 @@
     const SUPABASE_KEY = "sb_publishable_WW3rmZCePegJsIf6LeqFvQ_KRgHD9pz";
     const SYNC_TABLE = "daily_record_sync";
     const NOTE_BULLET = "• ";
+    const APP_VERSION = "v1.1";
+    const APP_VERSION_UPDATED = "2026-06-24";
     const state = loadState();
     const els = {
       pageTitle: document.querySelector("#pageTitle"),
       pageDate: document.querySelector("#pageDate"),
+      versionButton: document.querySelector("#versionButton"),
       saveState: document.querySelector("#saveState"),
       syncButton: document.querySelector("#syncButton"),
       exportButton: document.querySelector("#exportButton"),
@@ -1706,6 +1796,8 @@
       closeAuthButton: document.querySelector("#closeAuthButton"),
       authStatus: document.querySelector("#authStatus"),
       authUserText: document.querySelector("#authUserText"),
+      versionModal: document.querySelector("#versionModal"),
+      closeVersionButton: document.querySelector("#closeVersionButton"),
       todayScreen: document.querySelector("#todayScreen"),
       sleepScreen: document.querySelector("#sleepScreen"),
       historyScreen: document.querySelector("#historyScreen"),
@@ -1723,6 +1815,7 @@
       wakeTimeInput: document.querySelector("#wakeTimeInput"),
       riseTimeInput: document.querySelector("#riseTimeInput"),
       sleepTotalInput: document.querySelector("#sleepTotalInput"),
+      sleepTargetInput: document.querySelector("#sleepTargetInput"),
       sleepRangeTitle: document.querySelector("#sleepRangeTitle"),
       sleepTimelineChart: document.querySelector("#sleepTimelineChart"),
       sleepTimelineEmpty: document.querySelector("#sleepTimelineEmpty"),
@@ -1775,6 +1868,8 @@
 
     function init() {
       setupNoteEditors();
+      els.versionButton.textContent = APP_VERSION;
+      renderSleepTarget();
       syncDateInputs(selectedDate);
       syncSleepDateInputs(selectedSleepDate);
       loadForm(selectedDate);
@@ -1827,6 +1922,8 @@
 
       els.sleepTotalInput.addEventListener("change", saveSleepTotalOverride);
       els.sleepTotalInput.addEventListener("blur", saveSleepTotalOverride);
+      els.sleepTargetInput.addEventListener("change", saveSleepTarget);
+      els.sleepTargetInput.addEventListener("blur", saveSleepTarget);
 
       els.timelineLabelsToggle.addEventListener("change", renderSleepCharts);
       els.metricLabelsToggle.addEventListener("change", renderSleepCharts);
@@ -1873,6 +1970,8 @@
           closeAuthModal();
         }
       });
+      els.versionButton.addEventListener("click", openVersionModal);
+      els.closeVersionButton.addEventListener("click", closeVersionModal);
 
       els.sleepMetricTabs.forEach((button) => {
         button.addEventListener("click", () => {
@@ -2058,6 +2157,39 @@
       els.sleepTotalInput.placeholder = timeline?.computedTotal !== null && timeline?.computedTotal !== undefined
         ? `自动 ${formatDuration(timeline.computedTotal)}`
         : "未计算";
+    }
+
+    function renderSleepTarget() {
+      const minutes = expectedSleepMinutes();
+      els.sleepTargetInput.value = minutes !== null ? formatDurationCompact(minutes) : "";
+    }
+
+    function saveSleepTarget() {
+      const trimmed = els.sleepTargetInput.value.trim();
+      if (!trimmed) {
+        delete state.settings.expectedSleepMinutes;
+        persistState();
+        renderSleepTarget();
+        renderSleepCharts();
+        showSaved();
+        return;
+      }
+      const minutes = parseDurationInput(trimmed);
+      if (minutes === null) {
+        els.sleepTargetInput.value = expectedSleepMinutes() !== null ? formatDurationCompact(expectedSleepMinutes()) : "";
+        return;
+      }
+      state.settings.expectedSleepMinutes = minutes;
+      persistState();
+      renderSleepTarget();
+      renderSleepCharts();
+      showSaved();
+    }
+
+    function expectedSleepMinutes() {
+      return typeof state.settings?.expectedSleepMinutes === "number"
+        ? state.settings.expectedSleepMinutes
+        : null;
     }
 
     function loadForm(key) {
@@ -2560,6 +2692,16 @@
       els.authModal.setAttribute("aria-hidden", "true");
     }
 
+    function openVersionModal() {
+      els.versionModal.classList.add("is-visible");
+      els.versionModal.setAttribute("aria-hidden", "false");
+    }
+
+    function closeVersionModal() {
+      els.versionModal.classList.remove("is-visible");
+      els.versionModal.setAttribute("aria-hidden", "true");
+    }
+
     function setAuthStatus(message) {
       els.authStatus.textContent = message;
     }
@@ -2730,6 +2872,7 @@
             persistState({ sync: false });
             loadForm(selectedDate);
             loadSleepForm(selectedSleepDate);
+            renderSleepTarget();
             renderReminders();
             renderAll();
             if (els.backupModal.classList.contains("is-visible")) {
@@ -3235,9 +3378,11 @@
 
     function drawSleepTotalBars(ctx, width, height, rows) {
       const values = rows.map((row) => row.timeline?.totalMinutes ?? null);
+      const targetMinutes = expectedSleepMinutes();
       const hasData = values.some((value) => value !== null);
-      els.sleepMetricEmpty.classList.toggle("is-visible", !hasData);
-      if (!hasData) {
+      const hasTarget = targetMinutes !== null;
+      els.sleepMetricEmpty.classList.toggle("is-visible", !hasData && !hasTarget);
+      if (!hasData && !hasTarget) {
         drawEmptyAxes(ctx, width, height, rows);
         return;
       }
@@ -3245,11 +3390,17 @@
       const lineColor = cssVar("--line");
       const mutedColor = cssVar("--muted");
       const accentColor = cssVar("--sleep-main");
-      const pad = { top: 24, right: 44, bottom: 36, left: 48 };
+      const targetColor = cssVar("--accent-strong");
+      const pad = { top: 26, right: 50, bottom: 36, left: 54 };
       const plotWidth = width - pad.left - pad.right;
       const plotHeight = height - pad.top - pad.bottom;
-      const maxHours = Math.max(1, Math.ceil(Math.max(...values.filter((value) => value !== null)) / 60));
-      const xFor = (index) => pad.left + (plotWidth * index) / 6;
+      const maxMinutes = Math.max(
+        ...values.filter((value) => value !== null),
+        targetMinutes || 0
+      );
+      const maxHours = Math.max(1, Math.ceil(maxMinutes / 60));
+      const xInset = Math.min(26, Math.max(16, plotWidth / 14));
+      const xFor = (index) => pad.left + xInset + ((plotWidth - xInset * 2) * index) / 6;
       const yFor = (hours) => pad.top + plotHeight - (hours / maxHours) * plotHeight;
 
       ctx.font = "12px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
@@ -3268,6 +3419,9 @@
       }
 
       drawDateAxis(ctx, rows, height, pad, xFor, mutedColor);
+      if (targetMinutes !== null) {
+        drawSleepTargetLine(ctx, width, pad, yFor(targetMinutes / 60), targetColor, formatDurationCompact(targetMinutes));
+      }
 
       const barWidth = Math.max(12, Math.min(28, plotWidth / 12));
       const valueIndexes = values
@@ -3289,9 +3443,27 @@
           ctx.textAlign = index === firstValueIndex ? "left" : index === lastValueIndex ? "right" : "center";
           ctx.textBaseline = "bottom";
           const labelX = index === firstValueIndex ? x : index === lastValueIndex ? x + barWidth : x + barWidth / 2;
-          ctx.fillText(formatDuration(value), labelX, y - 5);
+          ctx.fillText(formatDurationCompact(value), clamp(labelX, pad.left + 2, width - pad.right - 2), y - 5);
         }
       });
+    }
+
+    function drawSleepTargetLine(ctx, width, pad, y, color, label) {
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.lineWidth = 1.4;
+      ctx.setLineDash([6, 5]);
+      ctx.beginPath();
+      ctx.moveTo(pad.left, crisp(y));
+      ctx.lineTo(width - pad.right, crisp(y));
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.font = "11px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
+      ctx.textAlign = "right";
+      ctx.textBaseline = "bottom";
+      ctx.fillText(`期望 ${label}`, width - pad.right, y - 4);
+      ctx.restore();
     }
 
     function drawSegment(ctx, start, end, xFor, y, height, color) {
@@ -3463,6 +3635,10 @@
       ctx.fillText(label, x + 12, y);
     }
 
+    function clamp(value, min, max) {
+      return Math.min(max, Math.max(min, value));
+    }
+
     function sleepMetricDefs() {
       return [
         { key: "bed", label: "上床", color: "#9a8171", value: (timeline) => timeline?.bed ?? null },
@@ -3605,6 +3781,12 @@
       return mins ? `${hours}小时${mins}分` : `${hours}小时`;
     }
 
+    function formatDurationCompact(minutes) {
+      const hours = Math.floor(minutes / 60);
+      const mins = minutes % 60;
+      return mins ? `${hours}h${mins}m` : `${hours}h`;
+    }
+
     function crisp(value) {
       return Math.round(value) + 0.5;
     }
@@ -3701,10 +3883,11 @@
         return {
           entries: saved.entries || {},
           sleepEntries: saved.sleepEntries || {},
+          settings: saved.settings && typeof saved.settings === "object" ? saved.settings : {},
           reminders: Array.isArray(saved.reminders) ? saved.reminders : []
         };
       } catch {
-        return { entries: {}, sleepEntries: {}, reminders: [] };
+        return { entries: {}, sleepEntries: {}, settings: {}, reminders: [] };
       }
     }
 
@@ -3721,6 +3904,7 @@
         version: 1,
         entries: state.entries,
         sleepEntries: state.sleepEntries,
+        settings: state.settings,
         reminders: state.reminders
       };
     }
@@ -4202,6 +4386,7 @@
       persistState();
       loadForm(selectedDate);
       loadSleepForm(selectedSleepDate);
+      renderSleepTarget();
       renderReminders();
       renderAll();
       refreshBackupText();
@@ -4212,8 +4397,9 @@
     function mergeBackup(parsed) {
       const incomingEntries = parsed.entries && typeof parsed.entries === "object" ? parsed.entries : {};
       const incomingSleepEntries = parsed.sleepEntries && typeof parsed.sleepEntries === "object" ? parsed.sleepEntries : {};
+      const incomingSettings = parsed.settings && typeof parsed.settings === "object" ? parsed.settings : {};
       const incomingReminders = Array.isArray(parsed.reminders) ? parsed.reminders : [];
-      if (!Object.keys(incomingEntries).length && !Object.keys(incomingSleepEntries).length && !incomingReminders.length) {
+      if (!Object.keys(incomingEntries).length && !Object.keys(incomingSleepEntries).length && !Object.keys(incomingSettings).length && !incomingReminders.length) {
         return { ok: false, message: "导入失败：没有找到可合并的记录。" };
       }
 
@@ -4236,6 +4422,10 @@
 
       mergeMap(state.entries, incomingEntries);
       mergeMap(state.sleepEntries, incomingSleepEntries);
+      if (typeof incomingSettings.expectedSleepMinutes === "number" && typeof state.settings.expectedSleepMinutes !== "number") {
+        state.settings.expectedSleepMinutes = incomingSettings.expectedSleepMinutes;
+        added += 1;
+      }
       incomingReminders.forEach((reminder) => {
         if (!reminder || typeof reminder !== "object" || !reminder.time) {
           return;
@@ -4256,7 +4446,11 @@
     }
 
     function todayKey() {
-      return dateKey(new Date());
+      const now = new Date();
+      if (now.getHours() < 4) {
+        now.setDate(now.getDate() - 1);
+      }
+      return dateKey(now);
     }
 
     function dateKey(date) {
