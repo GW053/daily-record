@@ -1487,6 +1487,25 @@
       </section>
 
       <section class="panel sleep-target-panel">
+        <h2 class="section-title">期望睡眠</h2>
+        <div class="sleep-time-grid">
+          <label class="time-field" for="expectedSleepTimeInput">
+            <span>期望入睡时间</span>
+            <input id="expectedSleepTimeInput" type="time">
+          </label>
+          <label class="time-field" for="expectedWakeTimeInput">
+            <span>期望醒来时间</span>
+            <input id="expectedWakeTimeInput" type="time">
+          </label>
+          <label class="time-field" for="expectedBedTimeInput">
+            <span>期望上床时间</span>
+            <input id="expectedBedTimeInput" type="time">
+          </label>
+          <label class="time-field" for="expectedRiseTimeInput">
+            <span>期望起床时间</span>
+            <input id="expectedRiseTimeInput" type="time">
+          </label>
+        </div>
         <label class="sleep-target-row" for="sleepTargetInput">
           <span class="total-label">期望睡眠时长</span>
           <input class="duration-input" id="sleepTargetInput" type="text" placeholder="例如 8h" aria-label="期望睡眠时长">
@@ -1722,7 +1741,7 @@
   <div class="modal-backdrop" id="versionModal" aria-hidden="true">
     <section class="backup-modal auth-modal" role="dialog" aria-modal="true" aria-labelledby="versionModalTitle">
       <header class="modal-head">
-        <h2 class="modal-title" id="versionModalTitle">新版本修复了什么</h2>
+        <h2 class="modal-title" id="versionModalTitle">版本信息</h2>
         <div class="modal-actions">
           <button class="icon-button" id="closeVersionButton" type="button" aria-label="关闭版本说明" title="关闭">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
@@ -1737,7 +1756,9 @@
         <ol class="version-list">
           <li>修复跨天睡眠记录，22:00 到 08:00 会自动识别为前一晚到今早。</li>
           <li>新增期望睡眠时长，并在总睡眠时长图表中显示参考线。</li>
+          <li>新增期望入睡、醒来、上床、起床时间，并在单项变化图中显示参考线。</li>
           <li>调整总睡眠时长图表间距和标签格式，减少显示时间时的遮挡。</li>
+          <li>延展总睡眠时长图表横轴，缓解日期标签拥挤。</li>
           <li>默认记录日期改为凌晨 4 点切换。</li>
         </ol>
       </div>
@@ -1815,6 +1836,10 @@
       wakeTimeInput: document.querySelector("#wakeTimeInput"),
       riseTimeInput: document.querySelector("#riseTimeInput"),
       sleepTotalInput: document.querySelector("#sleepTotalInput"),
+      expectedBedTimeInput: document.querySelector("#expectedBedTimeInput"),
+      expectedSleepTimeInput: document.querySelector("#expectedSleepTimeInput"),
+      expectedWakeTimeInput: document.querySelector("#expectedWakeTimeInput"),
+      expectedRiseTimeInput: document.querySelector("#expectedRiseTimeInput"),
       sleepTargetInput: document.querySelector("#sleepTargetInput"),
       sleepRangeTitle: document.querySelector("#sleepRangeTitle"),
       sleepTimelineChart: document.querySelector("#sleepTimelineChart"),
@@ -1869,6 +1894,7 @@
     function init() {
       setupNoteEditors();
       els.versionButton.textContent = APP_VERSION;
+      renderExpectedSleepTimes();
       renderSleepTarget();
       syncDateInputs(selectedDate);
       syncSleepDateInputs(selectedSleepDate);
@@ -1922,6 +1948,9 @@
 
       els.sleepTotalInput.addEventListener("change", saveSleepTotalOverride);
       els.sleepTotalInput.addEventListener("blur", saveSleepTotalOverride);
+      [els.expectedBedTimeInput, els.expectedSleepTimeInput, els.expectedWakeTimeInput, els.expectedRiseTimeInput].forEach((field) => {
+        field.addEventListener("input", saveExpectedSleepTimes);
+      });
       els.sleepTargetInput.addEventListener("change", saveSleepTarget);
       els.sleepTargetInput.addEventListener("blur", saveSleepTarget);
 
@@ -2164,6 +2193,32 @@
       els.sleepTargetInput.value = minutes !== null ? formatDurationCompact(minutes) : "";
     }
 
+    function renderExpectedSleepTimes() {
+      const times = expectedSleepTimes();
+      els.expectedBedTimeInput.value = times.bed || "";
+      els.expectedSleepTimeInput.value = times.sleep || "";
+      els.expectedWakeTimeInput.value = times.wake || "";
+      els.expectedRiseTimeInput.value = times.rise || "";
+    }
+
+    function saveExpectedSleepTimes() {
+      const times = {
+        bed: els.expectedBedTimeInput.value,
+        sleep: els.expectedSleepTimeInput.value,
+        wake: els.expectedWakeTimeInput.value,
+        rise: els.expectedRiseTimeInput.value
+      };
+      const cleaned = Object.fromEntries(Object.entries(times).filter(([, value]) => value));
+      if (!Object.keys(cleaned).length) {
+        delete state.settings.expectedTimes;
+      } else {
+        state.settings.expectedTimes = cleaned;
+      }
+      persistState();
+      renderSleepCharts();
+      showSaved();
+    }
+
     function saveSleepTarget() {
       const trimmed = els.sleepTargetInput.value.trim();
       if (!trimmed) {
@@ -2190,6 +2245,12 @@
       return typeof state.settings?.expectedSleepMinutes === "number"
         ? state.settings.expectedSleepMinutes
         : null;
+    }
+
+    function expectedSleepTimes() {
+      return state.settings?.expectedTimes && typeof state.settings.expectedTimes === "object"
+        ? state.settings.expectedTimes
+        : {};
     }
 
     function loadForm(key) {
@@ -2872,6 +2933,7 @@
             persistState({ sync: false });
             loadForm(selectedDate);
             loadSleepForm(selectedSleepDate);
+            renderExpectedSleepTimes();
             renderSleepTarget();
             renderReminders();
             renderAll();
@@ -3343,9 +3405,11 @@
           }
         });
       });
+      const targetValue = expectedSleepMetricValue(metric, values);
       const hasData = values.length > 0;
-      els.sleepMetricEmpty.classList.toggle("is-visible", !hasData);
-      if (!hasData) {
+      const hasTarget = targetValue !== null;
+      els.sleepMetricEmpty.classList.toggle("is-visible", !hasData && !hasTarget);
+      if (!hasData && !hasTarget) {
         drawEmptyAxes(ctx, width, height, rows);
         return;
       }
@@ -3355,8 +3419,9 @@
       const pad = { top: 20, right: 18, bottom: 36, left: 44 };
       const plotWidth = width - pad.left - pad.right;
       const plotHeight = height - pad.top - pad.bottom;
-      let minValue = Math.floor((Math.min(...values) - 45) / 60) * 60;
-      let maxValue = Math.ceil((Math.max(...values) + 45) / 60) * 60;
+      const scaleValues = targetValue !== null ? [...values, targetValue] : values;
+      let minValue = Math.floor((Math.min(...scaleValues) - 45) / 60) * 60;
+      let maxValue = Math.ceil((Math.max(...scaleValues) + 45) / 60) * 60;
       if (maxValue - minValue < 240) {
         const center = (minValue + maxValue) / 2;
         minValue = Math.floor((center - 120) / 60) * 60;
@@ -3367,9 +3432,14 @@
 
       drawTimeGrid(ctx, width, height, pad, minValue, maxValue, yFor, lineColor, mutedColor);
       drawDateAxis(ctx, rows, height, pad, xFor, mutedColor);
-      activeDefs.forEach((def) => {
-        drawMetricExtremes(ctx, values, width, pad, yFor, def.color);
-      });
+      if (targetValue !== null) {
+        drawExpectedTimeLine(ctx, width, pad, yFor(targetValue), sleepMetricColor(metric), `期望 ${formatClock(targetValue)}`);
+      }
+      if (hasData) {
+        activeDefs.forEach((def) => {
+          drawMetricExtremes(ctx, values, width, pad, yFor, def.color);
+        });
+      }
 
       activeDefs.forEach((def) => {
         drawMetricLine(ctx, rows, def, xFor, yFor, els.metricLabelsToggle.checked);
@@ -3391,7 +3461,7 @@
       const mutedColor = cssVar("--muted");
       const accentColor = cssVar("--sleep-main");
       const targetColor = cssVar("--accent-strong");
-      const pad = { top: 26, right: 50, bottom: 36, left: 54 };
+      const pad = { top: 26, right: 30, bottom: 36, left: 46 };
       const plotWidth = width - pad.left - pad.right;
       const plotHeight = height - pad.top - pad.bottom;
       const maxMinutes = Math.max(
@@ -3399,7 +3469,7 @@
         targetMinutes || 0
       );
       const maxHours = Math.max(1, Math.ceil(maxMinutes / 60));
-      const xInset = Math.min(26, Math.max(16, plotWidth / 14));
+      const xInset = Math.min(18, Math.max(12, plotWidth / 24));
       const xFor = (index) => pad.left + xInset + ((plotWidth - xInset * 2) * index) / 6;
       const yFor = (hours) => pad.top + plotHeight - (hours / maxHours) * plotHeight;
 
@@ -3423,12 +3493,7 @@
         drawSleepTargetLine(ctx, width, pad, yFor(targetMinutes / 60), targetColor, formatDurationCompact(targetMinutes));
       }
 
-      const barWidth = Math.max(12, Math.min(28, plotWidth / 12));
-      const valueIndexes = values
-        .map((value, index) => value !== null ? index : null)
-        .filter((index) => index !== null);
-      const firstValueIndex = valueIndexes[0];
-      const lastValueIndex = valueIndexes[valueIndexes.length - 1];
+      const barWidth = Math.max(12, Math.min(24, plotWidth / 14));
       values.forEach((value, index) => {
         if (value === null) {
           return;
@@ -3440,10 +3505,9 @@
         if (els.metricLabelsToggle.checked) {
           ctx.fillStyle = mutedColor;
           ctx.font = "11px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
-          ctx.textAlign = index === firstValueIndex ? "left" : index === lastValueIndex ? "right" : "center";
+          ctx.textAlign = "center";
           ctx.textBaseline = "bottom";
-          const labelX = index === firstValueIndex ? x : index === lastValueIndex ? x + barWidth : x + barWidth / 2;
-          ctx.fillText(formatDurationCompact(value), clamp(labelX, pad.left + 2, width - pad.right - 2), y - 5);
+          ctx.fillText(formatDurationCompact(value), x + barWidth / 2, y - 5);
         }
       });
     }
@@ -3464,6 +3528,40 @@
       ctx.textBaseline = "bottom";
       ctx.fillText(`期望 ${label}`, width - pad.right, y - 4);
       ctx.restore();
+    }
+
+    function drawExpectedTimeLine(ctx, width, pad, y, color, label) {
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.lineWidth = 1.2;
+      ctx.setLineDash([6, 5]);
+      ctx.beginPath();
+      ctx.moveTo(pad.left, crisp(y));
+      ctx.lineTo(width - pad.right, crisp(y));
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.font = "11px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
+      ctx.textAlign = "right";
+      ctx.textBaseline = y < pad.top + 18 ? "top" : "bottom";
+      ctx.fillText(label, width - pad.right, y + (y < pad.top + 18 ? 4 : -4));
+      ctx.restore();
+    }
+
+    function expectedSleepMetricValue(metric, values = []) {
+      const raw = timeToMinutes(expectedSleepTimes()[metric]);
+      if (raw === null) {
+        return null;
+      }
+      if (metric === "bed" || metric === "sleep") {
+        return raw >= 18 * 60 || values.some((value) => value < 0)
+          ? normalizeNightStart(raw)
+          : raw;
+      }
+      if (metric === "rise" && values.some((value) => value >= 1440) && raw < 12 * 60) {
+        return raw + 1440;
+      }
+      return raw;
     }
 
     function drawSegment(ctx, start, end, xFor, y, height, color) {
@@ -4386,6 +4484,7 @@
       persistState();
       loadForm(selectedDate);
       loadSleepForm(selectedSleepDate);
+      renderExpectedSleepTimes();
       renderSleepTarget();
       renderReminders();
       renderAll();
@@ -4425,6 +4524,22 @@
       if (typeof incomingSettings.expectedSleepMinutes === "number" && typeof state.settings.expectedSleepMinutes !== "number") {
         state.settings.expectedSleepMinutes = incomingSettings.expectedSleepMinutes;
         added += 1;
+      }
+      if (incomingSettings.expectedTimes && typeof incomingSettings.expectedTimes === "object") {
+        const target = state.settings.expectedTimes && typeof state.settings.expectedTimes === "object"
+          ? state.settings.expectedTimes
+          : {};
+        let changed = false;
+        ["bed", "sleep", "wake", "rise"].forEach((key) => {
+          if (!target[key] && incomingSettings.expectedTimes[key]) {
+            target[key] = incomingSettings.expectedTimes[key];
+            changed = true;
+          }
+        });
+        if (changed) {
+          state.settings.expectedTimes = target;
+          added += 1;
+        }
       }
       incomingReminders.forEach((reminder) => {
         if (!reminder || typeof reminder !== "object" || !reminder.time) {
