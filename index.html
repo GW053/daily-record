@@ -1290,7 +1290,7 @@
         <div class="brand-copy">
           <div class="title-row">
             <h1 id="pageTitle">今日记录</h1>
-            <button class="version-link" id="versionButton" type="button">v1.1</button>
+            <button class="version-link" id="versionButton" type="button">v1.2</button>
           </div>
           <p class="page-date" id="pageDate"></p>
         </div>
@@ -1451,6 +1451,10 @@
               <label for="timelineLabelsToggle">
                 <input id="timelineLabelsToggle" type="checkbox">
                 显示时间
+              </label>
+              <label for="timelineDurationsToggle">
+                <input id="timelineDurationsToggle" type="checkbox">
+                显示时长
               </label>
             </div>
           </div>
@@ -1752,6 +1756,12 @@
         </div>
       </header>
       <div class="version-body">
+        <p><strong>v1.2 更新时间：2026-06-27。</strong></p>
+        <ol class="version-list">
+          <li>睡眠记录图表新增期望时间竖线。</li>
+          <li>睡眠记录图表新增“显示时长”，可显示上床到入睡、入睡到醒来、醒来到起床三段时长。</li>
+          <li>期望竖线标签统一为“期望 具体时间”的格式。</li>
+        </ol>
         <p><strong>v1.1 更新时间：2026-06-24。</strong></p>
         <ol class="version-list">
           <li>修复跨天睡眠记录，22:00 到 08:00 会自动识别为前一晚到今早。</li>
@@ -1772,8 +1782,8 @@
     const SUPABASE_KEY = "sb_publishable_WW3rmZCePegJsIf6LeqFvQ_KRgHD9pz";
     const SYNC_TABLE = "daily_record_sync";
     const NOTE_BULLET = "• ";
-    const APP_VERSION = "v1.1";
-    const APP_VERSION_UPDATED = "2026-06-24";
+    const APP_VERSION = "v1.2";
+    const APP_VERSION_UPDATED = "2026-06-27";
     const state = loadState();
     const els = {
       pageTitle: document.querySelector("#pageTitle"),
@@ -1845,6 +1855,7 @@
       sleepTimelineChart: document.querySelector("#sleepTimelineChart"),
       sleepTimelineEmpty: document.querySelector("#sleepTimelineEmpty"),
       timelineLabelsToggle: document.querySelector("#timelineLabelsToggle"),
+      timelineDurationsToggle: document.querySelector("#timelineDurationsToggle"),
       sleepMetricTitle: document.querySelector("#sleepMetricTitle"),
       sleepMetricTabs: document.querySelectorAll(".metric-tab"),
       sleepMetricChart: document.querySelector("#sleepMetricChart"),
@@ -1955,6 +1966,7 @@
       els.sleepTargetInput.addEventListener("blur", saveSleepTarget);
 
       els.timelineLabelsToggle.addEventListener("change", renderSleepCharts);
+      els.timelineDurationsToggle.addEventListener("change", renderSleepCharts);
       els.metricLabelsToggle.addEventListener("change", renderSleepCharts);
       els.scoreLabelsToggle.addEventListener("change", renderChart);
       bindChartDrag(els.chart.parentElement, "score");
@@ -3307,7 +3319,9 @@
       const timelines = rows.map((row) => row.timeline).filter(Boolean);
       const points = timelines.flatMap((timeline) => [timeline.bed, timeline.sleep, timeline.wake, timeline.rise])
         .filter((value) => value !== null);
-      const hasData = points.length > 0;
+      const expectedTargets = expectedTimelineTargets(points);
+      const scalePoints = [...points, ...expectedTargets.map((target) => target.value)];
+      const hasData = scalePoints.length > 0;
       els.sleepTimelineEmpty.classList.toggle("is-visible", !hasData);
 
       const lineColor = cssVar("--line");
@@ -3321,8 +3335,8 @@
       const rowStep = plotHeight / rows.length;
       const rowY = (index) => pad.top + rowStep * index + rowStep / 2;
 
-      let minTime = hasData ? Math.min(...points) : 0;
-      let maxTime = hasData ? Math.max(...points) : 1440;
+      let minTime = hasData ? Math.min(...scalePoints) : 0;
+      let maxTime = hasData ? Math.max(...scalePoints) : 1440;
       minTime = Math.floor((minTime - 45) / 60) * 60;
       maxTime = Math.ceil((maxTime + 45) / 60) * 60;
       if (maxTime - minTime < 360) {
@@ -3348,6 +3362,9 @@
         ctx.textBaseline = "top";
         ctx.fillText(formatClock(tick), x, height - pad.bottom + 8);
       }
+      expectedTargets.forEach((target) => {
+        drawExpectedTimelineMarker(ctx, xFor(target.value), pad, height, target.color, target.label);
+      });
 
       rows.forEach((row, index) => {
         const y = rowY(index);
@@ -3366,6 +3383,9 @@
         drawSegment(ctx, row.timeline.wake, row.timeline.rise, xFor, y, barHeight, prePostColor);
         if (els.timelineLabelsToggle.checked) {
           drawTimelineLabels(ctx, row.timeline, xFor, y);
+        }
+        if (els.timelineDurationsToggle.checked) {
+          drawTimelineDurations(ctx, row.timeline, xFor, y);
         }
       });
 
@@ -3564,6 +3584,38 @@
       return raw;
     }
 
+    function expectedTimelineTargets(values = []) {
+      return [
+        { key: "sleep", color: cssVar("--accent-strong") },
+        { key: "wake", color: cssVar("--good") }
+      ].map((item) => ({
+        ...item,
+        value: expectedSleepMetricValue(item.key, values)
+      })).filter((item) => item.value !== null).map((item) => ({
+        ...item,
+        label: `期望 ${formatClock(item.value)}`
+      })).filter((item) => item.value !== null);
+    }
+
+    function drawExpectedTimelineMarker(ctx, x, pad, height, color, label) {
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.lineWidth = 1.2;
+      ctx.setLineDash([5, 5]);
+      const lineX = crisp(x);
+      ctx.beginPath();
+      ctx.moveTo(lineX, pad.top);
+      ctx.lineTo(lineX, height - pad.bottom);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.font = "11px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "bottom";
+      ctx.fillText(label, x, pad.top - 7);
+      ctx.restore();
+    }
+
     function drawSegment(ctx, start, end, xFor, y, height, color) {
       if (start === null || end === null || end <= start) {
         return;
@@ -3572,6 +3624,36 @@
       const width = Math.max(2, xFor(end) - x);
       ctx.fillStyle = color;
       ctx.fillRect(x, y - height / 2, width, height);
+    }
+
+    function drawTimelineDurations(ctx, timeline, xFor, y) {
+      if (!timeline) {
+        return;
+      }
+      const segments = [
+        { start: timeline.bed, end: timeline.sleep, yOffset: 16 },
+        { start: timeline.sleep, end: timeline.wake, yOffset: 18 },
+        { start: timeline.wake, end: timeline.rise, yOffset: 16 }
+      ];
+      ctx.save();
+      ctx.fillStyle = cssVar("--muted");
+      ctx.font = "10px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "top";
+      segments.forEach((segment) => {
+        if (segment.start === null || segment.end === null || segment.end <= segment.start) {
+          return;
+        }
+        const duration = segment.end - segment.start;
+        if (duration <= 0) {
+          return;
+        }
+        const startX = xFor(segment.start);
+        const endX = xFor(segment.end);
+        const centerX = (startX + endX) / 2;
+        ctx.fillText(formatDurationCompact(duration), centerX, y + segment.yOffset);
+      });
+      ctx.restore();
     }
 
     function drawTimelineLabels(ctx, timeline, xFor, y) {
