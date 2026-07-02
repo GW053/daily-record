@@ -89,13 +89,22 @@
       place-items: center;
       color: #fff;
       background: var(--accent);
+      border: 1px solid var(--accent);
       border-radius: 8px;
       box-shadow: 0 8px 18px rgba(182, 90, 43, 0.22);
+      cursor: pointer;
+      padding: 0;
     }
 
     .brand-mark svg {
       width: 21px;
       height: 21px;
+    }
+
+    body.is-simple-mode .brand-mark {
+      color: var(--accent);
+      background: var(--surface-strong);
+      box-shadow: none;
     }
 
     .brand-copy {
@@ -199,6 +208,10 @@
 
     .screen.is-active {
       display: grid;
+    }
+
+    body.is-simple-mode #sleepMetricPanel {
+      display: none;
     }
 
     .panel {
@@ -1233,6 +1246,26 @@
       transform: translateX(-50%);
     }
 
+    .bottom-nav .simple-nav-button {
+      display: none;
+    }
+
+    body.is-simple-mode .bottom-nav {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    body.is-simple-mode .standard-nav-button {
+      display: none;
+    }
+
+    body.is-simple-mode .simple-nav-button {
+      display: grid;
+    }
+
+    body.is-simple-mode .export-standard-option {
+      display: none;
+    }
+
     .nav-button {
       display: grid;
       gap: 3px;
@@ -1278,7 +1311,7 @@
   <div class="app-shell">
     <header class="topbar">
       <div class="brand">
-        <div class="brand-mark" aria-hidden="true">
+        <button class="brand-mark" id="modeToggleButton" type="button" aria-label="切换简洁版" title="切换简洁版">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
             <path d="M8 2v4"></path>
             <path d="M16 2v4"></path>
@@ -1286,11 +1319,11 @@
             <path d="M5 4h14a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"></path>
             <path d="m8 15 2 2 5-6"></path>
           </svg>
-        </div>
+        </button>
         <div class="brand-copy">
           <div class="title-row">
             <h1 id="pageTitle">今日记录</h1>
-            <button class="version-link" id="versionButton" type="button">v1.3</button>
+            <button class="version-link" id="versionButton" type="button">v1.4</button>
           </div>
           <p class="page-date" id="pageDate"></p>
         </div>
@@ -1443,7 +1476,7 @@
         </div>
       </section>
 
-      <section class="panel sleep-chart-panel">
+      <section class="panel sleep-chart-panel" id="sleepMetricPanel">
         <div class="section-head">
           <h2 class="section-title" id="sleepRangeTitle">睡眠记录</h2>
           <div class="section-actions">
@@ -1517,6 +1550,98 @@
       </section>
     </main>
 
+    <main class="screen" id="simpleMetricScreen">
+      <section class="panel sleep-chart-panel">
+        <div class="section-head">
+          <h2 class="section-title">入睡时间</h2>
+          <div class="section-actions">
+            <div class="chart-options">
+              <label for="simpleMetricSleepLabelsToggle">
+                <input class="simple-metric-label-toggle" id="simpleMetricSleepLabelsToggle" type="checkbox" data-simple-metric="sleep">
+                显示时间
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="chart-wrap">
+          <canvas class="sleep-metric-chart simple-metric-chart" id="simpleMetricSleepChart" width="640" height="480" data-simple-metric="sleep" aria-label="入睡时间变化图"></canvas>
+          <div class="chart-empty" id="simpleMetricSleepEmpty">暂无睡眠数据</div>
+        </div>
+      </section>
+
+      <section class="panel sleep-chart-panel">
+        <div class="section-head">
+          <h2 class="section-title">醒来时间</h2>
+          <div class="section-actions">
+            <div class="chart-options">
+              <label for="simpleMetricWakeLabelsToggle">
+                <input class="simple-metric-label-toggle" id="simpleMetricWakeLabelsToggle" type="checkbox" data-simple-metric="wake">
+                显示时间
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="chart-wrap">
+          <canvas class="sleep-metric-chart simple-metric-chart" id="simpleMetricWakeChart" width="640" height="480" data-simple-metric="wake" aria-label="醒来时间变化图"></canvas>
+          <div class="chart-empty" id="simpleMetricWakeEmpty">暂无睡眠数据</div>
+        </div>
+      </section>
+
+      <section class="panel sleep-chart-panel">
+        <div class="section-head">
+          <h2 class="section-title">上床时间</h2>
+          <div class="section-actions">
+            <div class="chart-options">
+              <label for="simpleMetricBedLabelsToggle">
+                <input class="simple-metric-label-toggle" id="simpleMetricBedLabelsToggle" type="checkbox" data-simple-metric="bed">
+                显示时间
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="chart-wrap">
+          <canvas class="sleep-metric-chart simple-metric-chart" id="simpleMetricBedChart" width="640" height="480" data-simple-metric="bed" aria-label="上床时间变化图"></canvas>
+          <div class="chart-empty" id="simpleMetricBedEmpty">暂无睡眠数据</div>
+        </div>
+      </section>
+
+      <section class="panel sleep-chart-panel">
+        <div class="section-head">
+          <h2 class="section-title">起床时间</h2>
+          <div class="section-actions">
+            <div class="chart-options">
+              <label for="simpleMetricRiseLabelsToggle">
+                <input class="simple-metric-label-toggle" id="simpleMetricRiseLabelsToggle" type="checkbox" data-simple-metric="rise">
+                显示时间
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="chart-wrap">
+          <canvas class="sleep-metric-chart simple-metric-chart" id="simpleMetricRiseChart" width="640" height="480" data-simple-metric="rise" aria-label="起床时间变化图"></canvas>
+          <div class="chart-empty" id="simpleMetricRiseEmpty">暂无睡眠数据</div>
+        </div>
+      </section>
+
+      <section class="panel sleep-chart-panel">
+        <div class="section-head">
+          <h2 class="section-title">总睡眠时长</h2>
+          <div class="section-actions">
+            <div class="chart-options">
+              <label for="simpleMetricTotalLabelsToggle">
+                <input class="simple-metric-label-toggle" id="simpleMetricTotalLabelsToggle" type="checkbox" data-simple-metric="total">
+                显示时间
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="chart-wrap">
+          <canvas class="sleep-metric-chart simple-metric-chart" id="simpleMetricTotalChart" width="640" height="480" data-simple-metric="total" aria-label="总睡眠时长变化图"></canvas>
+          <div class="chart-empty" id="simpleMetricTotalEmpty">暂无睡眠数据</div>
+        </div>
+      </section>
+    </main>
+
     <main class="screen" id="historyScreen">
       <section class="panel chart-panel">
         <div class="section-head">
@@ -1578,25 +1703,38 @@
   </div>
 
   <nav class="bottom-nav" aria-label="底部导航">
-    <button class="nav-button is-active" type="button" data-tab="today" aria-label="今日记录">
+    <button class="nav-button standard-nav-button is-active" type="button" data-tab="today" aria-label="今日记录">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M12 20h9"></path>
         <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
       </svg>
       <span>今日记录</span>
     </button>
-    <button class="nav-button" type="button" data-tab="sleep" aria-label="睡眠记录">
+    <button class="nav-button standard-nav-button" type="button" data-tab="sleep" aria-label="睡眠记录">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M12 3a6 6 0 1 0 9 7.8A8 8 0 1 1 12 3Z"></path>
       </svg>
       <span>睡眠记录</span>
     </button>
-    <button class="nav-button" type="button" data-tab="history" aria-label="历史回顾">
+    <button class="nav-button standard-nav-button" type="button" data-tab="history" aria-label="历史回顾">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M3 3v18h18"></path>
         <path d="m19 9-5 5-4-4-3 3"></path>
       </svg>
       <span>历史回顾</span>
+    </button>
+    <button class="nav-button simple-nav-button" type="button" data-tab="sleep" aria-label="睡眠记录">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 3a6 6 0 1 0 9 7.8A8 8 0 1 1 12 3Z"></path>
+      </svg>
+      <span>睡眠记录</span>
+    </button>
+    <button class="nav-button simple-nav-button" type="button" data-tab="simpleMetrics" aria-label="单项变化">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M3 3v18h18"></path>
+        <path d="M7 15 11 11l3 3 5-6"></path>
+      </svg>
+      <span>单项变化</span>
     </button>
   </nav>
 
@@ -1686,17 +1824,21 @@
                 起床时间
                 <input id="exportMetricRiseToggle" type="checkbox">
               </label>
+              <label for="exportMetricTotalToggle">
+                总睡眠时长
+                <input id="exportMetricTotalToggle" type="checkbox">
+              </label>
             </div>
           </div>
           <label for="exportSleepTimelineToggle">
             近七天睡眠
             <input id="exportSleepTimelineToggle" type="checkbox" checked>
           </label>
-          <label for="exportScoreToggle">
+          <label class="export-standard-option" for="exportScoreToggle">
             近七天分数
             <input id="exportScoreToggle" type="checkbox" checked>
           </label>
-          <label for="exportDetailToggle">
+          <label class="export-standard-option" for="exportDetailToggle">
             文字记录
             <input id="exportDetailToggle" type="checkbox" checked>
           </label>
@@ -1756,6 +1898,13 @@
         </div>
       </header>
       <div class="version-body">
+        <p><strong>v1.4 更新时间：2026-07-02。</strong></p>
+        <ol class="version-list">
+          <li>新增睡眠简洁版，可通过左上角图标在原版和简洁版之间切换。</li>
+          <li>简洁版底部导航调整为“睡眠记录”和“单项变化”两页，数据与原版完全共用。</li>
+          <li>单项变化页直接展示入睡、醒来、上床、起床、总睡眠时长五张图表，并保留各自的显示时间开关。</li>
+          <li>简洁版导出图片仅导出睡眠相关内容。</li>
+        </ol>
         <p><strong>v1.3 更新时间：2026-06-29。</strong></p>
         <ol class="version-list">
           <li>睡眠记录图表图例上移，与期望时间标签保持更清晰的间距。</li>
@@ -1784,16 +1933,18 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const STORAGE_KEY = "daily-record-site-v1";
+    const VIEW_MODE_KEY = "daily-record-view-mode";
     const SUPABASE_URL = "https://hgmpswhitmenyvnxotff.supabase.co";
     const SUPABASE_KEY = "sb_publishable_WW3rmZCePegJsIf6LeqFvQ_KRgHD9pz";
     const SYNC_TABLE = "daily_record_sync";
     const NOTE_BULLET = "• ";
-    const APP_VERSION = "v1.3";
-    const APP_VERSION_UPDATED = "2026-06-29";
+    const APP_VERSION = "v1.4";
+    const APP_VERSION_UPDATED = "2026-07-02";
     const state = loadState();
     const els = {
       pageTitle: document.querySelector("#pageTitle"),
       pageDate: document.querySelector("#pageDate"),
+      modeToggleButton: document.querySelector("#modeToggleButton"),
       versionButton: document.querySelector("#versionButton"),
       saveState: document.querySelector("#saveState"),
       syncButton: document.querySelector("#syncButton"),
@@ -1822,6 +1973,7 @@
       exportMetricWakeToggle: document.querySelector("#exportMetricWakeToggle"),
       exportMetricBedToggle: document.querySelector("#exportMetricBedToggle"),
       exportMetricRiseToggle: document.querySelector("#exportMetricRiseToggle"),
+      exportMetricTotalToggle: document.querySelector("#exportMetricTotalToggle"),
       authModal: document.querySelector("#authModal"),
       authEmail: document.querySelector("#authEmail"),
       authPassword: document.querySelector("#authPassword"),
@@ -1837,6 +1989,7 @@
       closeVersionButton: document.querySelector("#closeVersionButton"),
       todayScreen: document.querySelector("#todayScreen"),
       sleepScreen: document.querySelector("#sleepScreen"),
+      simpleMetricScreen: document.querySelector("#simpleMetricScreen"),
       historyScreen: document.querySelector("#historyScreen"),
       navButtons: document.querySelectorAll(".nav-button"),
       entryDate: document.querySelector("#entryDate"),
@@ -1863,10 +2016,13 @@
       timelineLabelsToggle: document.querySelector("#timelineLabelsToggle"),
       timelineDurationsToggle: document.querySelector("#timelineDurationsToggle"),
       sleepMetricTitle: document.querySelector("#sleepMetricTitle"),
+      sleepMetricPanel: document.querySelector("#sleepMetricPanel"),
       sleepMetricTabs: document.querySelectorAll(".metric-tab"),
       sleepMetricChart: document.querySelector("#sleepMetricChart"),
       sleepMetricEmpty: document.querySelector("#sleepMetricEmpty"),
       metricLabelsToggle: document.querySelector("#metricLabelsToggle"),
+      simpleMetricCharts: document.querySelectorAll(".simple-metric-chart"),
+      simpleMetricLabelToggles: document.querySelectorAll(".simple-metric-label-toggle"),
       scoreInput: document.querySelector("#scoreInput"),
       goodText: document.querySelector("#goodText"),
       improveText: document.querySelector("#improveText"),
@@ -1888,7 +2044,8 @@
       detailLucky: document.querySelector("#detailLucky")
     };
 
-    let activeTab = "today";
+    let simpleMode = localStorage.getItem(VIEW_MODE_KEY) === "simple";
+    let activeTab = simpleMode ? "sleep" : "today";
     let selectedDate = todayKey();
     let selectedSleepDate = selectedDate;
     let selectedHistoryDate = selectedDate;
@@ -1911,6 +2068,7 @@
     function init() {
       setupNoteEditors();
       els.versionButton.textContent = APP_VERSION;
+      applyViewMode();
       renderExpectedSleepTimes();
       renderSleepTarget();
       syncDateInputs(selectedDate);
@@ -1925,6 +2083,9 @@
         new ResizeObserver(queueDrawChart).observe(els.chart.parentElement);
         new ResizeObserver(queueDrawSleepCharts).observe(els.sleepTimelineChart.parentElement);
         new ResizeObserver(queueDrawSleepCharts).observe(els.sleepMetricChart.parentElement);
+        els.simpleMetricCharts.forEach((canvas) => {
+          new ResizeObserver(queueDrawSleepCharts).observe(canvas.parentElement);
+        });
       } else {
         window.addEventListener("resize", queueDrawChart);
         window.addEventListener("resize", queueDrawSleepCharts);
@@ -1974,10 +2135,16 @@
       els.timelineLabelsToggle.addEventListener("change", renderSleepCharts);
       els.timelineDurationsToggle.addEventListener("change", renderSleepCharts);
       els.metricLabelsToggle.addEventListener("change", renderSleepCharts);
+      els.simpleMetricLabelToggles.forEach((toggle) => {
+        toggle.addEventListener("change", drawSimpleMetricCharts);
+      });
       els.scoreLabelsToggle.addEventListener("change", renderChart);
       bindChartDrag(els.chart.parentElement, "score");
       bindChartDrag(els.sleepTimelineChart.parentElement, "sleep");
       bindChartDrag(els.sleepMetricChart.parentElement, "sleep");
+      els.simpleMetricCharts.forEach((canvas) => {
+        bindChartDrag(canvas.parentElement, "sleep");
+      });
 
       els.backupButton.addEventListener("click", openBackupModal);
       els.closeBackupButton.addEventListener("click", closeBackupModal);
@@ -2017,6 +2184,7 @@
           closeAuthModal();
         }
       });
+      els.modeToggleButton.addEventListener("click", toggleViewMode);
       els.versionButton.addEventListener("click", openVersionModal);
       els.closeVersionButton.addEventListener("click", closeVersionModal);
 
@@ -2059,13 +2227,47 @@
 
     function switchTab(tab) {
       activeTab = tab;
-      els.todayScreen.classList.toggle("is-active", tab === "today");
-      els.sleepScreen.classList.toggle("is-active", tab === "sleep");
-      els.historyScreen.classList.toggle("is-active", tab === "history");
+      if (simpleMode && !["sleep", "simpleMetrics"].includes(activeTab)) {
+        activeTab = "sleep";
+      }
+      if (!simpleMode && activeTab === "simpleMetrics") {
+        activeTab = "sleep";
+      }
+      els.todayScreen.classList.toggle("is-active", !simpleMode && activeTab === "today");
+      els.sleepScreen.classList.toggle("is-active", activeTab === "sleep");
+      els.simpleMetricScreen.classList.toggle("is-active", simpleMode && activeTab === "simpleMetrics");
+      els.historyScreen.classList.toggle("is-active", !simpleMode && activeTab === "history");
       els.navButtons.forEach((button) => {
-        button.classList.toggle("is-active", button.dataset.tab === tab);
+        button.classList.toggle("is-active", button.dataset.tab === activeTab);
       });
       renderAll();
+    }
+
+    function toggleViewMode() {
+      simpleMode = !simpleMode;
+      localStorage.setItem(VIEW_MODE_KEY, simpleMode ? "simple" : "standard");
+      activeTab = simpleMode ? "sleep" : "today";
+      applyViewMode();
+      renderAll();
+    }
+
+    function applyViewMode() {
+      document.body.classList.toggle("is-simple-mode", simpleMode);
+      els.modeToggleButton.setAttribute("aria-label", simpleMode ? "切换完整版本" : "切换简洁版");
+      els.modeToggleButton.setAttribute("title", simpleMode ? "切换完整版本" : "切换简洁版");
+      if (simpleMode && !["sleep", "simpleMetrics"].includes(activeTab)) {
+        activeTab = "sleep";
+      }
+      if (!simpleMode && activeTab === "simpleMetrics") {
+        activeTab = "sleep";
+      }
+      els.todayScreen.classList.toggle("is-active", !simpleMode && activeTab === "today");
+      els.sleepScreen.classList.toggle("is-active", activeTab === "sleep");
+      els.simpleMetricScreen.classList.toggle("is-active", simpleMode && activeTab === "simpleMetrics");
+      els.historyScreen.classList.toggle("is-active", !simpleMode && activeTab === "history");
+      els.navButtons.forEach((button) => {
+        button.classList.toggle("is-active", button.dataset.tab === activeTab);
+      });
     }
 
     function shiftEntryDate(days) {
@@ -3062,13 +3264,18 @@
     }
 
     function renderHeader() {
-      const titles = {
-        today: "今日记录",
-        sleep: "睡眠记录",
-        history: "历史回顾"
-      };
+      const titles = simpleMode
+        ? {
+            sleep: "睡眠记录",
+            simpleMetrics: "单项变化"
+          }
+        : {
+            today: "今日记录",
+            sleep: "睡眠记录",
+            history: "历史回顾"
+          };
       els.pageTitle.textContent = titles[activeTab] || "今日记录";
-      const key = activeTab === "sleep"
+      const key = activeTab === "sleep" || activeTab === "simpleMetrics"
         ? selectedSleepDate
         : activeTab === "today"
           ? selectedDate
@@ -3332,6 +3539,9 @@
       els.sleepMetricTitle.textContent = "单项变化";
       els.sleepTimelineChart.dataset.keys = JSON.stringify(keys);
       els.sleepMetricChart.dataset.keys = JSON.stringify(keys);
+      els.simpleMetricCharts.forEach((canvas) => {
+        canvas.dataset.keys = JSON.stringify(keys);
+      });
       queueDrawSleepCharts();
     }
 
@@ -3343,11 +3553,11 @@
         sleepChartFrame = 0;
         drawSleepTimelineChart();
         drawSleepMetricChart();
+        drawSimpleMetricCharts();
       });
     }
 
-    function sleepRows() {
-      const keys = JSON.parse(els.sleepTimelineChart.dataset.keys || "[]");
+    function sleepRows(keys = sleepKeysForCanvas(els.sleepTimelineChart)) {
       return keys.map((key) => {
         const entry = state.sleepEntries[key] || {};
         return {
@@ -3358,6 +3568,18 @@
       });
     }
 
+    function sleepKeysForCanvas(canvas) {
+      try {
+        const keys = JSON.parse(canvas.dataset.keys || "[]");
+        if (Array.isArray(keys) && keys.length === 7 && keys.every((key) => normalizeDateKey(key))) {
+          return keys;
+        }
+      } catch {
+        // Fall back to the current sleep window.
+      }
+      return sleepWeekKeys();
+    }
+
     function drawSleepTimelineChart() {
       const prepared = prepareCanvas(els.sleepTimelineChart, 320);
       if (!prepared) {
@@ -3366,7 +3588,7 @@
       const { ctx, width, height } = prepared;
       ctx.clearRect(0, 0, width, height);
 
-      const rows = sleepRows();
+      const rows = sleepRows(sleepKeysForCanvas(els.sleepTimelineChart));
       const timelines = rows.map((row) => row.timeline).filter(Boolean);
       const points = timelines.flatMap((timeline) => [timeline.bed, timeline.sleep, timeline.wake, timeline.rise])
         .filter((value) => value !== null);
@@ -3458,17 +3680,41 @@
     }
 
     function drawSleepMetricChart() {
-      const prepared = prepareCanvas(els.sleepMetricChart, 240);
+      drawSleepMetricChartOn({
+        canvas: els.sleepMetricChart,
+        emptyEl: els.sleepMetricEmpty,
+        metric: activeSleepMetric,
+        showLabels: els.metricLabelsToggle.checked,
+        cssHeight: 240
+      });
+    }
+
+    function drawSimpleMetricCharts() {
+      els.simpleMetricCharts.forEach((canvas) => {
+        const metric = canvas.dataset.simpleMetric;
+        const toggle = document.querySelector(`.simple-metric-label-toggle[data-simple-metric="${metric}"]`);
+        const emptyEl = document.querySelector(`#${canvas.id.replace("Chart", "Empty")}`);
+        drawSleepMetricChartOn({
+          canvas,
+          emptyEl,
+          metric,
+          showLabels: Boolean(toggle?.checked),
+          cssHeight: 240
+        });
+      });
+    }
+
+    function drawSleepMetricChartOn({ canvas, emptyEl, metric, showLabels, cssHeight }) {
+      const prepared = prepareCanvas(canvas, cssHeight);
       if (!prepared) {
         return;
       }
       const { ctx, width, height } = prepared;
       ctx.clearRect(0, 0, width, height);
 
-      const rows = sleepRows();
-      const metric = activeSleepMetric;
+      const rows = sleepRows(sleepKeysForCanvas(canvas));
       if (metric === "total") {
-        drawSleepTotalBars(ctx, width, height, rows);
+        drawSleepTotalBars(ctx, width, height, rows, { emptyEl, showLabels });
         return;
       }
 
@@ -3486,7 +3732,7 @@
       const targetValue = expectedSleepMetricValue(metric, values);
       const hasData = values.length > 0;
       const hasTarget = targetValue !== null;
-      els.sleepMetricEmpty.classList.toggle("is-visible", !hasData && !hasTarget);
+      emptyEl?.classList.toggle("is-visible", !hasData && !hasTarget);
       if (!hasData && !hasTarget) {
         drawEmptyAxes(ctx, width, height, rows);
         return;
@@ -3520,16 +3766,18 @@
       }
 
       activeDefs.forEach((def) => {
-        drawMetricLine(ctx, rows, def, xFor, yFor, els.metricLabelsToggle.checked);
+        drawMetricLine(ctx, rows, def, xFor, yFor, showLabels);
       });
     }
 
-    function drawSleepTotalBars(ctx, width, height, rows) {
+    function drawSleepTotalBars(ctx, width, height, rows, options = {}) {
       const values = rows.map((row) => row.timeline?.totalMinutes ?? null);
       const targetMinutes = expectedSleepMinutes();
       const hasData = values.some((value) => value !== null);
       const hasTarget = targetMinutes !== null;
-      els.sleepMetricEmpty.classList.toggle("is-visible", !hasData && !hasTarget);
+      const emptyEl = options.emptyEl || els.sleepMetricEmpty;
+      const showLabels = options.showLabels ?? els.metricLabelsToggle.checked;
+      emptyEl?.classList.toggle("is-visible", !hasData && !hasTarget);
       if (!hasData && !hasTarget) {
         drawEmptyAxes(ctx, width, height, rows);
         return;
@@ -3581,7 +3829,7 @@
         ctx.fillStyle = accentColor;
         ctx.fillRect(x, y, barWidth, height - pad.bottom - y);
       });
-      if (els.metricLabelsToggle.checked) {
+      if (showLabels) {
         ctx.fillStyle = mutedColor;
         ctx.font = "11px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
         ctx.textAlign = "center";
@@ -4197,7 +4445,8 @@
         { toggle: els.exportMetricSleepToggle, metric: "sleep" },
         { toggle: els.exportMetricWakeToggle, metric: "wake" },
         { toggle: els.exportMetricBedToggle, metric: "bed" },
-        { toggle: els.exportMetricRiseToggle, metric: "rise" }
+        { toggle: els.exportMetricRiseToggle, metric: "rise" },
+        { toggle: els.exportMetricTotalToggle, metric: "total" }
       ].filter((item) => item.toggle.checked);
 
       if (metricSelections.length || els.exportSleepTimelineToggle.checked) {
@@ -4234,7 +4483,7 @@
         });
       }
 
-      if (els.exportScoreToggle.checked) {
+      if (!simpleMode && els.exportScoreToggle.checked) {
         withHistoryChartReady(() => {
           const previousKeys = els.chart.dataset.days;
           els.chart.dataset.days = JSON.stringify(scoreKeys);
@@ -4248,7 +4497,7 @@
         });
       }
 
-      if (els.exportDetailToggle.checked) {
+      if (!simpleMode && els.exportDetailToggle.checked) {
         items.push({ name: `文字记录-${exportRecordKey()}`, canvas: makeDetailExportCanvas() });
       }
 
@@ -4275,6 +4524,7 @@
     function withSleepChartsReady(callback) {
       const originalClass = els.sleepScreen.className;
       const originalStyle = els.sleepScreen.getAttribute("style") || "";
+      const originalMetricPanelStyle = els.sleepMetricPanel.getAttribute("style") || "";
       if (!els.sleepScreen.classList.contains("is-active")) {
         els.sleepScreen.classList.add("is-active");
         els.sleepScreen.style.position = "absolute";
@@ -4282,6 +4532,9 @@
         els.sleepScreen.style.top = "0";
         els.sleepScreen.style.width = `${els.historyScreen.getBoundingClientRect().width || 452}px`;
         els.sleepScreen.style.pointerEvents = "none";
+      }
+      if (simpleMode) {
+        els.sleepMetricPanel.style.display = "block";
       }
       drawSleepTimelineChart();
       drawSleepMetricChart();
@@ -4293,6 +4546,11 @@
           els.sleepScreen.setAttribute("style", originalStyle);
         } else {
           els.sleepScreen.removeAttribute("style");
+        }
+        if (originalMetricPanelStyle) {
+          els.sleepMetricPanel.setAttribute("style", originalMetricPanelStyle);
+        } else {
+          els.sleepMetricPanel.removeAttribute("style");
         }
       }
     }
