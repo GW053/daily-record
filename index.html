@@ -1902,6 +1902,7 @@
         <ol class="version-list">
           <li>网站名称调整为“睡眠记录”。</li>
           <li>睡眠记录图表在空间充足时，会将上床/起床时间和左右两段时长移动到睡眠横条左右两侧，减少与中间睡眠信息重叠。</li>
+          <li>调整单项变化图表的滑动方向，右滑可查看更早的时间窗口。</li>
         </ol>
         <p><strong>v1.4 更新时间：2026-07-02。</strong></p>
         <ol class="version-list">
@@ -2146,9 +2147,9 @@
       els.scoreLabelsToggle.addEventListener("change", renderChart);
       bindChartDrag(els.chart.parentElement, "score");
       bindChartDrag(els.sleepTimelineChart.parentElement, "sleep");
-      bindChartDrag(els.sleepMetricChart.parentElement, "sleep");
+      bindChartDrag(els.sleepMetricChart.parentElement, "sleepMetric");
       els.simpleMetricCharts.forEach((canvas) => {
-        bindChartDrag(canvas.parentElement, "sleep");
+        bindChartDrag(canvas.parentElement, "sleepMetric");
       });
 
       els.backupButton.addEventListener("click", openBackupModal);
@@ -2900,7 +2901,10 @@
           scoreWindowOffset = Math.max(0, scoreWindowOffset + (deltaX < 0 ? days : -days));
           renderChart();
         } else {
-          sleepWindowOffset = Math.max(0, sleepWindowOffset + (deltaX < 0 ? days : -days));
+          const direction = type === "sleepMetric"
+            ? (deltaX > 0 ? days : -days)
+            : (deltaX < 0 ? days : -days);
+          sleepWindowOffset = Math.max(0, sleepWindowOffset + direction);
           renderSleepCharts();
         }
       });
