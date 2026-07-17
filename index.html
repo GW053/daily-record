@@ -513,6 +513,7 @@
 
     .chart-options {
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
       justify-content: flex-end;
       gap: 10px;
@@ -623,6 +624,7 @@
       display: flex;
       align-items: flex-start;
       min-height: 1.55em;
+      cursor: text;
     }
 
     .note-bullet {
@@ -635,8 +637,10 @@
     }
 
     .note-line-text {
+      display: block;
       flex: 1 1 auto;
       min-width: 0;
+      min-height: 1.55em;
       outline: none;
       white-space: pre-wrap;
       word-break: break-word;
@@ -1323,7 +1327,7 @@
         <div class="brand-copy">
           <div class="title-row">
             <h1 id="pageTitle">今日记录</h1>
-            <button class="version-link" id="versionButton" type="button">v1.5</button>
+            <button class="version-link" id="versionButton" type="button">v1.6</button>
           </div>
           <p class="page-date" id="pageDate"></p>
         </div>
@@ -1507,6 +1511,10 @@
                 <input id="metricLabelsToggle" type="checkbox">
                 显示时间
               </label>
+              <label for="metricAverageToggle">
+                <input id="metricAverageToggle" type="checkbox">
+                显示平均
+              </label>
             </div>
           </div>
         </div>
@@ -1560,6 +1568,10 @@
                 <input class="simple-metric-label-toggle" id="simpleMetricSleepLabelsToggle" type="checkbox" data-simple-metric="sleep">
                 显示时间
               </label>
+              <label for="simpleMetricSleepAverageToggle">
+                <input class="simple-metric-average-toggle" id="simpleMetricSleepAverageToggle" type="checkbox" data-simple-metric="sleep">
+                显示平均
+              </label>
             </div>
           </div>
         </div>
@@ -1577,6 +1589,10 @@
               <label for="simpleMetricWakeLabelsToggle">
                 <input class="simple-metric-label-toggle" id="simpleMetricWakeLabelsToggle" type="checkbox" data-simple-metric="wake">
                 显示时间
+              </label>
+              <label for="simpleMetricWakeAverageToggle">
+                <input class="simple-metric-average-toggle" id="simpleMetricWakeAverageToggle" type="checkbox" data-simple-metric="wake">
+                显示平均
               </label>
             </div>
           </div>
@@ -1596,6 +1612,10 @@
                 <input class="simple-metric-label-toggle" id="simpleMetricBedLabelsToggle" type="checkbox" data-simple-metric="bed">
                 显示时间
               </label>
+              <label for="simpleMetricBedAverageToggle">
+                <input class="simple-metric-average-toggle" id="simpleMetricBedAverageToggle" type="checkbox" data-simple-metric="bed">
+                显示平均
+              </label>
             </div>
           </div>
         </div>
@@ -1614,6 +1634,10 @@
                 <input class="simple-metric-label-toggle" id="simpleMetricRiseLabelsToggle" type="checkbox" data-simple-metric="rise">
                 显示时间
               </label>
+              <label for="simpleMetricRiseAverageToggle">
+                <input class="simple-metric-average-toggle" id="simpleMetricRiseAverageToggle" type="checkbox" data-simple-metric="rise">
+                显示平均
+              </label>
             </div>
           </div>
         </div>
@@ -1631,6 +1655,10 @@
               <label for="simpleMetricTotalLabelsToggle">
                 <input class="simple-metric-label-toggle" id="simpleMetricTotalLabelsToggle" type="checkbox" data-simple-metric="total">
                 显示时间
+              </label>
+              <label for="simpleMetricTotalAverageToggle">
+                <input class="simple-metric-average-toggle" id="simpleMetricTotalAverageToggle" type="checkbox" data-simple-metric="total">
+                显示平均
               </label>
             </div>
           </div>
@@ -1898,6 +1926,12 @@
         </div>
       </header>
       <div class="version-body">
+        <p><strong>v1.6 更新时间：2026-07-17。</strong></p>
+        <ol class="version-list">
+          <li>单项变化图表新增“显示平均”开关，可选择是否在图中显示平均参考线。</li>
+          <li>优化单项变化图表的标注避让：时间数字会按相邻线段选择象限，最早、最晚、平均等参考线标签也会参与避让，第六天标注优先放在左侧以减少拥挤。</li>
+          <li>优化文字记录编辑体验：换行会按光标位置断开，点击圆点后换行可将本行文字下移；非第一行在圆点右侧按删除键时，可将文字合并到上一行。</li>
+        </ol>
         <p><strong>v1.5 更新时间：2026-07-06。</strong></p>
         <ol class="version-list">
           <li>网站名称调整为“睡眠记录”。</li>
@@ -1944,8 +1978,8 @@
     const SUPABASE_KEY = "sb_publishable_WW3rmZCePegJsIf6LeqFvQ_KRgHD9pz";
     const SYNC_TABLE = "daily_record_sync";
     const NOTE_BULLET = "• ";
-    const APP_VERSION = "v1.5";
-    const APP_VERSION_UPDATED = "2026-07-06";
+    const APP_VERSION = "v1.6";
+    const APP_VERSION_UPDATED = "2026-07-17";
     const state = loadState();
     const els = {
       pageTitle: document.querySelector("#pageTitle"),
@@ -2027,8 +2061,10 @@
       sleepMetricChart: document.querySelector("#sleepMetricChart"),
       sleepMetricEmpty: document.querySelector("#sleepMetricEmpty"),
       metricLabelsToggle: document.querySelector("#metricLabelsToggle"),
+      metricAverageToggle: document.querySelector("#metricAverageToggle"),
       simpleMetricCharts: document.querySelectorAll(".simple-metric-chart"),
       simpleMetricLabelToggles: document.querySelectorAll(".simple-metric-label-toggle"),
+      simpleMetricAverageToggles: document.querySelectorAll(".simple-metric-average-toggle"),
       scoreInput: document.querySelector("#scoreInput"),
       goodText: document.querySelector("#goodText"),
       improveText: document.querySelector("#improveText"),
@@ -2141,7 +2177,11 @@
       els.timelineLabelsToggle.addEventListener("change", renderSleepCharts);
       els.timelineDurationsToggle.addEventListener("change", renderSleepCharts);
       els.metricLabelsToggle.addEventListener("change", renderSleepCharts);
+      els.metricAverageToggle.addEventListener("change", renderSleepCharts);
       els.simpleMetricLabelToggles.forEach((toggle) => {
+        toggle.addEventListener("change", drawSimpleMetricCharts);
+      });
+      els.simpleMetricAverageToggles.forEach((toggle) => {
         toggle.addEventListener("change", drawSimpleMetricCharts);
       });
       els.scoreLabelsToggle.addEventListener("change", renderChart);
@@ -2536,13 +2576,19 @@
           focusNoteLine(lines[lines.length - 1]);
         });
         editor.addEventListener("click", (event) => {
-          if (!event.target.closest(".note-line-text")) {
+          const clickedRow = event.target.closest(".note-line");
+          if (clickedRow && !event.target.closest(".note-line-text")) {
+            focusNoteLine(clickedRow.querySelector(".note-line-text"), "start");
+            return;
+          }
+          if (!clickedRow) {
             ensureNoteLine(editor);
             const lines = editor.querySelectorAll(".note-line-text");
             focusNoteLine(lines[lines.length - 1]);
           }
         });
         editor.addEventListener("keydown", handleNoteEditorKeydown);
+        editor.addEventListener("beforeinput", handleNoteEditorBeforeInput);
         editor.addEventListener("paste", handleNoteEditorPaste);
         editor.addEventListener("focusout", () => {
           window.setTimeout(() => {
@@ -2572,7 +2618,7 @@
       const bullet = document.createElement("span");
       bullet.className = "note-bullet";
       bullet.textContent = "•";
-      const content = document.createElement("span");
+      const content = document.createElement("div");
       content.className = "note-line-text";
       content.contentEditable = "true";
       content.spellcheck = true;
@@ -2598,17 +2644,21 @@
     function handleNoteEditorKeydown(event) {
       const textEl = event.target.closest(".note-line-text");
       if (!textEl) {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          ensureNoteLine(event.currentTarget);
+          const lines = event.currentTarget.querySelectorAll(".note-line-text");
+          focusNoteLine(lines[lines.length - 1]);
+        }
         return;
       }
       if (event.key === "Enter") {
         event.preventDefault();
-        if (!textEl.textContent.trim()) {
-          return;
-        }
-        const nextLine = createNoteLine();
-        textEl.closest(".note-line").after(nextLine);
-        focusNoteLine(nextLine.querySelector(".note-line-text"));
-        event.currentTarget.dispatchEvent(new Event("input", { bubbles: true }));
+        handleNoteLineBreak(event.currentTarget, textEl);
+        return;
+      }
+      if ((event.key === "Backspace" || event.key === "Delete") && mergeNoteLineWithPrevious(event.currentTarget, textEl)) {
+        event.preventDefault();
         return;
       }
       if (event.key === "Backspace" && !textEl.textContent.trim()) {
@@ -2622,6 +2672,108 @@
           event.currentTarget.dispatchEvent(new Event("input", { bubbles: true }));
         }
       }
+    }
+
+    function handleNoteEditorBeforeInput(event) {
+      if (event.inputType === "deleteContentBackward" || event.inputType === "deleteContentForward") {
+        const textEl = activeNoteLineText(event.currentTarget);
+        if (mergeNoteLineWithPrevious(event.currentTarget, textEl)) {
+          event.preventDefault();
+        }
+        return;
+      }
+      if (event.inputType !== "insertParagraph" && event.inputType !== "insertLineBreak") {
+        return;
+      }
+      event.preventDefault();
+      const textEl = activeNoteLineText(event.currentTarget);
+      handleNoteLineBreak(event.currentTarget, textEl);
+    }
+
+    function handleNoteLineBreak(editor, textEl) {
+      if (!textEl) {
+        ensureNoteLine(editor);
+        const lines = editor.querySelectorAll(".note-line-text");
+        focusNoteLine(lines[lines.length - 1]);
+        return;
+      }
+      const text = textEl.textContent || "";
+      if (!text.trim()) {
+        return;
+      }
+      const { start, end } = noteSelectionOffsets(textEl);
+      const before = text.slice(0, start);
+      const after = text.slice(end);
+      textEl.textContent = before;
+      const nextLine = createNoteLine(after);
+      textEl.closest(".note-line").after(nextLine);
+      focusNoteLine(nextLine.querySelector(".note-line-text"), "start");
+      editor.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+
+    function mergeNoteLineWithPrevious(editor, textEl) {
+      if (!textEl) {
+        return false;
+      }
+      const row = textEl.closest(".note-line");
+      const previousRow = row?.previousElementSibling;
+      const previousText = previousRow?.querySelector?.(".note-line-text");
+      if (!row || !previousText) {
+        return false;
+      }
+      const { start, end } = noteSelectionOffsets(textEl);
+      if (start !== 0 || end !== 0) {
+        return false;
+      }
+      const previousLength = (previousText.textContent || "").length;
+      previousText.textContent = `${previousText.textContent || ""}${textEl.textContent || ""}`;
+      row.remove();
+      focusNoteLineAtOffset(previousText, previousLength);
+      editor.dispatchEvent(new Event("input", { bubbles: true }));
+      return true;
+    }
+
+    function noteSelectionOffsets(textEl) {
+      const textLength = (textEl.textContent || "").length;
+      const selection = window.getSelection();
+      if (!selection?.rangeCount) {
+        return { start: textLength, end: textLength };
+      }
+      const range = selection.getRangeAt(0);
+      if (!textEl.contains(range.startContainer) || !textEl.contains(range.endContainer)) {
+        return { start: textLength, end: textLength };
+      }
+      const start = noteOffsetForPoint(textEl, range.startContainer, range.startOffset);
+      const end = noteOffsetForPoint(textEl, range.endContainer, range.endOffset);
+      return { start: Math.min(start, end), end: Math.max(start, end) };
+    }
+
+    function noteOffsetForPoint(textEl, node, offset) {
+      try {
+        const measure = document.createRange();
+        measure.selectNodeContents(textEl);
+        measure.setEnd(node, offset);
+        return measure.toString().length;
+      } catch (error) {
+        return (textEl.textContent || "").length;
+      }
+    }
+
+    function activeNoteLineText(editor) {
+      const selection = window.getSelection();
+      let node = selection?.anchorNode || document.activeElement;
+      if (node?.nodeType === Node.TEXT_NODE) {
+        node = node.parentElement;
+      }
+      const textEl = node?.closest?.(".note-line-text");
+      if (textEl && editor.contains(textEl)) {
+        return textEl;
+      }
+      const row = node?.closest?.(".note-line");
+      if (row && editor.contains(row)) {
+        return row.querySelector(".note-line-text");
+      }
+      return editor.querySelector(".note-line-text");
     }
 
     function handleNoteEditorPaste(event) {
@@ -2664,17 +2816,51 @@
       selection.addRange(range);
     }
 
-    function focusNoteLine(textEl) {
+    function focusNoteLine(textEl, position = "end") {
       if (!textEl) {
         return;
       }
       textEl.focus();
       const range = document.createRange();
       range.selectNodeContents(textEl);
-      range.collapse(false);
+      range.collapse(position === "start");
       const selection = window.getSelection();
       selection.removeAllRanges();
       selection.addRange(range);
+    }
+
+    function focusNoteLineAtOffset(textEl, offset) {
+      if (!textEl) {
+        return;
+      }
+      textEl.focus();
+      const range = document.createRange();
+      const position = noteTextPosition(textEl, offset);
+      range.setStart(position.node, position.offset);
+      range.collapse(true);
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
+
+    function noteTextPosition(root, offset) {
+      let remaining = Math.max(0, offset);
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+      let lastNode = null;
+      let node = walker.nextNode();
+      while (node) {
+        lastNode = node;
+        const length = node.textContent.length;
+        if (remaining <= length) {
+          return { node, offset: remaining };
+        }
+        remaining -= length;
+        node = walker.nextNode();
+      }
+      if (lastNode) {
+        return { node: lastNode, offset: lastNode.textContent.length };
+      }
+      return { node: root, offset: 0 };
     }
 
     function cleanupNoteEditor(editor) {
@@ -3456,29 +3642,37 @@
         ctx.stroke();
       });
       if (els.scoreLabelsToggle.checked) {
+        const scorePoints = values.map((value, index) => value === null
+          ? null
+          : { x: xFor(index), y: yFor(value), value, index });
+        const labelBounds = { left: pad.left, right: width - pad.right, top: pad.top, bottom: height - pad.bottom };
         values.forEach((value, index) => {
           if (value === null) {
             return;
           }
-          drawScoreLabel(ctx, `${value}分`, xFor(index), yFor(value), index, width, pad);
+          drawPointLabel(ctx, `${value}分`, scorePoints[index], scorePoints, labelBounds);
         });
       }
     }
 
-    function drawScoreLabel(ctx, label, x, y, index, width, pad) {
+    function drawBackedText(ctx, text, x, y, options = {}) {
+      const box = measureTextBox(ctx, text, x, y, options);
+      const textColor = options.color || ctx.fillStyle;
       ctx.save();
-      ctx.fillStyle = cssVar("--muted");
-      ctx.font = "11px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
-      ctx.textAlign = x > width - pad.right - 24 ? "right" : x < pad.left + 24 ? "left" : "center";
-      const placeBelow = y < pad.top + 18;
-      ctx.textBaseline = placeBelow ? "top" : "bottom";
-      const offsetY = placeBelow ? 9 : -9;
-      const stagger = index % 2 === 0 ? 0 : (placeBelow ? 5 : -5);
-      drawBackedText(ctx, label, x, y + offsetY + stagger);
+      ctx.fillStyle = options.background || cssVar("--surface");
+      ctx.fillRect(
+        box.left,
+        box.top,
+        box.right - box.left,
+        box.bottom - box.top
+      );
+      ctx.fillStyle = textColor;
+      ctx.fillText(String(text), x, y);
       ctx.restore();
+      return box;
     }
 
-    function drawBackedText(ctx, text, x, y, options = {}) {
+    function measureTextBox(ctx, text, x, y, options = {}) {
       const label = String(text);
       const metrics = ctx.measureText(label);
       const fontSize = Number(ctx.font.match(/(\d+(?:\.\d+)?)px/)?.[1]) || 11;
@@ -3504,18 +3698,39 @@
       } else if (baseline === "bottom" || baseline === "ideographic") {
         top = y - textHeight;
       }
-      const textColor = options.color || ctx.fillStyle;
-      ctx.save();
-      ctx.fillStyle = options.background || cssVar("--surface");
-      ctx.fillRect(
-        Math.floor(left - paddingX),
-        Math.floor(top - paddingY),
-        Math.ceil(textWidth + paddingX * 2),
-        Math.ceil(textHeight + paddingY * 2)
-      );
-      ctx.fillStyle = textColor;
-      ctx.fillText(label, x, y);
-      ctx.restore();
+      return {
+        left: Math.floor(left - paddingX),
+        top: Math.floor(top - paddingY),
+        right: Math.ceil(left + textWidth + paddingX),
+        bottom: Math.ceil(top + textHeight + paddingY)
+      };
+    }
+
+    function boxesOverlap(a, b, gap = 3) {
+      return a.left < b.right + gap
+        && a.right > b.left - gap
+        && a.top < b.bottom + gap
+        && a.bottom > b.top - gap;
+    }
+
+    function boxOverlapsAny(box, boxes) {
+      return boxes.some((item) => boxesOverlap(box, item));
+    }
+
+    function boxFitsBounds(box, bounds = {}) {
+      if (bounds.left !== undefined && box.left < bounds.left) {
+        return false;
+      }
+      if (bounds.right !== undefined && box.right > bounds.right) {
+        return false;
+      }
+      if (bounds.top !== undefined && box.top < bounds.top) {
+        return false;
+      }
+      if (bounds.bottom !== undefined && box.bottom > bounds.bottom) {
+        return false;
+      }
+      return true;
     }
 
     function cssVar(name) {
@@ -3694,6 +3909,7 @@
         emptyEl: els.sleepMetricEmpty,
         metric: activeSleepMetric,
         showLabels: els.metricLabelsToggle.checked,
+        showAverage: els.metricAverageToggle.checked,
         cssHeight: 240
       });
     }
@@ -3701,19 +3917,21 @@
     function drawSimpleMetricCharts() {
       els.simpleMetricCharts.forEach((canvas) => {
         const metric = canvas.dataset.simpleMetric;
-        const toggle = document.querySelector(`.simple-metric-label-toggle[data-simple-metric="${metric}"]`);
+        const labelToggle = document.querySelector(`.simple-metric-label-toggle[data-simple-metric="${metric}"]`);
+        const averageToggle = document.querySelector(`.simple-metric-average-toggle[data-simple-metric="${metric}"]`);
         const emptyEl = document.querySelector(`#${canvas.id.replace("Chart", "Empty")}`);
         drawSleepMetricChartOn({
           canvas,
           emptyEl,
           metric,
-          showLabels: Boolean(toggle?.checked),
+          showLabels: Boolean(labelToggle?.checked),
+          showAverage: Boolean(averageToggle?.checked),
           cssHeight: 240
         });
       });
     }
 
-    function drawSleepMetricChartOn({ canvas, emptyEl, metric, showLabels, cssHeight }) {
+    function drawSleepMetricChartOn({ canvas, emptyEl, metric, showLabels, showAverage, cssHeight }) {
       const prepared = prepareCanvas(canvas, cssHeight);
       if (!prepared) {
         return;
@@ -3723,7 +3941,7 @@
 
       const rows = sleepRows(sleepKeysForCanvas(canvas));
       if (metric === "total") {
-        drawSleepTotalBars(ctx, width, height, rows, { emptyEl, showLabels });
+        drawSleepTotalBars(ctx, width, height, rows, { emptyEl, showLabels, showAverage });
         return;
       }
 
@@ -3739,6 +3957,7 @@
         });
       });
       const targetValue = expectedSleepMetricValue(metric, values);
+      const averageValue = values.length ? Math.round(values.reduce((sum, value) => sum + value, 0) / values.length) : null;
       const hasData = values.length > 0;
       const hasTarget = targetValue !== null;
       emptyEl?.classList.toggle("is-visible", !hasData && !hasTarget);
@@ -3752,7 +3971,11 @@
       const pad = { top: 20, right: 18, bottom: 36, left: 44 };
       const plotWidth = width - pad.left - pad.right;
       const plotHeight = height - pad.top - pad.bottom;
-      const scaleValues = targetValue !== null ? [...values, targetValue] : values;
+      const scaleValues = [
+        ...values,
+        ...(targetValue !== null ? [targetValue] : []),
+        ...(showAverage && averageValue !== null ? [averageValue] : [])
+      ];
       let minValue = Math.floor((Math.min(...scaleValues) - 45) / 60) * 60;
       let maxValue = Math.ceil((Math.max(...scaleValues) + 45) / 60) * 60;
       if (maxValue - minValue < 240) {
@@ -3762,20 +3985,30 @@
       }
       const xFor = (index) => pad.left + (plotWidth * index) / 6;
       const yFor = (value) => pad.top + plotHeight - ((value - minValue) / (maxValue - minValue)) * plotHeight;
+      const labelBounds = { left: 2, right: width - 2, top: pad.top, bottom: height - pad.bottom };
+      const labelBoxes = [];
 
       drawTimeGrid(ctx, width, height, pad, minValue, maxValue, yFor, lineColor, mutedColor);
       drawDateAxis(ctx, rows, height, pad, xFor, mutedColor);
       if (targetValue !== null) {
-        drawExpectedTimeLine(ctx, width, pad, yFor(targetValue), sleepMetricColor(metric), `期望 ${formatClock(targetValue)}`);
+        drawExpectedTimeLine(ctx, width, pad, yFor(targetValue), sleepMetricColor(metric), `期望 ${formatClock(targetValue)}`, labelBoxes, labelBounds);
+      }
+      if (showAverage && averageValue !== null) {
+        drawAverageMetricLine(ctx, width, pad, yFor(averageValue), `平均 ${formatClock(averageValue)}`, labelBoxes, labelBounds);
       }
       if (hasData) {
         activeDefs.forEach((def) => {
-          drawMetricExtremes(ctx, values, width, pad, yFor, def.color);
+          drawMetricExtremes(ctx, values, width, pad, yFor, def.color, labelBoxes, labelBounds);
         });
       }
 
       activeDefs.forEach((def) => {
-        drawMetricLine(ctx, rows, def, xFor, yFor, showLabels);
+        drawMetricLine(ctx, rows, def, xFor, yFor, showLabels, {
+          left: pad.left,
+          right: width - pad.right,
+          top: pad.top,
+          bottom: height - pad.bottom
+        }, labelBoxes);
       });
     }
 
@@ -3786,6 +4019,11 @@
       const hasTarget = targetMinutes !== null;
       const emptyEl = options.emptyEl || els.sleepMetricEmpty;
       const showLabels = options.showLabels ?? els.metricLabelsToggle.checked;
+      const showAverage = Boolean(options.showAverage);
+      const presentValues = values.filter((value) => value !== null);
+      const averageMinutes = presentValues.length
+        ? Math.round(presentValues.reduce((sum, value) => sum + value, 0) / presentValues.length)
+        : null;
       emptyEl?.classList.toggle("is-visible", !hasData && !hasTarget);
       if (!hasData && !hasTarget) {
         drawEmptyAxes(ctx, width, height, rows);
@@ -3800,13 +4038,16 @@
       const plotWidth = width - pad.left - pad.right;
       const plotHeight = height - pad.top - pad.bottom;
       const maxMinutes = Math.max(
-        ...values.filter((value) => value !== null),
-        targetMinutes || 0
+        ...presentValues,
+        targetMinutes || 0,
+        showAverage && averageMinutes !== null ? averageMinutes : 0
       );
       const maxHours = Math.max(1, Math.ceil(maxMinutes / 60));
       const xInset = Math.min(18, Math.max(12, plotWidth / 24));
       const xFor = (index) => pad.left + xInset + ((plotWidth - xInset * 2) * index) / 6;
       const yFor = (hours) => pad.top + plotHeight - (hours / maxHours) * plotHeight;
+      const labelBounds = { left: 2, right: width - 2, top: pad.top, bottom: height - pad.bottom };
+      const labelBoxes = [];
 
       ctx.font = "12px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
       ctx.lineWidth = 1;
@@ -3825,7 +4066,7 @@
 
       drawDateAxis(ctx, rows, height, pad, xFor, mutedColor);
       if (targetMinutes !== null) {
-        drawSleepTargetLine(ctx, width, pad, yFor(targetMinutes / 60), targetColor, formatDurationCompact(targetMinutes));
+        drawSleepTargetLine(ctx, width, pad, yFor(targetMinutes / 60), targetColor, formatDurationCompact(targetMinutes), labelBoxes, labelBounds);
       }
 
       const barWidth = Math.max(12, Math.min(24, plotWidth / 14));
@@ -3838,6 +4079,9 @@
         ctx.fillStyle = accentColor;
         ctx.fillRect(x, y, barWidth, height - pad.bottom - y);
       });
+      if (showAverage && averageMinutes !== null) {
+        drawAverageMetricLine(ctx, width, pad, yFor(averageMinutes / 60), `平均 ${formatDurationCompact(averageMinutes)}`, labelBoxes, labelBounds);
+      }
       if (showLabels) {
         ctx.fillStyle = mutedColor;
         ctx.font = "11px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
@@ -3854,7 +4098,7 @@
       }
     }
 
-    function drawSleepTargetLine(ctx, width, pad, y, color, label) {
+    function drawSleepTargetLine(ctx, width, pad, y, color, label, labelBoxes = [], bounds = {}) {
       ctx.save();
       ctx.strokeStyle = color;
       ctx.fillStyle = color;
@@ -3866,13 +4110,16 @@
       ctx.stroke();
       ctx.setLineDash([]);
       ctx.font = "11px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
-      ctx.textAlign = "right";
-      ctx.textBaseline = "bottom";
-      drawBackedText(ctx, `期望 ${label}`, width - pad.right, y - 4);
+      drawReferenceLineLabel(ctx, `期望 ${label}`, width - pad.right, y, {
+        align: "right",
+        preferredSide: "above",
+        bounds,
+        boxes: labelBoxes
+      });
       ctx.restore();
     }
 
-    function drawExpectedTimeLine(ctx, width, pad, y, color, label) {
+    function drawExpectedTimeLine(ctx, width, pad, y, color, label, labelBoxes = [], bounds = {}) {
       ctx.save();
       ctx.strokeStyle = color;
       ctx.fillStyle = color;
@@ -3884,10 +4131,63 @@
       ctx.stroke();
       ctx.setLineDash([]);
       ctx.font = "11px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
-      ctx.textAlign = "right";
-      ctx.textBaseline = y < pad.top + 18 ? "top" : "bottom";
-      drawBackedText(ctx, label, width - pad.right, y + (y < pad.top + 18 ? 4 : -4));
+      drawReferenceLineLabel(ctx, label, width - pad.right, y, {
+        align: "right",
+        preferredSide: y < pad.top + 18 ? "below" : "above",
+        bounds,
+        boxes: labelBoxes
+      });
       ctx.restore();
+    }
+
+    function drawAverageMetricLine(ctx, width, pad, y, label, labelBoxes = [], bounds = {}) {
+      const color = cssVar("--sleep-line");
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.lineWidth = 1.2;
+      ctx.setLineDash([3, 5]);
+      ctx.beginPath();
+      ctx.moveTo(pad.left, crisp(y));
+      ctx.lineTo(width - pad.right, crisp(y));
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.font = "11px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
+      drawReferenceLineLabel(ctx, label, pad.left + 2, y, {
+        align: "left",
+        preferredSide: y < pad.top + 18 ? "below" : "above",
+        bounds,
+        boxes: labelBoxes
+      });
+      ctx.restore();
+    }
+
+    function drawReferenceLineLabel(ctx, label, x, y, options = {}) {
+      const boxes = options.boxes || [];
+      const bounds = options.bounds || {};
+      const align = options.align || "right";
+      const preferredSide = options.preferredSide || "above";
+      const sideOrder = preferredSide === "below" ? ["below", "above"] : ["above", "below"];
+      const shifts = [0, -12, 12, -24, 24];
+      const placements = sideOrder.flatMap((side) => shifts.map((shift) => ({ side, shift })));
+      const fallback = placements[0];
+      const placement = placements.find((item) => {
+        const box = referenceLineLabelBox(ctx, label, x, y, align, item.side, item.shift);
+        return boxFitsBounds(box, bounds) && !boxOverlapsAny(box, boxes);
+      }) || fallback;
+      ctx.textAlign = align;
+      ctx.textBaseline = placement.side === "below" ? "top" : "bottom";
+      const textY = y + (placement.side === "below" ? 4 : -4) + placement.shift;
+      const box = drawBackedText(ctx, label, x, textY);
+      boxes.push(box);
+      return box;
+    }
+
+    function referenceLineLabelBox(ctx, label, x, y, align, side, shift) {
+      return measureTextBox(ctx, label, x, y + (side === "below" ? 4 : -4) + shift, {
+        align,
+        baseline: side === "below" ? "top" : "bottom"
+      });
     }
 
     function expectedSleepMetricValue(metric, values = []) {
@@ -4037,57 +4337,58 @@
       drawBackedText(ctx, label, canPlaceBeside ? x + 6 : x, canPlaceBeside ? y : y - 10);
     }
 
-    function drawMetricLine(ctx, rows, def, xFor, yFor, showLabels) {
+    function drawMetricLine(ctx, rows, def, xFor, yFor, showLabels, bounds, labelBoxes = []) {
       ctx.strokeStyle = def.color;
       ctx.fillStyle = def.color;
       ctx.lineWidth = 2.3;
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
-      let drawing = false;
-      rows.forEach((row, index) => {
+      const points = rows.map((row, index) => {
         const value = def.value(row.timeline);
-        if (value === null) {
+        return value === null ? null : { x: xFor(index), y: yFor(value), value, index };
+      });
+      let drawing = false;
+      points.forEach((point) => {
+        if (!point) {
           if (drawing) {
             ctx.stroke();
           }
           drawing = false;
           return;
         }
-        const x = xFor(index);
-        const y = yFor(value);
         if (!drawing) {
           ctx.beginPath();
-          ctx.moveTo(x, y);
+          ctx.moveTo(point.x, point.y);
           drawing = true;
         } else {
-          ctx.lineTo(x, y);
+          ctx.lineTo(point.x, point.y);
         }
       });
       if (drawing) {
         ctx.stroke();
       }
-      rows.forEach((row, index) => {
-        const value = def.value(row.timeline);
-        if (value === null) {
+      points.forEach((point) => {
+        if (!point) {
           return;
         }
         ctx.beginPath();
-        ctx.arc(xFor(index), yFor(value), 4, 0, Math.PI * 2);
+        ctx.arc(point.x, point.y, 4, 0, Math.PI * 2);
         ctx.fill();
       });
       if (!showLabels) {
         return;
       }
-      rows.forEach((row, index) => {
-        const value = def.value(row.timeline);
-        if (value === null) {
+      points.forEach((point) => {
+        if (!point) {
           return;
         }
-        drawPointLabel(ctx, formatClock(value), xFor(index), yFor(value), index);
+        drawPointLabel(ctx, formatClock(point.value), point, points, bounds, labelBoxes, {
+          preferredQuadrants: point.index === 5 ? ["nw", "sw", "ne", "se"] : null
+        });
       });
     }
 
-    function drawMetricExtremes(ctx, values, width, pad, yFor, color) {
+    function drawMetricExtremes(ctx, values, width, pad, yFor, color, labelBoxes = [], bounds = {}) {
       const unique = [...new Set(values)];
       if (unique.length < 2) {
         return;
@@ -4095,8 +4396,8 @@
       const earliest = Math.min(...values);
       const latest = Math.max(...values);
       const items = [
-        { value: latest, label: `最晚 ${formatClock(latest)}`, baseline: "bottom", offset: -5 },
-        { value: earliest, label: `最早 ${formatClock(earliest)}`, baseline: "top", offset: 5 }
+        { value: latest, label: `最晚 ${formatClock(latest)}`, side: "above" },
+        { value: earliest, label: `最早 ${formatClock(earliest)}`, side: "below" }
       ];
       ctx.save();
       ctx.strokeStyle = color;
@@ -4110,23 +4411,107 @@
         ctx.moveTo(pad.left, y);
         ctx.lineTo(width - pad.right, y);
         ctx.stroke();
-        ctx.textAlign = "right";
-        ctx.textBaseline = item.baseline;
-        drawBackedText(ctx, item.label, width - pad.right - 2, y + item.offset);
+        drawReferenceLineLabel(ctx, item.label, width - pad.right - 2, y, {
+          align: "right",
+          preferredSide: item.side,
+          bounds,
+          boxes: labelBoxes
+        });
       });
       ctx.restore();
     }
 
-    function drawPointLabel(ctx, label, x, y, index) {
+    function drawPointLabel(ctx, label, point, points, bounds = {}, labelBoxes = [], options = {}) {
+      if (!point) {
+        return;
+      }
       ctx.save();
       ctx.font = "11px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
       ctx.fillStyle = cssVar("--muted");
-      ctx.textAlign = index >= 5 ? "right" : "left";
-      ctx.textBaseline = "middle";
-      const offsetX = index >= 5 ? -7 : 7;
-      const offsetY = index % 2 === 0 ? -9 : 9;
-      drawBackedText(ctx, label, x + offsetX, y + offsetY);
+      const placement = pointLabelPlacement(point, points, bounds, ctx, label, labelBoxes, options);
+      ctx.textAlign = placement.align;
+      ctx.textBaseline = placement.baseline;
+      const box = drawBackedText(ctx, label, point.x + placement.x, point.y + placement.y);
+      labelBoxes.push(box);
       ctx.restore();
+    }
+
+    function pointLabelPlacement(point, points, bounds = {}, ctx = null, label = "", labelBoxes = [], options = {}) {
+      const occupied = new Set();
+      const addQuadrant = (neighbor) => {
+        if (!neighbor) {
+          return;
+        }
+        const east = neighbor.x >= point.x;
+        const south = neighbor.y >= point.y;
+        occupied.add(east ? (south ? "se" : "ne") : (south ? "sw" : "nw"));
+      };
+      addQuadrant(previousPoint(points, point.index));
+      addQuadrant(nextPoint(points, point.index));
+
+      const baseOrder = Array.isArray(options.preferredQuadrants) && options.preferredQuadrants.length
+        ? options.preferredQuadrants
+        : ["ne", "se", "nw", "sw"];
+      const candidates = baseOrder.filter((quadrant) => !occupied.has(quadrant));
+      const ordered = candidates.length ? candidates : baseOrder;
+      const filtered = ordered.filter((quadrant) => {
+        if (quadrant.includes("e") && bounds.right !== undefined && point.x > bounds.right - 42) {
+          return false;
+        }
+        if (quadrant.includes("w") && bounds.left !== undefined && point.x < bounds.left + 42) {
+          return false;
+        }
+        if (quadrant.includes("n") && bounds.top !== undefined && point.y < bounds.top + 20) {
+          return false;
+        }
+        if (quadrant.includes("s") && bounds.bottom !== undefined && point.y > bounds.bottom - 20) {
+          return false;
+        }
+        return true;
+      });
+      if (ctx && label) {
+        const clear = filtered.filter((quadrant) => {
+          const placement = quadrantOffset(quadrant);
+          const box = measureTextBox(ctx, label, point.x + placement.x, point.y + placement.y, {
+            align: placement.align,
+            baseline: placement.baseline
+          });
+          return !boxOverlapsAny(box, labelBoxes);
+        });
+        if (clear.length) {
+          return quadrantOffset(clear[0]);
+        }
+      }
+      return quadrantOffset(filtered[0] || ordered[0] || "ne");
+    }
+
+    function previousPoint(points, index) {
+      for (let cursor = index - 1; cursor >= 0; cursor -= 1) {
+        if (points[cursor]) {
+          return points[cursor];
+        }
+      }
+      return null;
+    }
+
+    function nextPoint(points, index) {
+      for (let cursor = index + 1; cursor < points.length; cursor += 1) {
+        if (points[cursor]) {
+          return points[cursor];
+        }
+      }
+      return null;
+    }
+
+    function quadrantOffset(quadrant) {
+      const east = quadrant.includes("e");
+      const north = quadrant.includes("n");
+      return {
+        x: east ? 8 : -8,
+        y: north ? -10 : 10,
+        align: east ? "left" : "right",
+        baseline: north ? "bottom" : "top"
+      };
     }
 
     function drawTimeGrid(ctx, width, height, pad, minValue, maxValue, yFor, lineColor, mutedColor) {
