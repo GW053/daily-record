@@ -17,6 +17,7 @@
       --accent-strong: #8f4324;
       --accent-soft: #f5dfd0;
       --good: #557a58;
+      --danger: #b84c3f;
       --good-soft: #e6efe3;
       --improve: #bd6436;
       --improve-soft: #f6e2d5;
@@ -212,6 +213,14 @@
 
     body.is-simple-mode #sleepMetricPanel {
       display: none;
+    }
+
+    .simple-sleep-calendar {
+      display: none;
+    }
+
+    body.is-simple-mode .simple-sleep-calendar {
+      display: block;
     }
 
     .panel {
@@ -1127,10 +1136,15 @@
 
     .day-cell {
       position: relative;
-      display: grid;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 4px;
       width: 100%;
       aspect-ratio: 1 / 1;
-      place-items: center;
+      min-height: 60px;
+      padding: 6px 2px 5px;
       color: var(--ink);
       background: transparent;
       border: 1px solid transparent;
@@ -1157,8 +1171,8 @@
 
     .day-cell.has-entry::after {
       position: absolute;
+      top: 6px;
       right: 7px;
-      bottom: 6px;
       width: 5px;
       height: 5px;
       content: "";
@@ -1171,7 +1185,62 @@
     }
 
     .day-blank {
-      aspect-ratio: 1 / 1;
+      min-height: 60px;
+    }
+
+    .day-number {
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .day-cell:not(.has-sleep-summary) .day-number {
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .day-sleep-info {
+      display: grid;
+      gap: 2px;
+      width: 100%;
+      min-height: 24px;
+      place-items: center;
+    }
+
+    .day-sleep-line {
+      max-width: 100%;
+      padding: 0 2px;
+      overflow: hidden;
+      border-radius: 4px;
+      font-size: 9.5px;
+      font-weight: 850;
+      line-height: 1.12;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .day-sleep-line.is-met {
+      color: var(--good);
+    }
+
+    .day-sleep-line.is-miss {
+      color: var(--danger);
+    }
+
+    .day-sleep-line.is-neutral {
+      color: var(--muted);
+    }
+
+    .day-cell.is-selected .day-sleep-line {
+      background: transparent;
+      text-shadow:
+        0 -1px 0 rgba(255, 253, 249, 0.94),
+        0 1px 0 rgba(255, 253, 249, 0.94),
+        0 -1px 1px rgba(255, 253, 249, 0.7),
+        0 1px 1px rgba(255, 253, 249, 0.78),
+        1px 0 1px rgba(255, 253, 249, 0.46),
+        -1px 0 1px rgba(255, 253, 249, 0.46),
+        0 2px 2px rgba(90, 45, 22, 0.16);
     }
 
     .day-detail {
@@ -1327,7 +1396,7 @@
         <div class="brand-copy">
           <div class="title-row">
             <h1 id="pageTitle">今日记录</h1>
-            <button class="version-link" id="versionButton" type="button">v1.6</button>
+            <button class="version-link" id="versionButton" type="button">v1.7</button>
           </div>
           <p class="page-date" id="pageDate"></p>
         </div>
@@ -1500,6 +1569,26 @@
           <canvas class="sleep-timeline-chart" id="sleepTimelineChart" width="640" height="640" aria-label="近七天睡眠横向时间图"></canvas>
           <div class="chart-empty" id="sleepTimelineEmpty">暂无睡眠数据</div>
         </div>
+      </section>
+
+      <section class="panel calendar-panel simple-sleep-calendar">
+        <div class="calendar-top">
+          <button class="icon-button" id="prevSimpleSleepMonthButton" type="button" aria-label="上个月" title="上个月">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m15 18-6-6 6-6"></path>
+            </svg>
+          </button>
+          <h2 class="calendar-title" id="simpleSleepMonthTitle"></h2>
+          <button class="icon-button" id="nextSimpleSleepMonthButton" type="button" aria-label="下个月" title="下个月">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m9 18 6-6-6-6"></path>
+            </svg>
+          </button>
+        </div>
+        <div class="weekdays" aria-hidden="true">
+          <span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span>
+        </div>
+        <div class="calendar-grid" id="simpleSleepCalendarGrid"></div>
       </section>
 
       <section class="panel sleep-chart-panel" id="sleepMetricPanel">
@@ -1926,6 +2015,10 @@
         </div>
       </header>
       <div class="version-body">
+        <p><strong>v1.7 更新时间：2026-09-24。</strong></p>
+        <ol class="version-list">
+          <li>历史回顾月历新增入睡时间和睡眠时长两行小数字，并按是否达到期望显示为绿色或红色；简洁版睡眠页同步新增同样的睡眠月历。</li>
+        </ol>
         <p><strong>v1.6 更新时间：2026-07-17。</strong></p>
         <ol class="version-list">
           <li>单项变化图表新增“显示平均”开关，可选择是否在图中显示平均参考线。</li>
@@ -1978,8 +2071,8 @@
     const SUPABASE_KEY = "sb_publishable_WW3rmZCePegJsIf6LeqFvQ_KRgHD9pz";
     const SYNC_TABLE = "daily_record_sync";
     const NOTE_BULLET = "• ";
-    const APP_VERSION = "v1.6";
-    const APP_VERSION_UPDATED = "2026-07-17";
+    const APP_VERSION = "v1.7";
+    const APP_VERSION_UPDATED = "2026-09-24";
     const state = loadState();
     const els = {
       pageTitle: document.querySelector("#pageTitle"),
@@ -2055,6 +2148,10 @@
       sleepTimelineEmpty: document.querySelector("#sleepTimelineEmpty"),
       timelineLabelsToggle: document.querySelector("#timelineLabelsToggle"),
       timelineDurationsToggle: document.querySelector("#timelineDurationsToggle"),
+      simpleSleepMonthTitle: document.querySelector("#simpleSleepMonthTitle"),
+      simpleSleepCalendarGrid: document.querySelector("#simpleSleepCalendarGrid"),
+      prevSimpleSleepMonthButton: document.querySelector("#prevSimpleSleepMonthButton"),
+      nextSimpleSleepMonthButton: document.querySelector("#nextSimpleSleepMonthButton"),
       sleepMetricTitle: document.querySelector("#sleepMetricTitle"),
       sleepMetricPanel: document.querySelector("#sleepMetricPanel"),
       sleepMetricTabs: document.querySelectorAll(".metric-tab"),
@@ -2092,6 +2189,7 @@
     let selectedSleepDate = selectedDate;
     let selectedHistoryDate = selectedDate;
     let monthCursor = firstOfMonth(parseDateKey(selectedDate));
+    let sleepMonthCursor = firstOfMonth(parseDateKey(selectedSleepDate));
     let saveTimer = null;
     let chartFrame = 0;
     let sleepChartFrame = 0;
@@ -2152,6 +2250,7 @@
 
       els.sleepEntryDate.addEventListener("change", () => {
         selectedSleepDate = els.sleepEntryDate.value || todayKey();
+        sleepMonthCursor = firstOfMonth(parseDateKey(selectedSleepDate));
         syncSleepDateInputs(selectedSleepDate);
         loadSleepForm(selectedSleepDate);
         renderAll();
@@ -2269,6 +2368,16 @@
         monthCursor = new Date(monthCursor.getFullYear(), monthCursor.getMonth() + 1, 1);
         renderCalendar();
       });
+
+      els.prevSimpleSleepMonthButton?.addEventListener("click", () => {
+        sleepMonthCursor = new Date(sleepMonthCursor.getFullYear(), sleepMonthCursor.getMonth() - 1, 1);
+        renderSimpleSleepCalendar();
+      });
+
+      els.nextSimpleSleepMonthButton?.addEventListener("click", () => {
+        sleepMonthCursor = new Date(sleepMonthCursor.getFullYear(), sleepMonthCursor.getMonth() + 1, 1);
+        renderSimpleSleepCalendar();
+      });
     }
 
     function switchTab(tab) {
@@ -2346,6 +2455,7 @@
 
     function shiftSleepDate(days) {
       selectedSleepDate = dateKey(addDays(parseDateKey(selectedSleepDate), days));
+      sleepMonthCursor = firstOfMonth(parseDateKey(selectedSleepDate));
       syncSleepDateInputs(selectedSleepDate);
       loadSleepForm(selectedSleepDate);
       renderAll();
@@ -2358,6 +2468,7 @@
         return;
       }
       selectedSleepDate = nextDate;
+      sleepMonthCursor = firstOfMonth(parseDateKey(selectedSleepDate));
       syncSleepDateInputs(nextDate);
       loadSleepForm(nextDate);
       renderAll();
@@ -2400,6 +2511,7 @@
       renderSleepTotal(entry);
       showSaved();
       renderSleepCharts();
+      renderSleepCalendars();
     }
 
     function saveSleepTotalOverride() {
@@ -2437,6 +2549,7 @@
       renderSleepTotal(entry);
       showSaved();
       renderSleepCharts();
+      renderSleepCalendars();
     }
 
     function renderSleepTotal(entry = null) {
@@ -2482,6 +2595,7 @@
       }
       persistState();
       renderSleepCharts();
+      renderSleepCalendars();
       showSaved();
     }
 
@@ -2492,6 +2606,7 @@
         persistState();
         renderSleepTarget();
         renderSleepCharts();
+        renderSleepCalendars();
         showSaved();
         return;
       }
@@ -2504,6 +2619,7 @@
       persistState();
       renderSleepTarget();
       renderSleepCharts();
+      renderSleepCalendars();
       showSaved();
     }
 
@@ -3454,8 +3570,13 @@
       renderHeader();
       renderChart();
       renderSleepCharts();
-      renderCalendar();
+      renderSleepCalendars();
       renderDetail();
+    }
+
+    function renderSleepCalendars() {
+      renderCalendar();
+      renderSimpleSleepCalendar();
     }
 
     function renderHeader() {
@@ -4723,15 +4844,52 @@
     }
 
     function renderCalendar() {
-      const year = monthCursor.getFullYear();
-      const month = monthCursor.getMonth();
+      renderSleepSummaryCalendar({
+        cursor: monthCursor,
+        titleEl: els.monthTitle,
+        gridEl: els.calendarGrid,
+        selectedKey: selectedHistoryDate,
+        markDailyEntry: true,
+        onSelect(key) {
+          selectedHistoryDate = key;
+          selectedDate = key;
+          syncDateInputs(key);
+          loadForm(key);
+          renderAll();
+        }
+      });
+    }
+
+    function renderSimpleSleepCalendar() {
+      if (!els.simpleSleepMonthTitle || !els.simpleSleepCalendarGrid) {
+        return;
+      }
+      renderSleepSummaryCalendar({
+        cursor: sleepMonthCursor,
+        titleEl: els.simpleSleepMonthTitle,
+        gridEl: els.simpleSleepCalendarGrid,
+        selectedKey: selectedSleepDate,
+        markDailyEntry: false,
+        onSelect(key) {
+          selectedSleepDate = key;
+          sleepMonthCursor = firstOfMonth(parseDateKey(key));
+          syncSleepDateInputs(key);
+          loadSleepForm(key);
+          renderAll();
+        }
+      });
+    }
+
+    function renderSleepSummaryCalendar({ cursor, titleEl, gridEl, selectedKey, markDailyEntry, onSelect }) {
+      const year = cursor.getFullYear();
+      const month = cursor.getMonth();
       const first = new Date(year, month, 1);
       const daysInMonth = new Date(year, month + 1, 0).getDate();
       const leading = first.getDay();
       const fragment = document.createDocumentFragment();
 
-      els.monthTitle.textContent = `${year}年${month + 1}月`;
-      els.calendarGrid.replaceChildren();
+      titleEl.textContent = `${year}年${month + 1}月`;
+      gridEl.replaceChildren();
 
       for (let index = 0; index < leading; index += 1) {
         const blank = document.createElement("div");
@@ -4745,22 +4903,84 @@
         const button = document.createElement("button");
         button.type = "button";
         button.className = "day-cell";
-        button.textContent = day;
-        button.setAttribute("aria-label", formatLongDate(key));
+        const summary = sleepCalendarSummary(key);
+        button.append(createCalendarDayNumber(day));
+        if (summary) {
+          button.append(createCalendarSleepInfo(summary));
+        }
+        button.setAttribute("aria-label", calendarDayLabel(key, summary));
         button.classList.toggle("is-today", key === todayKey());
-        button.classList.toggle("is-selected", key === selectedHistoryDate);
-        button.classList.toggle("has-entry", Boolean(state.entries[key]));
+        button.classList.toggle("is-selected", key === selectedKey);
+        button.classList.toggle("has-entry", markDailyEntry && Boolean(state.entries[key]));
+        button.classList.toggle("has-sleep-summary", Boolean(summary));
         button.addEventListener("click", () => {
-          selectedHistoryDate = key;
-          selectedDate = key;
-          syncDateInputs(key);
-          loadForm(key);
-          renderAll();
+          onSelect(key);
         });
         fragment.append(button);
       }
 
-      els.calendarGrid.append(fragment);
+      gridEl.append(fragment);
+    }
+
+    function createCalendarDayNumber(day) {
+      const number = document.createElement("span");
+      number.className = "day-number";
+      number.textContent = day;
+      return number;
+    }
+
+    function createCalendarSleepInfo(summary) {
+      const info = document.createElement("span");
+      info.className = "day-sleep-info";
+      [
+        { text: summary.sleepText, status: summary.sleepStatus },
+        { text: summary.durationText, status: summary.durationStatus }
+      ].forEach((item) => {
+        const line = document.createElement("span");
+        line.className = `day-sleep-line is-${item.status}`;
+        line.textContent = item.text || "";
+        info.append(line);
+      });
+      return info;
+    }
+
+    function sleepCalendarSummary(key) {
+      const entry = state.sleepEntries[key];
+      const timeline = entry ? buildSleepTimeline(entry) : null;
+      if (!timeline) {
+        return null;
+      }
+      const hasSleep = timeline.sleep !== null;
+      const hasDuration = typeof timeline.totalMinutes === "number";
+      if (!hasSleep && !hasDuration) {
+        return null;
+      }
+      const sleepTarget = hasSleep ? expectedSleepMetricValue("sleep", [timeline.sleep]) : null;
+      const durationTarget = expectedSleepMinutes();
+      return {
+        sleepText: hasSleep ? formatClock(timeline.sleep) : "",
+        durationText: hasDuration ? formatDurationCompact(timeline.totalMinutes) : "",
+        sleepStatus: statusForTarget(hasSleep, sleepTarget, timeline.sleep, (value, target) => value <= target),
+        durationStatus: statusForTarget(hasDuration, durationTarget, timeline.totalMinutes, (value, target) => value >= target)
+      };
+    }
+
+    function statusForTarget(hasValue, target, value, predicate) {
+      if (!hasValue || typeof target !== "number") {
+        return "neutral";
+      }
+      return predicate(value, target) ? "met" : "miss";
+    }
+
+    function calendarDayLabel(key, summary) {
+      const parts = [formatLongDate(key)];
+      if (summary?.sleepText) {
+        parts.push(`入睡 ${summary.sleepText}`);
+      }
+      if (summary?.durationText) {
+        parts.push(`睡眠时长 ${summary.durationText}`);
+      }
+      return parts.join("，");
     }
 
     function renderDetail() {
