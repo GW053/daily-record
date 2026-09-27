@@ -941,7 +941,10 @@
     .version-body {
       display: grid;
       gap: 12px;
+      height: min(58vh, 360px);
       padding: 14px;
+      overflow-y: auto;
+      overscroll-behavior: contain;
       color: var(--ink);
       font-size: 13px;
       line-height: 1.6;
@@ -1140,11 +1143,11 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      gap: 4px;
+      gap: 2px;
       width: 100%;
-      aspect-ratio: 1 / 1;
-      min-height: 60px;
-      padding: 6px 2px 5px;
+      aspect-ratio: 1 / 1.08;
+      min-height: 0;
+      padding: 4px 1px;
       color: var(--ink);
       background: transparent;
       border: 1px solid transparent;
@@ -1185,7 +1188,8 @@
     }
 
     .day-blank {
-      min-height: 60px;
+      aspect-ratio: 1 / 1.08;
+      min-height: 0;
     }
 
     .day-number {
@@ -1201,9 +1205,9 @@
 
     .day-sleep-info {
       display: grid;
-      gap: 2px;
+      gap: 1px;
       width: 100%;
-      min-height: 24px;
+      min-height: 22px;
       place-items: center;
     }
 
@@ -1233,14 +1237,19 @@
 
     .day-cell.is-selected .day-sleep-line {
       background: transparent;
-      text-shadow:
-        0 -1px 0 rgba(255, 253, 249, 0.94),
-        0 1px 0 rgba(255, 253, 249, 0.94),
-        0 -1px 1px rgba(255, 253, 249, 0.7),
-        0 1px 1px rgba(255, 253, 249, 0.78),
-        1px 0 1px rgba(255, 253, 249, 0.46),
-        -1px 0 1px rgba(255, 253, 249, 0.46),
-        0 2px 2px rgba(90, 45, 22, 0.16);
+      text-shadow: 0 1px 1px rgba(80, 36, 18, 0.18);
+    }
+
+    .day-cell.is-selected .day-sleep-line.is-met {
+      color: #7cff5b;
+    }
+
+    .day-cell.is-selected .day-sleep-line.is-miss {
+      color: #ff4fa3;
+    }
+
+    .day-cell.is-selected .day-sleep-line.is-neutral {
+      color: #fff5e8;
     }
 
     .day-detail {
@@ -1396,7 +1405,7 @@
         <div class="brand-copy">
           <div class="title-row">
             <h1 id="pageTitle">今日记录</h1>
-            <button class="version-link" id="versionButton" type="button">v1.7</button>
+            <button class="version-link" id="versionButton" type="button">v1.8</button>
           </div>
           <p class="page-date" id="pageDate"></p>
         </div>
@@ -1452,9 +1461,9 @@
       </section>
 
       <section class="panel score-panel">
-        <label class="field-label" for="scoreInput">给自己的打分（0-100分）</label>
+        <label class="field-label" for="scoreInput">给睡眠打分（0-100分）</label>
         <div class="score-row">
-          <input id="scoreInput" type="number" min="0" max="100" step="1" inputmode="numeric" aria-label="给自己的打分，0 到 100">
+          <input id="scoreInput" type="number" min="0" max="100" step="1" inputmode="numeric" aria-label="给睡眠打分，0 到 100">
           <span>分</span>
         </div>
       </section>
@@ -1468,7 +1477,7 @@
                 <path d="m20 6-11 11-5-5"></path>
               </svg>
             </span>
-            做得好的事情
+            心情怎么样（激动、开心、平静、失落、消沉）
           </span>
           <div class="note-editor" id="goodText" role="textbox" aria-multiline="true"></div>
         </label>
@@ -1480,7 +1489,7 @@
                 <path d="m5 12 7-7 7 7"></path>
               </svg>
             </span>
-            渴望做的事情
+            睡眠怎么样（秒睡、整觉、睡饱、酣睡）
           </span>
           <div class="note-editor" id="improveText" role="textbox" aria-multiline="true"></div>
         </label>
@@ -1491,7 +1500,7 @@
                 <path d="M12 3 14.2 8.1 20 8.6 15.6 12.4 16.9 18 12 15.1 7.1 18 8.4 12.4 4 8.6 9.8 8.1 12 3Z"></path>
               </svg>
             </span>
-            幸运的事情
+            做了什么梦
           </span>
           <div class="note-editor" id="luckyText" role="textbox" aria-multiline="true"></div>
         </label>
@@ -1804,15 +1813,15 @@
           <span class="score-badge" id="detailScore"></span>
         </div>
         <article class="detail-block detail-good">
-          <h3>做得好的事情</h3>
+          <h3>心情怎么样（激动、开心、平静、失落、消沉）</h3>
           <p id="detailGood"></p>
         </article>
         <article class="detail-block detail-improve">
-          <h3>渴望做的事情</h3>
+          <h3>睡眠怎么样（秒睡、整觉、睡饱、酣睡）</h3>
           <p id="detailImprove"></p>
         </article>
         <article class="detail-block detail-lucky">
-          <h3>幸运的事情</h3>
+          <h3>做了什么梦</h3>
           <p id="detailLucky"></p>
         </article>
       </section>
@@ -2015,6 +2024,12 @@
         </div>
       </header>
       <div class="version-body">
+        <p><strong>v1.8 更新时间：2026-09-27。</strong></p>
+        <ol class="version-list">
+          <li>今日记录改为睡眠复盘记录，打分项调整为给睡眠打分，文字记录问题调整为心情、睡眠情况和梦境记录，并更新对应提示词。</li>
+          <li>优化月历选中态的小数字颜色，达标和未达标项都改为更浅更亮的红绿配色，提高与深色底的对比。</li>
+          <li>版本信息框固定内容高度，并支持滚动查看旧版本更新。</li>
+        </ol>
         <p><strong>v1.7 更新时间：2026-09-24。</strong></p>
         <ol class="version-list">
           <li>历史回顾月历新增入睡时间和睡眠时长两行小数字，并按是否达到期望显示为绿色或红色；简洁版睡眠页同步新增同样的睡眠月历。</li>
@@ -2071,8 +2086,8 @@
     const SUPABASE_KEY = "sb_publishable_WW3rmZCePegJsIf6LeqFvQ_KRgHD9pz";
     const SYNC_TABLE = "daily_record_sync";
     const NOTE_BULLET = "• ";
-    const APP_VERSION = "v1.7";
-    const APP_VERSION_UPDATED = "2026-09-24";
+    const APP_VERSION = "v1.8";
+    const APP_VERSION_UPDATED = "2026-09-27";
     const state = loadState();
     const els = {
       pageTitle: document.querySelector("#pageTitle"),
@@ -5257,9 +5272,9 @@
       const measure = canvas.getContext("2d");
       measure.font = "15px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
       const sections = [
-        { title: "做得好的事情", text: entry.good || "暂无记录", color: cssVar("--good") },
-        { title: "渴望做的事情", text: entry.improve || "暂无记录", color: cssVar("--improve") },
-        { title: "幸运的事情", text: entry.lucky || "暂无记录", color: cssVar("--lucky") }
+        { title: "心情怎么样（激动、开心、平静、失落、消沉）", text: entry.good || "暂无记录", color: cssVar("--good") },
+        { title: "睡眠怎么样（秒睡、整觉、睡饱、酣睡）", text: entry.improve || "暂无记录", color: cssVar("--improve") },
+        { title: "做了什么梦", text: entry.lucky || "暂无记录", color: cssVar("--lucky") }
       ].map((section) => ({
         ...section,
         lines: wrapCanvasText(measure, section.text, bodyWidth)
