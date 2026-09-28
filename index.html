@@ -1489,7 +1489,7 @@
                 <path d="m5 12 7-7 7 7"></path>
               </svg>
             </span>
-            睡眠怎么样（秒睡、整觉、睡饱、酣睡）
+            睡得怎么样（快不快、沉不沉、够不够）
           </span>
           <div class="note-editor" id="improveText" role="textbox" aria-multiline="true"></div>
         </label>
@@ -1817,7 +1817,7 @@
           <p id="detailGood"></p>
         </article>
         <article class="detail-block detail-improve">
-          <h3>睡眠怎么样（秒睡、整觉、睡饱、酣睡）</h3>
+          <h3>睡得怎么样（快不快、沉不沉、够不够）</h3>
           <p id="detailImprove"></p>
         </article>
         <article class="detail-block detail-lucky">
@@ -5273,7 +5273,7 @@
       measure.font = "15px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
       const sections = [
         { title: "心情怎么样（激动、开心、平静、失落、消沉）", text: entry.good || "暂无记录", color: cssVar("--good") },
-        { title: "睡眠怎么样（秒睡、整觉、睡饱、酣睡）", text: entry.improve || "暂无记录", color: cssVar("--improve") },
+        { title: "睡得怎么样（快不快、沉不沉、够不够）", text: entry.improve || "暂无记录", color: cssVar("--improve") },
         { title: "做了什么梦", text: entry.lucky || "暂无记录", color: cssVar("--lucky") }
       ].map((section) => ({
         ...section,
