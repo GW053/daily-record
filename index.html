@@ -88,6 +88,7 @@
     .brand {
       display: flex;
       align-items: center;
+      flex: 1 1 auto;
       gap: 10px;
       min-width: 0;
     }
@@ -119,6 +120,7 @@
     }
 
     .brand-copy {
+      flex: 1 1 auto;
       min-width: 0;
     }
 
@@ -130,6 +132,7 @@
     }
 
     .version-link {
+      flex: 0 0 auto;
       padding: 0;
       color: var(--accent-strong);
       background: transparent;
@@ -153,6 +156,7 @@
       font-size: 22px;
       line-height: 1.18;
       letter-spacing: 0;
+      white-space: nowrap;
     }
 
     .page-date {
@@ -1402,6 +1406,93 @@
       }
     }
 
+    @media (max-width: 430px) {
+      .app-shell {
+        padding-right: 12px;
+        padding-left: 12px;
+      }
+
+      .topbar {
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+
+      .brand {
+        gap: 8px;
+      }
+
+      .brand-mark {
+        width: 36px;
+        height: 36px;
+      }
+
+      .brand-mark svg {
+        width: 20px;
+        height: 20px;
+      }
+
+      h1 {
+        font-size: 20px;
+        line-height: 1.12;
+      }
+
+      .page-date {
+        font-size: 12.5px;
+      }
+
+      .top-actions {
+        gap: 6px;
+      }
+
+      .top-actions .icon-button {
+        width: 36px;
+        height: 36px;
+      }
+
+      .top-actions .icon-button svg {
+        width: 18px;
+        height: 18px;
+      }
+
+      .sleep-panel,
+      .sleep-chart-panel,
+      .sleep-table-panel {
+        gap: 12px;
+        padding: 13px;
+      }
+
+      .sleep-time-grid {
+        row-gap: 10px;
+      }
+
+      .time-field {
+        gap: 6px;
+      }
+
+      .time-field input {
+        width: min(100%, 104px);
+        min-height: 40px;
+        padding: 0 8px;
+        font-size: 12.5px;
+      }
+
+      .time-field span,
+      .total-label {
+        font-size: 12.5px;
+      }
+
+      .sleep-total-row,
+      .sleep-target-row {
+        grid-template-columns: minmax(0, 1fr) minmax(104px, 140px);
+        gap: 10px;
+      }
+
+      .total-value {
+        min-height: 40px;
+        font-size: 13px;
+      }
+    }
+
     @media (max-width: 390px) {
       .date-strip {
         grid-template-columns: auto 34px minmax(0, 1fr) 34px 34px;
@@ -2416,7 +2507,7 @@
           <li>优化睡眠小结表达和建议逻辑，会结合入睡/醒来波动、是否睡够、上床/起床节奏、入睡耗时和赖床情况生成更自然的分析。</li>
           <li>睡眠记录和期望睡眠的时间填写改为站内可拖动钟盘式选择器，减少系统默认时间控件在手机和 APK 中的割裂感。</li>
           <li>优化睡眠记录图表布局、表格三线表样式和达标显示，并新增“睡眠表格”导出选项。</li>
-          <li>加强 APK/WebView 适配，减少字体自动放大、标题截断、弹窗挤压和安全区露白等显示问题。</li>
+          <li>加强普通浏览器和 APK/WebView 适配，收紧小屏标题、顶部按钮、睡眠表单和时间输入布局，减少字号偏大、标题换行、弹窗挤压和安全区露白等显示问题。</li>
         </ol>
         <p><strong>v1.8 更新时间：2026-09-27。</strong></p>
         <ol class="version-list">
