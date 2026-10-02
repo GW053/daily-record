@@ -3,6 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f8f1ea">
+  <meta name="color-scheme" content="light">
   <title>睡眠记录</title>
   <style>
     :root {
@@ -37,16 +39,22 @@
     }
 
     html {
+      height: 100%;
+      min-height: 100%;
       background: var(--bg);
       overflow-x: hidden;
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
     }
 
     body {
       min-height: 100vh;
+      min-height: 100dvh;
       margin: 0;
       color: var(--ink);
       background: var(--bg);
       overflow-x: hidden;
+      overscroll-behavior-y: none;
     }
 
     button,
@@ -62,6 +70,7 @@
     .app-shell {
       width: min(100%, 480px);
       min-height: 100vh;
+      min-height: 100dvh;
       margin: 0 auto;
       padding: 18px 14px calc(88px + env(safe-area-inset-bottom));
     }
@@ -140,11 +149,8 @@
     }
 
     h1 {
-      overflow: hidden;
       font-size: 22px;
       line-height: 1.18;
-      text-overflow: ellipsis;
-      white-space: nowrap;
       letter-spacing: 0;
     }
 
@@ -212,6 +218,10 @@
     }
 
     body.is-simple-mode #sleepMetricPanel {
+      display: none;
+    }
+
+    body.is-simple-mode #sleepTablePanel {
       display: none;
     }
 
@@ -302,6 +312,7 @@
 
     .date-display,
     .duration-input,
+    .time-input,
     input[type="date"],
     input[type="time"],
     input[type="number"],
@@ -318,6 +329,7 @@
 
     .date-display:focus,
     .duration-input:focus,
+    .time-input:focus,
     input[type="date"]:focus,
     input[type="time"]:focus,
     input[type="number"]:focus,
@@ -336,6 +348,13 @@
     input[type="time"] {
       min-height: 42px;
       padding: 0 11px;
+    }
+
+    .time-input {
+      min-height: 42px;
+      padding: 0 11px;
+      cursor: pointer;
+      caret-color: transparent;
     }
 
     .duration-input {
@@ -446,7 +465,8 @@
     }
 
     .sleep-panel,
-    .sleep-chart-panel {
+    .sleep-chart-panel,
+    .sleep-table-panel {
       display: grid;
       gap: 14px;
       padding: 14px;
@@ -700,6 +720,10 @@
       user-select: none;
     }
 
+    .sleep-chart-panel .chart-wrap {
+      margin-top: 0;
+    }
+
     .chart-wrap:active {
       cursor: grabbing;
     }
@@ -718,6 +742,77 @@
 
     .sleep-metric-chart {
       height: 240px;
+    }
+
+    .sleep-summary-table {
+      padding: 2px 0;
+      border-top: 2px solid rgba(127, 96, 79, 0.72);
+      border-bottom: 2px solid rgba(127, 96, 79, 0.72);
+      background: transparent;
+    }
+
+    .sleep-summary-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      min-height: 38px;
+      align-items: center;
+    }
+
+    .sleep-summary-row.is-head {
+      min-height: 34px;
+      color: var(--muted);
+      border-bottom: 1.5px solid rgba(127, 96, 79, 0.62);
+      background: transparent;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .sleep-summary-cell {
+      min-width: 0;
+      padding: 9px 6px;
+      color: var(--ink);
+      font-size: 13.5px;
+      line-height: 1.2;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .sleep-summary-cell.is-date {
+      color: var(--accent-strong);
+      font-weight: 700;
+    }
+
+    .sleep-summary-cell.is-empty {
+      color: var(--muted);
+    }
+
+    .sleep-summary-cell.is-met {
+      color: var(--good);
+      font-weight: 650;
+    }
+
+    .sleep-summary-note {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 12.5px;
+      line-height: 1.55;
+    }
+
+    .sleep-summary-note p {
+      margin: 0;
+    }
+
+    .sleep-summary-note strong {
+      color: var(--accent-strong);
+    }
+
+    .simple-sleep-table {
+      display: none;
+    }
+
+    body.is-simple-mode .simple-sleep-table {
+      display: grid;
     }
 
     .chart-empty {
@@ -806,6 +901,7 @@
       align-items: center;
       justify-content: center;
       padding: 18px 12px;
+      padding: calc(18px + env(safe-area-inset-top)) 12px calc(18px + env(safe-area-inset-bottom));
       background: rgba(47, 41, 36, 0.34);
     }
 
@@ -818,6 +914,7 @@
       grid-template-rows: auto minmax(0, 1fr);
       width: min(100%, 920px);
       max-height: min(76vh, 520px);
+      max-height: min(76dvh, 520px);
       overflow: hidden;
       background: var(--surface);
       border: 1px solid var(--line);
@@ -828,6 +925,7 @@
     .auth-modal {
       width: min(100%, 420px);
       max-height: min(86vh, 520px);
+      max-height: min(86dvh, 520px);
     }
 
     .modal-head {
@@ -936,6 +1034,228 @@
     .auth-fields input {
       min-height: 42px;
       padding: 0 11px;
+    }
+
+    .time-picker-modal {
+      max-width: 330px;
+    }
+
+    .time-picker-modal .modal-head {
+      border-bottom: 0;
+      padding-bottom: 4px;
+    }
+
+    .time-picker-body {
+      display: grid;
+      gap: 10px;
+      padding: 6px 12px 12px;
+    }
+
+    .time-picker-label {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    .time-picker-display {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 14px 10px;
+      color: #fff;
+      background: var(--accent);
+      border-radius: 8px;
+      box-shadow: 0 10px 24px rgba(182, 90, 43, 0.18);
+    }
+
+    .time-display-button {
+      min-width: 78px;
+      padding: 4px 6px;
+      color: rgba(255, 255, 255, 0.62);
+      background: transparent;
+      border: 0;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 44px;
+      font-weight: 300;
+      line-height: 1;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .time-display-button.is-active {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.1);
+      font-weight: 300;
+    }
+
+    .time-display-separator {
+      color: rgba(255, 255, 255, 0.78);
+      font-size: 42px;
+      font-weight: 300;
+      line-height: 1;
+    }
+
+    .time-clock {
+      position: relative;
+      width: min(100%, 252px);
+      aspect-ratio: 1;
+      justify-self: center;
+      border-radius: 50%;
+      background: #f1ece7;
+      touch-action: none;
+      user-select: none;
+    }
+
+    .time-clock::after {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 9px;
+      height: 9px;
+      content: "";
+      background: var(--accent);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 2;
+    }
+
+    .time-clock-hand {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 3px;
+      height: var(--hand-length, 88px);
+      background: var(--accent);
+      border-radius: 999px;
+      transform: translate(-50%, -100%) rotate(var(--hand-angle, 0deg));
+      transform-origin: center bottom;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .time-clock-button {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      display: grid;
+      width: 36px;
+      height: 36px;
+      place-items: center;
+      color: var(--ink);
+      background: transparent;
+      border: 0;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 16px;
+      line-height: 1;
+      transform: translate(-50%, -50%) rotate(var(--angle)) translateY(var(--radius)) rotate(calc(-1 * var(--angle)));
+      z-index: 2;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .time-clock-button.is-inner {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .time-clock-button.is-selected,
+    .time-clock-thumb {
+      color: #fff;
+      background: var(--accent);
+      box-shadow: 0 6px 14px rgba(182, 90, 43, 0.25);
+    }
+
+    .time-clock-thumb {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      display: grid;
+      width: 42px;
+      height: 42px;
+      place-items: center;
+      border-radius: 50%;
+      font-size: 16px;
+      line-height: 1;
+      transform: translate(-50%, -50%) rotate(var(--angle)) translateY(var(--radius)) rotate(calc(-1 * var(--angle)));
+      z-index: 3;
+      pointer-events: none;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .time-picker-controls {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+      gap: 12px;
+      align-items: center;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface-strong);
+    }
+
+    .time-picker-separator {
+      color: var(--accent-strong);
+      font-size: 24px;
+      font-weight: 800;
+    }
+
+    .time-picker-column {
+      display: grid;
+      gap: 8px;
+      place-items: center;
+    }
+
+    .time-picker-value {
+      min-width: 72px;
+      padding: 8px 6px;
+      color: var(--ink);
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      font-size: 28px;
+      font-weight: 800;
+      line-height: 1;
+      text-align: center;
+    }
+
+    .time-step-button {
+      display: grid;
+      width: 40px;
+      height: 32px;
+      place-items: center;
+      color: var(--accent-strong);
+      background: var(--accent-soft);
+      border: 0;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .time-picker-quick {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .time-quick-button {
+      min-height: 34px;
+      color: var(--muted);
+      background: var(--surface-strong);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .time-picker-actions {
+      display: grid;
+      grid-template-columns: minmax(0, 0.85fr) minmax(0, 1fr) minmax(0, 1fr);
+      gap: 8px;
     }
 
     .version-body {
@@ -1405,7 +1725,7 @@
         <div class="brand-copy">
           <div class="title-row">
             <h1 id="pageTitle">今日记录</h1>
-            <button class="version-link" id="versionButton" type="button">v1.8</button>
+            <button class="version-link" id="versionButton" type="button">v1.9</button>
           </div>
           <p class="page-date" id="pageDate"></p>
         </div>
@@ -1537,19 +1857,19 @@
         <div class="sleep-time-grid">
           <label class="time-field" for="sleepTimeInput">
             <span>入睡时间</span>
-            <input id="sleepTimeInput" type="time">
+            <input class="time-input" id="sleepTimeInput" type="text" inputmode="none" readonly placeholder="--:--">
           </label>
           <label class="time-field" for="wakeTimeInput">
             <span>醒来时间</span>
-            <input id="wakeTimeInput" type="time">
+            <input class="time-input" id="wakeTimeInput" type="text" inputmode="none" readonly placeholder="--:--">
           </label>
           <label class="time-field" for="bedTimeInput">
             <span>上床时间</span>
-            <input id="bedTimeInput" type="time">
+            <input class="time-input" id="bedTimeInput" type="text" inputmode="none" readonly placeholder="--:--">
           </label>
           <label class="time-field" for="riseTimeInput">
             <span>起床时间</span>
-            <input id="riseTimeInput" type="time">
+            <input class="time-input" id="riseTimeInput" type="text" inputmode="none" readonly placeholder="--:--">
           </label>
         </div>
         <div class="sleep-total-row">
@@ -1600,6 +1920,22 @@
         <div class="calendar-grid" id="simpleSleepCalendarGrid"></div>
       </section>
 
+      <section class="panel sleep-table-panel simple-sleep-table">
+        <div class="section-head">
+          <h2 class="section-title">睡眠表格</h2>
+          <div class="section-actions">
+            <div class="chart-options">
+              <label for="simpleSleepTableMetToggle">
+                <input id="simpleSleepTableMetToggle" type="checkbox">
+                显示达标
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="sleep-summary-table" id="simpleSleepSummaryTable" aria-label="简洁版近七天睡眠概览表"></div>
+        <div class="sleep-summary-note" id="simpleSleepSummaryNote" aria-label="简洁版睡眠小结"></div>
+      </section>
+
       <section class="panel sleep-chart-panel" id="sleepMetricPanel">
         <div class="section-head">
           <h2 class="section-title" id="sleepMetricTitle">单项变化</h2>
@@ -1629,24 +1965,40 @@
         </div>
       </section>
 
+      <section class="panel sleep-table-panel" id="sleepTablePanel">
+        <div class="section-head">
+          <h2 class="section-title">睡眠表格</h2>
+          <div class="section-actions">
+            <div class="chart-options">
+              <label for="sleepTableMetToggle">
+                <input id="sleepTableMetToggle" type="checkbox">
+                显示达标
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="sleep-summary-table" id="sleepSummaryTable" aria-label="近七天睡眠概览表"></div>
+        <div class="sleep-summary-note" id="sleepSummaryNote" aria-label="睡眠小结"></div>
+      </section>
+
       <section class="panel sleep-target-panel">
         <h2 class="section-title">期望睡眠</h2>
         <div class="sleep-time-grid">
           <label class="time-field" for="expectedSleepTimeInput">
             <span>期望入睡时间</span>
-            <input id="expectedSleepTimeInput" type="time">
+            <input class="time-input" id="expectedSleepTimeInput" type="text" inputmode="none" readonly placeholder="--:--">
           </label>
           <label class="time-field" for="expectedWakeTimeInput">
             <span>期望醒来时间</span>
-            <input id="expectedWakeTimeInput" type="time">
+            <input class="time-input" id="expectedWakeTimeInput" type="text" inputmode="none" readonly placeholder="--:--">
           </label>
           <label class="time-field" for="expectedBedTimeInput">
             <span>期望上床时间</span>
-            <input id="expectedBedTimeInput" type="time">
+            <input class="time-input" id="expectedBedTimeInput" type="text" inputmode="none" readonly placeholder="--:--">
           </label>
           <label class="time-field" for="expectedRiseTimeInput">
             <span>期望起床时间</span>
-            <input id="expectedRiseTimeInput" type="time">
+            <input class="time-input" id="expectedRiseTimeInput" type="text" inputmode="none" readonly placeholder="--:--">
           </label>
         </div>
         <label class="sleep-target-row" for="sleepTargetInput">
@@ -1960,6 +2312,10 @@
             近七天睡眠
             <input id="exportSleepTimelineToggle" type="checkbox" checked>
           </label>
+          <label for="exportSleepTableToggle">
+            睡眠表格
+            <input id="exportSleepTableToggle" type="checkbox">
+          </label>
           <label class="export-standard-option" for="exportScoreToggle">
             近七天分数
             <input id="exportScoreToggle" type="checkbox" checked>
@@ -1975,6 +2331,35 @@
         </div>
         <p class="export-status" id="exportStatus"></p>
         <img class="export-preview" id="exportPreview" alt="导出图片预览">
+      </div>
+    </section>
+  </div>
+
+  <div class="modal-backdrop" id="timePickerModal" aria-hidden="true">
+    <section class="backup-modal time-picker-modal" role="dialog" aria-modal="true" aria-labelledby="timePickerTitle">
+      <header class="modal-head">
+        <h2 class="modal-title" id="timePickerTitle">选择时间</h2>
+        <div class="modal-actions">
+          <button class="icon-button" id="closeTimePickerButton" type="button" aria-label="关闭时间选择" title="关闭">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 6 6 18"></path>
+              <path d="m6 6 12 12"></path>
+            </svg>
+          </button>
+        </div>
+      </header>
+      <div class="time-picker-body">
+        <div class="time-picker-display" aria-label="当前选择时间">
+          <button class="time-display-button" id="timePickerHourDisplay" type="button" aria-label="选择小时">00</button>
+          <span class="time-display-separator">:</span>
+          <button class="time-display-button" id="timePickerMinuteDisplay" type="button" aria-label="选择分钟">00</button>
+        </div>
+        <div class="time-clock" id="timePickerClock" aria-label="时间圆盘"></div>
+        <div class="time-picker-actions">
+          <button class="action-button" id="clearTimePickerButton" type="button">清空</button>
+          <button class="action-button" id="cancelTimePickerButton" type="button">取消</button>
+          <button class="action-button primary" id="confirmTimePickerButton" type="button">确定</button>
+        </div>
       </div>
     </section>
   </div>
@@ -2024,6 +2409,14 @@
         </div>
       </header>
       <div class="version-body">
+        <p><strong>v1.9 更新时间：2026-10-02。</strong></p>
+        <ol class="version-list">
+          <li>新增睡眠表格和睡眠小结，按当前七天窗口汇总入睡、醒来、时长、达标情况和整体趋势；完整版本与简洁版同步显示。</li>
+          <li>优化睡眠小结表达和建议逻辑，会结合入睡/醒来波动、是否睡够、上床/起床节奏、入睡耗时和赖床情况生成更自然的分析。</li>
+          <li>睡眠记录和期望睡眠的时间填写改为站内可拖动钟盘式选择器，减少系统默认时间控件在手机和 APK 中的割裂感。</li>
+          <li>优化睡眠记录图表布局、表格三线表样式和达标显示，并新增“睡眠表格”导出选项。</li>
+          <li>加强 APK/WebView 适配，减少字体自动放大、标题截断、弹窗挤压和安全区露白等显示问题。</li>
+        </ol>
         <p><strong>v1.8 更新时间：2026-09-27。</strong></p>
         <ol class="version-list">
           <li>今日记录改为睡眠复盘记录，打分项调整为给睡眠打分，文字记录问题调整为心情、睡眠情况和梦境记录，并更新对应提示词。</li>
@@ -2082,12 +2475,13 @@
   <script>
     const STORAGE_KEY = "daily-record-site-v1";
     const VIEW_MODE_KEY = "daily-record-view-mode";
+    const SLEEP_TABLE_MET_KEY = "daily-record-sleep-table-met";
     const SUPABASE_URL = "https://hgmpswhitmenyvnxotff.supabase.co";
     const SUPABASE_KEY = "sb_publishable_WW3rmZCePegJsIf6LeqFvQ_KRgHD9pz";
     const SYNC_TABLE = "daily_record_sync";
     const NOTE_BULLET = "• ";
-    const APP_VERSION = "v1.8";
-    const APP_VERSION_UPDATED = "2026-09-27";
+    const APP_VERSION = "v1.9";
+    const APP_VERSION_UPDATED = "2026-10-02";
     const state = loadState();
     const els = {
       pageTitle: document.querySelector("#pageTitle"),
@@ -2117,6 +2511,7 @@
       exportDetailToggle: document.querySelector("#exportDetailToggle"),
       exportScoreToggle: document.querySelector("#exportScoreToggle"),
       exportSleepTimelineToggle: document.querySelector("#exportSleepTimelineToggle"),
+      exportSleepTableToggle: document.querySelector("#exportSleepTableToggle"),
       exportMetricSleepToggle: document.querySelector("#exportMetricSleepToggle"),
       exportMetricWakeToggle: document.querySelector("#exportMetricWakeToggle"),
       exportMetricBedToggle: document.querySelector("#exportMetricBedToggle"),
@@ -2135,6 +2530,15 @@
       authUserText: document.querySelector("#authUserText"),
       versionModal: document.querySelector("#versionModal"),
       closeVersionButton: document.querySelector("#closeVersionButton"),
+      timePickerModal: document.querySelector("#timePickerModal"),
+      timePickerTitle: document.querySelector("#timePickerTitle"),
+      timePickerHourDisplay: document.querySelector("#timePickerHourDisplay"),
+      timePickerMinuteDisplay: document.querySelector("#timePickerMinuteDisplay"),
+      timePickerClock: document.querySelector("#timePickerClock"),
+      closeTimePickerButton: document.querySelector("#closeTimePickerButton"),
+      clearTimePickerButton: document.querySelector("#clearTimePickerButton"),
+      cancelTimePickerButton: document.querySelector("#cancelTimePickerButton"),
+      confirmTimePickerButton: document.querySelector("#confirmTimePickerButton"),
       todayScreen: document.querySelector("#todayScreen"),
       sleepScreen: document.querySelector("#sleepScreen"),
       simpleMetricScreen: document.querySelector("#simpleMetricScreen"),
@@ -2167,11 +2571,17 @@
       simpleSleepCalendarGrid: document.querySelector("#simpleSleepCalendarGrid"),
       prevSimpleSleepMonthButton: document.querySelector("#prevSimpleSleepMonthButton"),
       nextSimpleSleepMonthButton: document.querySelector("#nextSimpleSleepMonthButton"),
+      simpleSleepSummaryTable: document.querySelector("#simpleSleepSummaryTable"),
+      simpleSleepSummaryNote: document.querySelector("#simpleSleepSummaryNote"),
+      simpleSleepTableMetToggle: document.querySelector("#simpleSleepTableMetToggle"),
       sleepMetricTitle: document.querySelector("#sleepMetricTitle"),
       sleepMetricPanel: document.querySelector("#sleepMetricPanel"),
       sleepMetricTabs: document.querySelectorAll(".metric-tab"),
       sleepMetricChart: document.querySelector("#sleepMetricChart"),
       sleepMetricEmpty: document.querySelector("#sleepMetricEmpty"),
+      sleepSummaryTable: document.querySelector("#sleepSummaryTable"),
+      sleepSummaryNote: document.querySelector("#sleepSummaryNote"),
+      sleepTableMetToggle: document.querySelector("#sleepTableMetToggle"),
       metricLabelsToggle: document.querySelector("#metricLabelsToggle"),
       metricAverageToggle: document.querySelector("#metricAverageToggle"),
       simpleMetricCharts: document.querySelectorAll(".simple-metric-chart"),
@@ -2217,6 +2627,11 @@
     let reminderTimer = null;
     let scoreWindowOffset = 0;
     let sleepWindowOffset = 0;
+    let showSleepTableMet = localStorage.getItem(SLEEP_TABLE_MET_KEY) === "true";
+    let activeTimeInput = null;
+    let draftTime = { hour: 0, minute: 0 };
+    let timePickerMode = "hour";
+    let timePickerPointerId = null;
 
     init();
 
@@ -2226,6 +2641,7 @@
       applyViewMode();
       renderExpectedSleepTimes();
       renderSleepTarget();
+      syncSleepTableMetToggles();
       syncDateInputs(selectedDate);
       syncSleepDateInputs(selectedSleepDate);
       loadForm(selectedDate);
@@ -2279,6 +2695,19 @@
       [els.bedTimeInput, els.sleepTimeInput, els.wakeTimeInput, els.riseTimeInput].forEach((field) => {
         field.addEventListener("input", saveSleepEntry);
       });
+      timeInputs().forEach((field) => {
+        field.addEventListener("click", () => openTimePicker(field));
+        field.addEventListener("focus", () => openTimePicker(field));
+        field.addEventListener("keydown", (event) => {
+          if (event.key === "Backspace" || event.key === "Delete") {
+            event.preventDefault();
+            setTimeInputValue(field, "");
+          } else if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            openTimePicker(field);
+          }
+        });
+      });
 
       els.sleepTotalInput.addEventListener("change", saveSleepTotalOverride);
       els.sleepTotalInput.addEventListener("blur", saveSleepTotalOverride);
@@ -2292,6 +2721,14 @@
       els.timelineDurationsToggle.addEventListener("change", renderSleepCharts);
       els.metricLabelsToggle.addEventListener("change", renderSleepCharts);
       els.metricAverageToggle.addEventListener("change", renderSleepCharts);
+      [els.sleepTableMetToggle, els.simpleSleepTableMetToggle].forEach((toggle) => {
+        toggle?.addEventListener("change", () => {
+          showSleepTableMet = Boolean(toggle.checked);
+          localStorage.setItem(SLEEP_TABLE_MET_KEY, showSleepTableMet ? "true" : "false");
+          syncSleepTableMetToggles();
+          renderSleepSummaryTables();
+        });
+      });
       els.simpleMetricLabelToggles.forEach((toggle) => {
         toggle.addEventListener("change", drawSimpleMetricCharts);
       });
@@ -2330,6 +2767,41 @@
         if (event.target === els.exportModal) {
           closeExportModal();
         }
+      });
+
+      els.closeTimePickerButton.addEventListener("click", closeTimePicker);
+      els.cancelTimePickerButton.addEventListener("click", closeTimePicker);
+      els.clearTimePickerButton.addEventListener("click", clearPickedTime);
+      els.confirmTimePickerButton.addEventListener("click", confirmPickedTime);
+      els.timePickerHourDisplay.addEventListener("click", () => setTimePickerMode("hour"));
+      els.timePickerMinuteDisplay.addEventListener("click", () => setTimePickerMode("minute"));
+      els.timePickerModal.addEventListener("click", (event) => {
+        if (event.target === els.timePickerModal) {
+          closeTimePicker();
+        }
+      });
+      els.timePickerClock.addEventListener("pointerdown", (event) => {
+        timePickerPointerId = event.pointerId;
+        els.timePickerClock.setPointerCapture?.(event.pointerId);
+        updateDraftTimeFromPointer(event);
+      });
+      els.timePickerClock.addEventListener("pointermove", (event) => {
+        if (timePickerPointerId === event.pointerId) {
+          updateDraftTimeFromPointer(event);
+        }
+      });
+      els.timePickerClock.addEventListener("pointerup", (event) => {
+        if (timePickerPointerId !== event.pointerId) {
+          return;
+        }
+        updateDraftTimeFromPointer(event);
+        timePickerPointerId = null;
+        if (timePickerMode === "hour") {
+          setTimePickerMode("minute");
+        }
+      });
+      els.timePickerClock.addEventListener("pointercancel", () => {
+        timePickerPointerId = null;
       });
 
       els.syncButton.addEventListener("click", openAuthModal);
@@ -2393,6 +2865,263 @@
         sleepMonthCursor = new Date(sleepMonthCursor.getFullYear(), sleepMonthCursor.getMonth() + 1, 1);
         renderSimpleSleepCalendar();
       });
+    }
+
+    function timeInputs() {
+      return [
+        els.bedTimeInput,
+        els.sleepTimeInput,
+        els.wakeTimeInput,
+        els.riseTimeInput,
+        els.expectedBedTimeInput,
+        els.expectedSleepTimeInput,
+        els.expectedWakeTimeInput,
+        els.expectedRiseTimeInput
+      ].filter(Boolean);
+    }
+
+    function openTimePicker(input) {
+      if (!input) {
+        return;
+      }
+      if (activeTimeInput === input && els.timePickerModal.classList.contains("is-visible")) {
+        return;
+      }
+      activeTimeInput = input;
+      const initial = parseTimeInputValue(input.value) || defaultTimeForInput(input);
+      draftTime = { ...initial };
+      timePickerMode = "hour";
+      els.timePickerTitle.textContent = timeInputLabel(input);
+      renderTimePicker();
+      els.timePickerModal.classList.add("is-visible");
+      els.timePickerModal.setAttribute("aria-hidden", "false");
+    }
+
+    function closeTimePicker() {
+      els.timePickerModal.classList.remove("is-visible");
+      els.timePickerModal.setAttribute("aria-hidden", "true");
+      activeTimeInput?.blur();
+      activeTimeInput = null;
+    }
+
+    function renderTimePicker() {
+      els.timePickerHourDisplay.textContent = padTimeUnit(draftTime.hour);
+      els.timePickerMinuteDisplay.textContent = padTimeUnit(draftTime.minute);
+      els.timePickerHourDisplay.classList.toggle("is-active", timePickerMode === "hour");
+      els.timePickerMinuteDisplay.classList.toggle("is-active", timePickerMode === "minute");
+      renderTimeClock();
+    }
+
+    function setTimePickerMode(mode) {
+      timePickerMode = mode;
+      renderTimePicker();
+    }
+
+    function renderTimeClock() {
+      els.timePickerClock.replaceChildren();
+      const hand = document.createElement("span");
+      hand.className = "time-clock-hand";
+      const selectedAngle = timePickerMode === "hour"
+        ? clockAngle(hourToClockPosition(draftTime.hour))
+        : minuteAngle(draftTime.minute);
+      const selectedRadius = timePickerMode === "hour" && draftTime.hour > 12 ? 62 : 96;
+      hand.style.setProperty("--hand-angle", `${selectedAngle}deg`);
+      hand.style.setProperty("--hand-length", `${Math.max(58, selectedRadius - 20)}px`);
+      els.timePickerClock.append(hand);
+
+      if (timePickerMode === "hour") {
+        renderHourClockButtons();
+      } else {
+        renderMinuteClockButtons();
+      }
+    }
+
+    function renderHourClockButtons() {
+      const outer = [12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+      const inner = [0, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23];
+      outer.forEach((hour, index) => {
+        appendClockButton({
+          value: hour,
+          label: String(hour),
+          index,
+          radius: 96,
+          mode: "hour",
+          selected: draftTime.hour === hour
+        });
+      });
+      inner.forEach((hour, index) => {
+        appendClockButton({
+          value: hour,
+          label: padTimeUnit(hour),
+          index,
+          radius: 62,
+          mode: "hour",
+          inner: true,
+          selected: draftTime.hour === hour
+        });
+      });
+    }
+
+    function renderMinuteClockButtons() {
+      Array.from({ length: 12 }, (_, index) => index * 5).forEach((minute, index) => {
+        appendClockButton({
+          value: minute,
+          label: padTimeUnit(minute),
+          index,
+          radius: 94,
+          mode: "minute",
+          selected: draftTime.minute === minute
+        });
+      });
+      if (draftTime.minute % 5 !== 0) {
+        appendClockThumb({
+          label: padTimeUnit(draftTime.minute),
+          angle: minuteAngle(draftTime.minute),
+          radius: 94
+        });
+      }
+    }
+
+    function appendClockButton({ value, label, index, radius, mode, inner = false, selected = false }) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = `time-clock-button${inner ? " is-inner" : ""}${selected ? " is-selected" : ""}`;
+      button.dataset.clockValue = String(value);
+      button.dataset.clockMode = mode;
+      button.style.setProperty("--angle", `${clockAngle(index || 12)}deg`);
+      button.style.setProperty("--radius", `-${radius}px`);
+      button.textContent = label;
+      els.timePickerClock.append(button);
+    }
+
+    function appendClockThumb({ label, angle, radius }) {
+      const thumb = document.createElement("span");
+      thumb.className = "time-clock-thumb";
+      thumb.style.setProperty("--angle", `${angle}deg`);
+      thumb.style.setProperty("--radius", `-${radius}px`);
+      thumb.textContent = label;
+      els.timePickerClock.append(thumb);
+    }
+
+    function updateDraftTimeFromPointer(event) {
+      const point = clockPointerInfo(event);
+      if (!point) {
+        return;
+      }
+      if (timePickerMode === "minute") {
+        draftTime.minute = Math.round(point.angle / 6) % 60;
+      } else {
+        const position = Math.round(point.angle / 30) % 12;
+        const hour12 = position === 0 ? 12 : position;
+        draftTime.hour = point.distance < point.radius * 0.36
+          ? (hour12 === 12 ? 0 : hour12 + 12)
+          : hour12;
+      }
+      renderTimePicker();
+    }
+
+    function clockPointerInfo(event) {
+      const rect = els.timePickerClock.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      const dx = event.clientX - centerX;
+      const dy = event.clientY - centerY;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      if (distance > rect.width / 2 + 24) {
+        return null;
+      }
+      let angle = Math.atan2(dx, -dy) * 180 / Math.PI;
+      if (angle < 0) {
+        angle += 360;
+      }
+      return { angle, distance, radius: rect.width / 2 };
+    }
+
+    function hourToClockPosition(hour) {
+      const normalized = hour % 12;
+      return normalized === 0 ? 12 : normalized;
+    }
+
+    function clockAngle(position) {
+      return (position % 12) * 30;
+    }
+
+    function minuteAngle(minute) {
+      return (minute % 60) * 6;
+    }
+
+    function adjustDraftTime(part, step) {
+      if (part === "hour") {
+        draftTime.hour = wrapNumber(draftTime.hour + step, 24);
+      } else {
+        const total = draftTime.hour * 60 + draftTime.minute + step;
+        const wrapped = wrapNumber(total, 24 * 60);
+        draftTime.hour = Math.floor(wrapped / 60);
+        draftTime.minute = wrapped % 60;
+      }
+      renderTimePicker();
+    }
+
+    function confirmPickedTime() {
+      if (!activeTimeInput) {
+        closeTimePicker();
+        return;
+      }
+      setTimeInputValue(activeTimeInput, `${padTimeUnit(draftTime.hour)}:${padTimeUnit(draftTime.minute)}`);
+      closeTimePicker();
+    }
+
+    function clearPickedTime() {
+      if (activeTimeInput) {
+        setTimeInputValue(activeTimeInput, "");
+      }
+      closeTimePicker();
+    }
+
+    function setTimeInputValue(input, value) {
+      input.value = value;
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      input.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+
+    function parseTimeInputValue(value) {
+      const match = String(value || "").match(/^(\d{1,2}):(\d{2})$/);
+      if (!match) {
+        return null;
+      }
+      const hour = Number(match[1]);
+      const minute = Number(match[2]);
+      if (hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+        return null;
+      }
+      return { hour, minute };
+    }
+
+    function defaultTimeForInput(input) {
+      const defaults = {
+        bedTimeInput: { hour: 23, minute: 0 },
+        sleepTimeInput: { hour: 0, minute: 30 },
+        wakeTimeInput: { hour: 8, minute: 0 },
+        riseTimeInput: { hour: 8, minute: 30 },
+        expectedBedTimeInput: { hour: 23, minute: 0 },
+        expectedSleepTimeInput: { hour: 0, minute: 0 },
+        expectedWakeTimeInput: { hour: 8, minute: 0 },
+        expectedRiseTimeInput: { hour: 8, minute: 30 }
+      };
+      return defaults[input.id] || { hour: 0, minute: 0 };
+    }
+
+    function timeInputLabel(input) {
+      const label = document.querySelector(`label[for="${input.id}"] span`);
+      return label?.textContent || "选择时间";
+    }
+
+    function padTimeUnit(value) {
+      return String(value).padStart(2, "0");
+    }
+
+    function wrapNumber(value, max) {
+      return ((value % max) + max) % max;
     }
 
     function switchTab(tab) {
@@ -3902,6 +4631,7 @@
       els.simpleMetricCharts.forEach((canvas) => {
         canvas.dataset.keys = JSON.stringify(keys);
       });
+      renderSleepSummaryTables(keys);
       queueDrawSleepCharts();
     }
 
@@ -3926,6 +4656,307 @@
           timeline: buildSleepTimeline(entry)
         };
       });
+    }
+
+    function sleepSummaryRows(keys = sleepKeysForCanvas(els.sleepMetricChart)) {
+      return sleepRows(keys).map((row) => {
+        const timeline = row.timeline;
+        const total = timeline?.totalMinutes ?? null;
+        return {
+          key: row.key,
+          date: formatTableDate(row.key),
+          bedValue: timeline?.bed ?? null,
+          sleepValue: timeline?.sleep ?? null,
+          wakeValue: timeline?.wake ?? null,
+          riseValue: timeline?.rise ?? null,
+          durationValue: total,
+          sleep: timeline?.sleep !== null && timeline?.sleep !== undefined ? formatClock(timeline.sleep) : "",
+          wake: timeline?.wake !== null && timeline?.wake !== undefined ? formatClock(timeline.wake) : "",
+          duration: total !== null ? formatDurationCompact(total) : ""
+        };
+      });
+    }
+
+    function renderSleepSummaryTables(keys = sleepKeysForCanvas(els.sleepMetricChart)) {
+      renderSleepSummaryBlock(els.sleepSummaryTable, els.sleepSummaryNote, keys);
+      renderSleepSummaryBlock(els.simpleSleepSummaryTable, els.simpleSleepSummaryNote, keys);
+    }
+
+    function syncSleepTableMetToggles() {
+      [els.sleepTableMetToggle, els.simpleSleepTableMetToggle].forEach((toggle) => {
+        if (toggle) {
+          toggle.checked = showSleepTableMet;
+        }
+      });
+    }
+
+    function renderSleepSummaryBlock(tableEl, noteEl, keys) {
+      if (!tableEl) {
+        return;
+      }
+      tableEl.replaceChildren();
+      const header = document.createElement("div");
+      header.className = "sleep-summary-row is-head";
+      ["日期", "入睡", "醒来", "时长"].forEach((text) => {
+        const cell = document.createElement("div");
+        cell.className = "sleep-summary-cell";
+        cell.textContent = text;
+        header.append(cell);
+      });
+      tableEl.append(header);
+
+      sleepSummaryRows(keys).forEach((row) => {
+        const line = document.createElement("div");
+        line.className = "sleep-summary-row";
+        [
+          { text: row.date, extra: " is-date" },
+          { text: row.sleep, metric: "sleep" },
+          { text: row.wake, metric: "wake" },
+          {
+            text: row.duration,
+            metric: "duration"
+          }
+        ].forEach((item) => {
+          const cell = document.createElement("div");
+          const metClass = item.metric && sleepSummaryMetricMet(row, item.metric) ? " is-met" : "";
+          cell.className = `sleep-summary-cell${item.extra || ""}${metClass}${item.text ? "" : " is-empty"}`;
+          cell.textContent = item.text || "—";
+          line.append(cell);
+        });
+        tableEl.append(line);
+      });
+      if (noteEl) {
+        noteEl.replaceChildren();
+        sleepSummaryLines(keys).forEach((line) => {
+          const paragraph = document.createElement("p");
+          paragraph.innerHTML = line;
+          noteEl.append(paragraph);
+        });
+      }
+    }
+
+    function sleepSummaryMetricMet(row, metric) {
+      if (!showSleepTableMet) {
+        return false;
+      }
+      if (metric === "sleep") {
+        const target = expectedSleepMetricValue("sleep", row.sleepValue !== null ? [row.sleepValue] : []);
+        return row.sleepValue !== null && typeof target === "number" && row.sleepValue <= target;
+      }
+      if (metric === "wake") {
+        const target = expectedSleepMetricValue("wake", row.wakeValue !== null ? [row.wakeValue] : []);
+        return row.wakeValue !== null && typeof target === "number" && row.wakeValue <= target;
+      }
+      if (metric === "duration") {
+        const target = expectedSleepMinutes();
+        return row.durationValue !== null && typeof target === "number" && row.durationValue >= target;
+      }
+      return false;
+    }
+
+    function sleepSummaryLines(keys) {
+      const rows = sleepSummaryRows(keys);
+      const withSleep = rows.filter((row) => row.sleepValue !== null);
+      const withWake = rows.filter((row) => row.wakeValue !== null);
+      const withDuration = rows.filter((row) => row.durationValue !== null);
+      const withBed = rows.filter((row) => row.bedValue !== null);
+      const withRise = rows.filter((row) => row.riseValue !== null);
+      if (withSleep.length + withWake.length + withDuration.length < 3) {
+        return ["<strong>睡眠小结：</strong>暂无足够数据生成小结。"];
+      }
+
+      const sleepRange = valueRange(withSleep.map((row) => row.sleepValue));
+      const wakeRange = valueRange(withWake.map((row) => row.wakeValue));
+      const durationRange = valueRange(withDuration.map((row) => row.durationValue));
+      const target = expectedSleepMinutes();
+      const reached = target !== null
+        ? withDuration.filter((row) => row.durationValue >= target).length
+        : null;
+      const avgBed = averageValue(withBed.map((row) => row.bedValue));
+      const avgRise = averageValue(withRise.map((row) => row.riseValue));
+      const avgLatency = averageValue(rows
+        .filter((row) => row.bedValue !== null && row.sleepValue !== null && row.sleepValue >= row.bedValue)
+        .map((row) => row.sleepValue - row.bedValue));
+      const avgLinger = averageValue(rows
+        .filter((row) => row.wakeValue !== null && row.riseValue !== null && row.riseValue >= row.wakeValue)
+        .map((row) => row.riseValue - row.wakeValue));
+      const trends = sleepTrendDetails(rows, target);
+      const trend = sleepTrendSummary(trends);
+      const suggestion = sleepSuggestion({ sleepRange, wakeRange, avgLatency, avgLinger, target, reached, durationCount: withDuration.length, trends });
+
+      return [
+        `<strong>波动：</strong>入睡${rangeSentence(sleepRange, "暂无")}；醒来${rangeSentence(wakeRange, "暂无")}。`,
+        `<strong>时长：</strong>${durationRange ? `最短 ${formatDurationCompact(durationRange.min)}，最长 ${formatDurationCompact(durationRange.max)}，平均 ${formatDurationCompact(Math.round(durationRange.avg))}` : "暂无"}${target !== null ? `；达标 ${reached}/${withDuration.length} 天` : ""}。`,
+        `<strong>节奏：</strong>${avgBed !== null ? `上床平均 ${formatClock(avgBed)}` : "上床暂无"}，${avgRise !== null ? `起床平均 ${formatClock(avgRise)}` : "起床暂无"}；入睡耗时${avgLatency !== null ? `平均 ${formatTimelineDuration(Math.round(avgLatency))}` : "暂无"}，赖床${avgLinger !== null ? `平均 ${formatTimelineDuration(Math.round(avgLinger))}` : "暂无"}。`,
+        `<strong>整体：</strong>${combineTrendAndSuggestion(trend, suggestion)}`
+      ];
+    }
+
+    function valueRange(values) {
+      const valid = values.filter((value) => value !== null && Number.isFinite(value));
+      if (!valid.length) {
+        return null;
+      }
+      const min = Math.min(...valid);
+      const max = Math.max(...valid);
+      return {
+        min,
+        max,
+        avg: valid.reduce((sum, value) => sum + value, 0) / valid.length,
+        span: max - min,
+        count: valid.length
+      };
+    }
+
+    function averageValue(values) {
+      const range = valueRange(values);
+      return range ? Math.round(range.avg) : null;
+    }
+
+    function rangeSentence(range, fallback) {
+      if (!range) {
+        return fallback;
+      }
+      return `最早 ${formatClock(range.min)}，最晚 ${formatClock(range.max)}，波动 ${formatTimelineDuration(Math.round(range.span))}`;
+    }
+
+    function sleepTrendDetails(rows, target) {
+      const valid = rows.filter((row) => row.durationValue !== null || row.sleepValue !== null || row.wakeValue !== null);
+      const empty = {
+        enough: valid.length >= 4,
+        durationDelta: 0,
+        bedDelta: 0,
+        sleepDelta: 0,
+        wakeDelta: 0,
+        riseDelta: 0,
+        latencyDelta: 0,
+        lingerDelta: 0,
+        secondDuration: null,
+        target
+      };
+      if (valid.length < 4) {
+        return empty;
+      }
+      const first = valid.slice(0, Math.ceil(valid.length / 2));
+      const second = valid.slice(Math.floor(valid.length / 2));
+      const firstDuration = averageValue(first.map((row) => row.durationValue));
+      const secondDuration = averageValue(second.map((row) => row.durationValue));
+      const firstBed = averageValue(first.map((row) => row.bedValue));
+      const secondBed = averageValue(second.map((row) => row.bedValue));
+      const firstSleep = averageValue(first.map((row) => row.sleepValue));
+      const secondSleep = averageValue(second.map((row) => row.sleepValue));
+      const firstWake = averageValue(first.map((row) => row.wakeValue));
+      const secondWake = averageValue(second.map((row) => row.wakeValue));
+      const firstRise = averageValue(first.map((row) => row.riseValue));
+      const secondRise = averageValue(second.map((row) => row.riseValue));
+      const firstLatency = averageValue(first
+        .filter((row) => row.bedValue !== null && row.sleepValue !== null && row.sleepValue >= row.bedValue)
+        .map((row) => row.sleepValue - row.bedValue));
+      const secondLatency = averageValue(second
+        .filter((row) => row.bedValue !== null && row.sleepValue !== null && row.sleepValue >= row.bedValue)
+        .map((row) => row.sleepValue - row.bedValue));
+      const firstLinger = averageValue(first
+        .filter((row) => row.wakeValue !== null && row.riseValue !== null && row.riseValue >= row.wakeValue)
+        .map((row) => row.riseValue - row.wakeValue));
+      const secondLinger = averageValue(second
+        .filter((row) => row.wakeValue !== null && row.riseValue !== null && row.riseValue >= row.wakeValue)
+        .map((row) => row.riseValue - row.wakeValue));
+      return {
+        ...empty,
+        durationDelta: firstDuration !== null && secondDuration !== null ? secondDuration - firstDuration : 0,
+        bedDelta: firstBed !== null && secondBed !== null ? secondBed - firstBed : 0,
+        sleepDelta: firstSleep !== null && secondSleep !== null ? secondSleep - firstSleep : 0,
+        wakeDelta: firstWake !== null && secondWake !== null ? secondWake - firstWake : 0,
+        riseDelta: firstRise !== null && secondRise !== null ? secondRise - firstRise : 0,
+        latencyDelta: firstLatency !== null && secondLatency !== null ? secondLatency - firstLatency : 0,
+        lingerDelta: firstLinger !== null && secondLinger !== null ? secondLinger - firstLinger : 0,
+        secondDuration
+      };
+    }
+
+    function sleepTrendSummary(trends) {
+      if (!trends.enough) {
+        return "数据还偏少，先观察连续记录。";
+      }
+      const phaseDeltas = [trends.sleepDelta || null, trends.wakeDelta || null].filter((value) => value !== null);
+      const avgPhaseDelta = phaseDeltas.length ? phaseDeltas.reduce((sum, value) => sum + value, 0) / phaseDeltas.length : 0;
+      const targetText = trends.target !== null && trends.secondDuration !== null
+        ? (trends.secondDuration >= trends.target ? "，后半周基本够睡" : "，后半周仍偏短")
+        : "";
+      if (avgPhaseDelta > 30) {
+        return `睡相有后移迹象${targetText}。`;
+      }
+      if (avgPhaseDelta < -30) {
+        return `睡相略有前移${targetText}。`;
+      }
+      if (trends.durationDelta > 25) {
+        return `睡眠时长较前半周增加${targetText}。`;
+      }
+      if (trends.durationDelta < -25) {
+        return `睡眠时长较前半周减少${targetText}。`;
+      }
+      return `整体节奏较稳定${targetText}。`;
+    }
+
+    function sleepSuggestion({ sleepRange, wakeRange, avgLatency, avgLinger, target, reached, durationCount, trends }) {
+      if (trends.sleepDelta > 30 && trends.bedDelta > 30) {
+        return "入睡和上床都在变晚，可以先把上床时间往前提 15-30 分钟。";
+      }
+      if (trends.sleepDelta > 30) {
+        return "入睡时间在后移，可以把睡前收尾提前一点，给入睡留出缓冲。";
+      }
+      if (trends.bedDelta > 30 && trends.durationDelta < -20) {
+        return "上床变晚且睡眠变短，建议优先早点上床补回时长。";
+      }
+      if (trends.latencyDelta > 20 || (avgLatency !== null && avgLatency > 45)) {
+        return "上床到睡着偏久，可以加入放松性活动，比如拉伸、热水澡或安静阅读。";
+      }
+      if (trends.riseDelta > 30 || trends.wakeDelta > 30) {
+        return "起床/醒来时间在后移，可以先固定起床时间，避免节奏继续往后拖。";
+      }
+      if (trends.lingerDelta > 15 || (avgLinger !== null && avgLinger > 40)) {
+        return "醒来到起床偏久，可以设置一个固定起床动作，减少赖床时间。";
+      }
+      if (wakeRange?.span > 90) {
+        return "醒来时间波动较大，可以先把起床时间稳定在一个小范围内。";
+      }
+      if (target !== null && durationCount && reached !== null && reached < Math.ceil(durationCount * 0.6)) {
+        return "达标天数偏少，可以优先提早上床，把睡眠时长补到期望附近。";
+      }
+      if (sleepRange?.span > 120) {
+        return "入睡时间跨度较大，先观察哪些晚睡日的睡前安排最容易影响入睡。";
+      }
+      return "整体可以继续保持，重点观察晚睡日和睡不够的原因。";
+    }
+
+    function combineTrendAndSuggestion(trend, suggestion) {
+      const trendContext = trendToContext(trend);
+      const cleanSuggestion = trimSentence(suggestion);
+      if (!trendContext) {
+        return `${cleanSuggestion}。`;
+      }
+      const match = cleanSuggestion.match(/^(.+?)(，(?:可以|建议|先|优先|尽量).+)$/);
+      if (match) {
+        return `${match[1]}，${trendContext}${match[2]}。`;
+      }
+      if (cleanSuggestion.includes(trendContext)) {
+        return `${cleanSuggestion}。`;
+      }
+      return `${trendContext}，${cleanSuggestion}。`;
+    }
+
+    function trendToContext(trend) {
+      return trimSentence(trend)
+        .replace("睡相有后移迹象", "有睡相后移迹象")
+        .replace("睡相略有前移", "睡相略有前移")
+        .replace("后半周仍偏短", "后几天睡得较少")
+        .replace("后半周基本够睡", "后几天基本够睡")
+        .replace("睡眠时长较前半周增加", "睡眠时长较前几天增加")
+        .replace("睡眠时长较前半周减少", "睡眠时长较前几天减少");
+    }
+
+    function trimSentence(value) {
+      return String(value || "").replace(/[。.!！\s]+$/g, "");
     }
 
     function sleepKeysForCanvas(canvas) {
@@ -3962,7 +4993,7 @@
       const accentColor = cssVar("--sleep-main");
       const prePostColor = cssVar("--sleep-softer");
 
-      const pad = { top: 42, right: 16, bottom: 30, left: 54 };
+      const pad = { top: 54, right: 28, bottom: 26, left: 42 };
       const plotWidth = width - pad.left - pad.right;
       const plotHeight = height - pad.top - pad.bottom;
       const rowStep = plotHeight / rows.length;
@@ -4004,7 +5035,7 @@
         ctx.textAlign = "right";
         ctx.textBaseline = "middle";
         ctx.fillStyle = mutedColor;
-        ctx.fillText(formatShortDate(row.key), pad.left - 8, y);
+        ctx.fillText(formatShortDate(row.key), pad.left - 6, y);
 
         if (!row.timeline) {
           return;
@@ -4022,8 +5053,9 @@
 
       ctx.textBaseline = "middle";
       ctx.textAlign = "left";
-      drawLegend(ctx, pad.left, 12, accentColor, "睡眠");
-      drawLegend(ctx, pad.left + 62, 12, prePostColor, "上床/起床缓冲");
+      const legendY = Math.max(18, pad.top - 36);
+      drawLegend(ctx, pad.left, legendY, accentColor, "睡眠");
+      drawLegend(ctx, pad.left + 62, legendY, prePostColor, "上床/起床缓冲");
 
       rows.forEach((row, index) => {
         if (!row.timeline) {
@@ -4370,7 +5402,7 @@
       ctx.font = "11px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "bottom";
-      drawBackedText(ctx, label, x, pad.top - 7);
+      drawBackedText(ctx, label, x, pad.top - 5);
       ctx.restore();
     }
 
@@ -5145,6 +6177,13 @@
         });
       }
 
+      if (els.exportSleepTableToggle.checked) {
+        items.push({
+          name: `睡眠表格-${sleepKeys[6]}`,
+          canvas: makeSleepTableExportCanvas(`睡眠表格（${sleepRange}）`, sleepKeys)
+        });
+      }
+
       if (!simpleMode && els.exportScoreToggle.checked) {
         withHistoryChartReady(() => {
           const previousKeys = els.chart.dataset.days;
@@ -5258,6 +6297,117 @@
       ctx.fillText(title, padding, padding);
       ctx.drawImage(sourceCanvas, padding, padding + titleHeight, chartWidth, chartHeight);
       return canvas;
+    }
+
+    function roundedRect(ctx, x, y, width, height, radius) {
+      const r = Math.min(radius, width / 2, height / 2);
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + width - r, y);
+      ctx.quadraticCurveTo(x + width, y, x + width, y + r);
+      ctx.lineTo(x + width, y + height - r);
+      ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+      ctx.lineTo(x + r, y + height);
+      ctx.quadraticCurveTo(x, y + height, x, y + height - r);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+      ctx.closePath();
+    }
+
+    function makeSleepTableExportCanvas(title, keys) {
+      const rows = sleepSummaryRows(keys);
+      const width = 900;
+      const padding = 36;
+      const titleHeight = 48;
+      const rowHeight = 54;
+      const tableTop = padding + titleHeight;
+      const tableWidth = width - padding * 2;
+      const measure = document.createElement("canvas").getContext("2d");
+      measure.font = "22px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
+      const summaryLines = sleepSummaryLines(keys)
+        .map(stripSummaryHtml)
+        .flatMap((line) => wrapCanvasText(measure, line, tableWidth));
+      const summaryTopGap = 28;
+      const summaryTitleHeight = 30;
+      const summaryLineHeight = 32;
+      const tableHeight = rowHeight * (rows.length + 1);
+      const summaryHeight = summaryTitleHeight + summaryLines.length * summaryLineHeight;
+      const height = tableTop + tableHeight + summaryTopGap + summaryHeight + padding;
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle = cssVar("--surface");
+      ctx.fillRect(0, 0, width, height);
+      ctx.fillStyle = cssVar("--ink");
+      ctx.font = "700 28px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
+      ctx.textBaseline = "top";
+      ctx.fillText(title, padding, padding);
+
+      const columns = ["日期", "入睡", "醒来", "时长"];
+      const colWidth = tableWidth / columns.length;
+
+      ctx.strokeStyle = "rgba(127, 96, 79, 0.72)";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(padding, tableTop);
+      ctx.lineTo(padding + tableWidth, tableTop);
+      ctx.moveTo(padding, tableTop + tableHeight);
+      ctx.lineTo(padding + tableWidth, tableTop + tableHeight);
+      ctx.stroke();
+      ctx.strokeStyle = "rgba(127, 96, 79, 0.62)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(padding, tableTop + rowHeight);
+      ctx.lineTo(padding + tableWidth, tableTop + rowHeight);
+      ctx.stroke();
+
+      ctx.font = "700 23px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      columns.forEach((column, index) => {
+        ctx.fillStyle = cssVar("--muted");
+        ctx.fillText(column, padding + colWidth * index + colWidth / 2, tableTop + rowHeight / 2);
+      });
+
+      rows.forEach((row, rowIndex) => {
+        const y = tableTop + rowHeight * (rowIndex + 1);
+        [
+          { value: row.date, metric: null },
+          { value: row.sleep || "—", metric: "sleep" },
+          { value: row.wake || "—", metric: "wake" },
+          { value: row.duration || "—", metric: "duration" }
+        ].forEach((item, index) => {
+          const met = item.metric && sleepSummaryMetricMet(row, item.metric);
+          ctx.fillStyle = index === 0
+            ? cssVar("--accent-strong")
+            : (met ? cssVar("--good") : (item.value === "—" ? cssVar("--muted") : cssVar("--ink")));
+          ctx.font = `${index === 0 ? "700" : (met ? "650" : "600")} 23px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif`;
+          ctx.fillText(item.value, padding + colWidth * index + colWidth / 2, y + rowHeight / 2);
+        });
+      });
+
+      let summaryY = tableTop + tableHeight + summaryTopGap;
+      ctx.textAlign = "left";
+      ctx.textBaseline = "top";
+      ctx.fillStyle = cssVar("--accent-strong");
+      ctx.font = "700 22px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
+      ctx.fillText("睡眠小结", padding, summaryY);
+      summaryY += summaryTitleHeight;
+      ctx.fillStyle = cssVar("--muted");
+      ctx.font = "22px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
+      summaryLines.forEach((line) => {
+        ctx.fillText(line, padding, summaryY);
+        summaryY += summaryLineHeight;
+      });
+      return canvas;
+    }
+
+    function stripSummaryHtml(line) {
+      return String(line || "")
+        .replace(/<strong>/g, "")
+        .replace(/<\/strong>/g, "")
+        .replace(/<[^>]+>/g, "");
     }
 
     function makeDetailExportCanvas() {
@@ -5709,6 +6859,11 @@
     function formatCompactDate(key) {
       const date = parseDateKey(key);
       return `${date.getMonth() + 1}.${date.getDate()}`;
+    }
+
+    function formatTableDate(key) {
+      const [, month, day] = key.split("-");
+      return `${Number(month)}.${day}`;
     }
   </script>
 </body>
